@@ -9,6 +9,15 @@ The fact that such a joining of objects ALWAYS produces a helix I call Lord's Ob
 
 I use the term "discrete helix" or "delix" to refer to this object, which coincides with a continuous helix.
 
+Following the normal Public Invention pattern of working on technical subjects, the repo
+contains a LaTeX paper which is a work-in-progress describing the work. Additionally,
+the math being developed exists in JavaScript and Mathematica. The Javascript is used to
+suport an interactive web page that demonstrates the principles, and may eventually
+be useful as an online "calculator."
+
+The nature of this project (not all Public Invention projects are like this) is that it
+deserves an academic-style description.
+
 Although I welcome collaboration in all cases, this project is evolving very rapidly; however, the
 section below "The Platonic Delices" is a project that I probably will not directly undertake.
 This work will almost certainly result in a publishable paper; for any of you interested in
