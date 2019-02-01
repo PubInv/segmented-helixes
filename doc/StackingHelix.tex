@@ -215,6 +215,8 @@ In engineering, sometimes the term ``special helix''\cite{gu2012research} is use
 
 \subsection{The 4-point Algorithm (Kahn's Method)}
 
+
+
 TODO: this figure is okay, but it should be modified to use A,B,C and D.
 
 \begin{figure}
@@ -262,6 +264,17 @@ From these observations we may state a fundamental fact:
   The angle bisectors of each joint are in general skew and are closest
   at the axis of helix.
 \end{observation}
+
+This observation by Kahn allows his the unit vector of the axis to
+be computed as the cross product of the angle bisectors.
+
+From there, he goes on to compute various parameters.
+
+We have modified this method by carefully arranging our axes
+so that we can compute $\phi$, the angle between the helical axis
+and the $z$ axis. This, in combination with symmetry and the knowledge
+that the helical axis is in the $XZ$ plane, lets us compute the
+points on the axis correcsponding to the joints directly from $\phi$.
 
 The conjecture allows us to use the standard linear algebra formula for
 computing the closest points of two skew lines to find two points on the
@@ -500,7 +513,7 @@ as mathematically possible.
 \section{Applied to Periodic Regular Simplex Chains}
 
 It is now clear that in fact ANY repeated rule applied to chains of tetrahedra, or any other object,
-is simply producing a larger repeated subunit, and that Hahn's method and Face Normal method
+is simply producing a larger repeated subunit, and that Kahn's method and Face Normal method
 may be applied to the larger subunit.
 
 In some circumstances we may wish to design a shelix based on ``molecules'' comprised of ``atoms'',
@@ -1658,7 +1671,7 @@ With[{q = D[[3]] - L/2,
   ]]]]]]]]]]]
 
 (* Now attempting to test the hypotheis that d = (P2 - P1 dot (V1 x V2) *)
-Hahn[L_,B_,D_] :=
+Kahn[L_,B_,D_] :=
 With[{q = D[[3]] - L/2,
       x = D[[1]],
       y = D[[2]]},
@@ -1707,18 +1720,54 @@ Print[{Ca}];
 Print[{Norm[Ba-B],Norm[Ca-C]}];
 (* Print[{AF,LBn2,s}]; *)
                 With[{
-                    di = 2Sqrt[Part[B1,1]^2 + Part[B1,3]^2],
-                    r =   Abs[LBn2] Norm[ Bb],
-                    r1 = Norm[Ba-B]},
-                    Print[{dtravel,di}];
+(*                    di = 2Sqrt[Part[B1,1]^2 + Part[B1,3]^2],
+                    r =   Abs[LBn2] Norm[ Bb],*)
+                    r = Norm[Ba-B]},
+                    Print[{dtravel}];
                     Print[2222];
                   With[{
-                      c = ChordFromLD[L,di]},
+                      c = ChordFromLD[L,dtravel]},
                     With[{ theta2 = ThetaFromRC[r,c]},
-                    Print[{r,r1}];
+                    Print[{r,r}];
                     Print[N[{r,theta2,dtravel,c}]];
                       {r,theta2,dtravel,c}
   ]]]]]]]]]]]]]]
+
+
+Kahn2[L_,B_,D_] :=
+With[{q = D[[3]] - L/2,
+      x = D[[1]],
+      y = D[[2]]},
+    With[{u = q - L,
+        C = {0,0,L/2}},
+      With[{Bb = {x,-y,u}, (* This is the B bisector *)
+      Cb = {-x,-y,-u}},(* This is the C bisector *)
+          With[{H = Cross[Bb,Cb]},
+          With[{      
+          dtravel = (C - B) . Normalize[H]
+          },
+(* It is unclear why this should be negative, need a way of determining that. *)
+          With[{phi = -ArcCos[dtravel/L]},
+          With[{
+          (* Not sure how to compute the signs here *)
+          Bax = Sin[phi] dtravel/2,
+          Baz = -Cos[phi] dtravel/2
+          },
+            With[{
+            Bay =  Bb[[2]] (Bax/Bb[[1]])
+              },
+              With[{ Ba = {Bax,Bay,Baz}},
+              With[{
+              r = Norm[Ba-B]
+              },
+                With[{
+                      c = ChordFromLD[L,dtravel]},
+                    With[{ theta2 = ThetaFromRC[r,c]},
+                    Print[{r,theta2,dtravel,c,phi}];
+                    Print[N[{r,theta2 180 / Pi,dtravel,c, phi 180 / Pi}]];
+                      {r,theta2,dtravel,c,phi}
+  ]]]]]]]]]]]]
+
 
 
 (* This does not seem to take tau into effect. Unified Comp needs to return tau *)
@@ -1733,7 +1782,7 @@ UnifiedComp7[L_,rho_,omega_] :=
       With[{
           D = {x,y,(L/2 + q)}
         },
-        Hahn[L,B,D]]]]
+        Kahn[L,B,D]]]]
   
 
   N[UnifiedComp5[1, Pi/10, Pi/30]]
@@ -1895,20 +1944,12 @@ With[{ NBN = Normalize[NB],
     NCN = Normalize[NC]},
   With[{Bp = {NBN[[1]],NBN[[2]]},
       Cp = {NCN[[1]],NCN[[2]]}},
-    Print[N[{Bp,Cp}]];
     With[{ ba = ArcTan[Bp[[1]],Bp[[2]]],
            ca = ArcTan[Cp[[1]],Cp[[2]]]},
-    Print[N[ba] 180 / Pi];
-    Print[N[ca] 180 / Pi];
-    Print[N[(ba+ca)/2] 180 / Pi];
     With[{m = Bp+Cp},
       With[{mn = m / 2},
-        Print[N[ArcTan[mn[[1]],mn[[2]]]] 180 / Pi];                  
         (* We want to return the angle that makes the negative of this vector point up *)
-        Print[N[mn]];
         With[{theta = -(ba+ca)/2 + -Pi/2 },
-          Print[70707070];
-          Print[N[theta] 180 / Pi];
           With[{
               (*              rt = RotationTransform[{{mn[[1]],mn[[2]],0},{0,-1,0}}] *)
               rt = RotationTransform[-theta,{0,0,-1}]
@@ -1958,6 +1999,40 @@ With[{C = {1,3/4,1},
         Assert[Cp[[2]] < 0];
         res
   ]]]]
+
+
+
+TestComputeBalancingRotation3[] :=
+With[{
+    L0 = 1,
+    tetAngle = ArcTan[Sqrt[2]/2],
+    (* Rotation by an aribitraty amount should give us the same number. *)
+    testRot = Pi/4
+  },
+  With[{ rt = RotationTransform[testRot,{0,0,1}]},
+    With[{
+        plainB = {0,-Sin[tetAngle],-Cos[tetAngle]},
+        plainC = {0,-Sin[tetAngle],Cos[tetAngle]},
+        tau = 2 Pi /3
+      },
+   With[{C = rt[plainB],
+       B = rt[plainC]},
+  With[{res = ComputeBalancingRotation[B,C]},
+    Print[N[res]];
+    With[{ theta = res[[1]],
+        Br = res[[2]],
+        Cr = res[[3]]},
+      With[{Bp = Normalize[{Br[[1]],Br[[2]]}],
+          Cp = Normalize[{Cr[[1]],Cr[[2]]}]},
+         Print[8888888];
+        Print[N[Bp]];
+        Print[N[Cp]];
+        Assert[N[Bp[[1]]] == -N[Cp[[1]]]];
+        Assert[N[Bp[[1]]] == -N[Cp[[1]]]];
+        Assert[Bp[[2]] < 0];
+        Assert[Cp[[2]] < 0];
+        res
+  ]]]]]]]
 
 (* Warning: I may not have the sign of this correct. *)
 AfromLtauNBNC[L_,tau_,NBunb_,NCunb_] :=
@@ -2040,7 +2115,7 @@ With[{
       With[{ B = {0,0,-L0/2},
           D = {-A[[1]],A[[2]],-A[[3]]}
         },
-        With[{ res = Hahn[L0,B,D],
+        With[{ res = Kahn2[L0,B,D],
             theta = ArcCos[-2/3]},
           Assert[Abs[res[[2]] - theta] < 0.00001];
 ]]]]]
@@ -2050,7 +2125,7 @@ With[{
     L0 = 1,
     tetAngle = ArcTan[Sqrt[2]/2],
     (* Rotation by an aribitraty amount should give us the same number. *)
-    testRot = Pi/4
+    testRot = Pi/5
   },
   With[{ rt = RotationTransform[testRot,{0,0,1}]},
     With[{
@@ -2068,7 +2143,7 @@ With[{
         With[{ B = {0,0,-L0/2},
             D = {-A[[1]],A[[2]],-A[[3]]}
           },
-          With[{ res = UnifiedCompTwoPoints[L0,B,D],
+          With[{ res = Kahn2[L0,B,D],
               theta = ArcCos[-2/3]},
             Assert[Abs[res[[2]] - theta] < 0.00001];
 ]]]]]]]
@@ -2087,6 +2162,68 @@ Solve[{a == h x + p, b == i x + q, c == j x + r, z^2 == (a)^2 + (b)^2 + (c)^2},
 ,{x},Reals]
 
 \end{verbatim}
+
+\section{Proof that Repeted Units Produced Segmente Helices}
+
+\begin{theorem}
+  Consider $N$ identical objects which each have two points, $A$ and $B$,
+  and a vector $U$ not collinear with $A$ and $B$. Call
+  $\overline{AB}$ the axis of this object.
+  Consider the frame of reference for this object to have
+  its axis on the $z$-axis with $B$ in the positive direction, the
+  midpoint of the at the origin, and the up-vector pointing in the positive $y$ direciton.
+
+  Consider any rule that conjoins $A$ of object $i+1$ to $B$ such that
+  from the frame of reference of $i$, the object $i+1$ anything rigidly
+  attached to it is always in the same position in the frame of reference for $i$.
+  Infomally, $i+1$ ``looks the same'' to $i$, no matter what $i$ we choose, $i < N$.
+
+  A chain of $N$ identical rigid objects conjoined via a rule that
+  conjoins $A$ to $B$ in such a way that every vector 
+  of $B$ is always in the same position relative to a frame of reference
+  constructed from $A$ has a segmented helix whose segemts correspond
+  to the axes of these objects.
+\end{theorem}
+
+\begin{proof}
+  We will proceed by induction.
+
+  Base Case ($k < 3$):
+  Construct 3 such objects. By construction via Kahn's method, there is
+  a segmented helix matching these objects. Call this segmented helix $H$,
+  and define the  vectors
+  $V_{ai}, V_{bi}$ for $i \in \{1,2,3\}$, each in the frame of reference
+  for $i$ to be the vector from the joint to the nearest point on the
+  axis of $H$. (These happen to be the joint angle bisectors, if there is an object on
+  each side to form such a vector.)
+  By construction, these all have the same magnitude (the radius
+  of $H$) and the same direction (pointing directly at the axis of $H$
+  perpendicular to $H$.)
+
+  Inductive Case ($k+1$):
+  Assume there is a segmented helix coinciding with the first $k$ objects, and
+  consider the frame of reference of the $k$th object. The axis and any
+  other rigid property of the $k+1$th object stands in relation to object $k$
+  as $k$ stood to $k-1$. By induction, the $k$th object had a segment
+  of a segmented helix corresponding to its axis. Attach vectors $V_{Ak}$ and $V_{Bk}$
+  from the
+  joints of $k$ to the axis of the helix perpendicularly. Define these
+  vectors in the frame of reference for $k$.
+
+  To the $k-1$th, the tips of  $V_{Ak}$ and $V_{Bk}$ define
+  a line segment which lies on the axis of the segmented helix $H$, with the
+  tip of $V_{Ak}$ conincident with the tip of $V_{B(k-1)}$.
+
+  By our rule and by induction, since this is true of the $k-1$th object,
+  it is true of the $k$th object. There the $k+1$th objects $V$ vectors
+  point to a line segment which lies on the axis of $H$, extending it
+  in the same direction. The axis of the $k+1$th object therefore conicides 
+  with the $k+1$th segment of $H$. 
+
+  Therefore, by induction, identical objects conjoined by the same rule always
+  coincide with some segmented helix, whose parameters are discoverable by
+  Kahn's method.
+  \end{proof}
 
 \end{document}
 
