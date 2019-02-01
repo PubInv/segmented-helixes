@@ -346,7 +346,7 @@ object.''
   angular separation of the normal from the $XZ$ and $YZ$ planes. We assume that normals point out
   of the object rather than in. The angles in the method may be considered the angles of the face diagonals of the axis-aligned cuboid whose body digaonal is the vector normal.
 \item The length $L$ of an object, measured from joint point $A$ to joint point $B$.
-\item A joint twist $\tau$ defining the change in computed up-vector between objects,
+\item A joint twist $\tau$ defining the change in computed out-vector between objects,
   mesured at the joint face.
 \end{itemize}
 
@@ -356,35 +356,35 @@ In this section add graphs. Also, a check against the BC helix.
 Possibly software should be used to produce a 3D simulation
 of the issues.
 
-\section{The up-vector}
+\section{The out-vector}
 
-From the normals, we can compute an {\em up vector} which is intrinsic to the object.
-We could think of the up vector as a fine mark made on each face in the same direction
+From the normals, we can compute an {\em out vector} which is intrinsic to the object.
+We could think of the out vector as a fine mark made on each face in the same direction
 (if projected onto a plane perpendicular to the axis.) When face $F_A$ of object $N+1$
 is placed against $F_B$ of object $N$, object $N+1$ is twisted until the mark on $F_A$ angles
 $\tau$ away from the mark on object $N$, measured anticlockwise looking from $A$ to $B$ on
 object $N$.
 
-To define the up vector, place the object so that joint $B$ is at the origin and the
+To define the out vector, place the object so that joint $B$ is at the origin and the
 axis is aligned with the $z$-axis, with the point $A$ on the negative $z$-axis.
 The projection of the face normals form a minimum angle less than or equal to $\pi$
 radians. Rotate the object about the $z$-axis so that the projections of the face normals
-form equal angles with the negative $y$-axis. Then define the direction straight up
-the $y$ axis to be the up vector. If we had a physical object, we might mark the face
-normals with an arrow to mark the up vectors.
+form equal angles with the negative $y$-axis. Then define the direction straight out
+the $y$ axis to be the out vector. If we had a physical object, we might mark the face
+normals with an arrow to mark the out vectors.
 
-If one of the face normals is aligned with object axis, the up-vector is the opposite
+If one of the face normals is aligned with object axis, the out-vector is the opposite
 of the other face normal. (If both face normals are aligned with the axis of the object,
 then shelix has zero radius and $d = L$, so we need do no further math.)
 
-Mathematically, we will treat the up vector as unit-vector.
+Mathematically, we will treat the out vector as unit-vector.
 \begin{align}
   M &= \frac{A+B}{2} \\
   X &= \frac{(A+F_a) + (B+F_b)}{2} \\
   U &= \frac{M - X}{\Vert M - X \Vert}
 \end{align}
 
-The up vector is not defined when the face normals point in precisely opposite directions,
+The out vector is not defined when the face normals point in precisely opposite directions,
 in which case $d = L$.
 
 In the placement of the first object described above, it would
@@ -396,7 +396,7 @@ the resulting angles to compute a rotation $R(N_A,N_B)$ to be a applied to
 a vector of length $L$, and then performing the twist by $T(\tau)$. This process can be repeated at
 the point $B_1$ (though no longer at the axis) to generate
 four or more points. In fact the entire process of constructing
-the stack could be thought of a series of ``rotate then translate'' steps by the composition of the rotation matrixes $RT$ applied to a vector $\overline{AB}$ and the up vector.
+the stack could be thought of a series of ``rotate then translate'' steps by the composition of the rotation matrixes $RT$ applied to a vector $\overline{AB}$ and the out vector.
 However, it is a tiny bit of work to compute this given only
 the intrinsic properties of the object and joint.
 
@@ -406,14 +406,14 @@ point B of the second object will be.
 Note: The twist is not the same as $\theta$. When $\tau = 0$, $\theta = \alpha$,
 I think. Possible $\theta = \alpha + $ some function of $\tau$.
 
-Note: Possibly theta goes down as tau goes up.
+Note: Possibly theta goes down as tau goes out.
 
 Note: Considering the pitch of the segmented helix may be useful
 in relating variables.
 
 Note: I now think we can think in terms of the skew lines (the
 joint lines), and I believe $\tau$ is directly the angle
-formed with the up vector, that the up-vector aims at
+formed with the out vector, that the out-vector aims at
 the mid point of the axis between the intersection skew line
 points, and that angle bend $\alpha$ (or $(\pi - alpha)/2$)
 let's us determine the skew line as well.  So we have
@@ -1636,6 +1636,7 @@ With[{q = D[[3]] - L/2,
     With[{u = q - L},
       With[{Bb = {x,-y,u},
           Cb = {-x,-y,-u}},
+(* N2 normal of the plane normal to the axis and Cb, along which the skew alogirthm moves. *)
         With[{n2 =   Cross[Cb,Cross[Bb,Cb]]
           },
             With[{
@@ -1652,8 +1653,72 @@ With[{q = D[[3]] - L/2,
                   With[{
                       c = ChordFromLD[L,di]},
                     With[{ theta2 = ThetaFromRC[r,c]},
-                      {r,theta2,di,c}
+                    Print[N[{r,theta2,di,c,C1}]];
+                      {r,theta2,di,c,C1}
   ]]]]]]]]]]]
+
+(* Now attempting to test the hypotheis that d = (P2 - P1 dot (V1 x V2) *)
+Hahn[L_,B_,D_] :=
+With[{q = D[[3]] - L/2,
+      x = D[[1]],
+      y = D[[2]]},
+    With[{u = q - L,
+        C = {0,0,L/2}},
+      With[{Bb = {x,-y,u}, (* This is the B bisector *)
+      Cb = {-x,-y,-u}},(* This is the C bisector *)
+          With[{H = Cross[Bb,Cb]},
+          With[{      
+(* I am very confused by this. I don't know that is right. *)
+          dtravel = (C - B) . Normalize[H],
+(* n2 is from the skew algorithm, it is the normal for the plane containing Cb 
+and perpendicular to helix axis *)
+          n2 =   Cross[Cb,H]
+          },
+(* It is unclear why this should be negative, need a way of determining that. *)
+          With[{phi = -ArcCos[dtravel/L]},
+          With[{
+          (* Not sure how to compute the signs here *)
+          Baxx = Sin[phi] dtravel/2,
+          Bazz = -Cos[phi] dtravel/2
+          },
+            With[{
+            Bayy =  Bb[[2]] (Baxx/Bb[[1]]),  
+             n2z = Part[n2,3]
+              },
+(* This (n2z) is really the factor (C - B) . n2, but we know that is zero exept for z *)
+(* {0,0,n2z} is the projection of (C-B) onto n2 *)
+              With[{
+              Ba = {Baxx,Bayy,Bazz},
+
+              Bn2 = n2z / (Bb . n2),
+(* This is an alternative factor for clarity, but we know only the z matters. *)
+              AF = ((C - B) . n2)/(Bb . n2) 
+                },
+                With[{LBn2 = L Bn2},
+(* C1 is the axial projection of C (Except I now think NOT!) *)
+              With[{
+              Ca = {-Ba[[1]],Ba[[2]],-Ba[[3]]},
+              B1 = B + LBn2 Bb,
+              B1x = B + AF Bb
+                },
+Print[8888];
+Print[{B1,B1x,Ba}];
+Print[{Ca}];
+Print[{Norm[Ba-B],Norm[Ca-C]}];
+(* Print[{AF,LBn2,s}]; *)
+                With[{
+                    di = 2Sqrt[Part[B1,1]^2 + Part[B1,3]^2],
+                    r =   Abs[LBn2] Norm[ Bb],
+                    r1 = Norm[Ba-B]},
+                    Print[{dtravel,di}];
+                    Print[2222];
+                  With[{
+                      c = ChordFromLD[L,di]},
+                    With[{ theta2 = ThetaFromRC[r,c]},
+                    Print[{r,r1}];
+                    Print[N[{r,theta2,dtravel,c}]];
+                      {r,theta2,dtravel,c}
+  ]]]]]]]]]]]]]]
 
 
 (* This does not seem to take tau into effect. Unified Comp needs to return tau *)
@@ -1668,7 +1733,7 @@ UnifiedComp7[L_,rho_,omega_] :=
       With[{
           D = {x,y,(L/2 + q)}
         },
-        UnifiedCompTwoPoints[L,B,D]]]]
+        Hahn[L,B,D]]]]
   
 
   N[UnifiedComp5[1, Pi/10, Pi/30]]
@@ -1960,28 +2025,66 @@ With[{
           Assert[Abs[res[[2]] - theta] < 0.00001];
 ]]]]]
 
+TestRegularTets1[] :=
+With[{
+    L0 = 1/3,
+    tetAngle = ArcTan[Sqrt[2]/2]},
+  With[{
+    NB1 = {0,-Sin[tetAngle],-Cos[tetAngle]},
+    NC1 = {0,-Sin[tetAngle],Cos[tetAngle]},
+    tau = 2 Pi /3
+    },
+    With[{
+        A = AfromLtauNBNC[L0,tau,NB1,NC1]},
+      Print[N[A]];
+      With[{ B = {0,0,-L0/2},
+          D = {-A[[1]],A[[2]],-A[[3]]}
+        },
+        With[{ res = Hahn[L0,B,D],
+            theta = ArcCos[-2/3]},
+          Assert[Abs[res[[2]] - theta] < 0.00001];
+]]]]]
+
 TestRegularTets2[] :=
 With[{
     L0 = 1,
     tetAngle = ArcTan[Sqrt[2]/2],
     (* Rotation by an aribitraty amount should give us the same number. *)
-    testRot = Pi/17
+    testRot = Pi/4
   },
   With[{ rt = RotationTransform[testRot,{0,0,1}]},
     With[{
-        NB1 = rt[{0,-Sin[tetAngle],-Cos[tetAngle]}],
-        NC1 = rt[{0,-Sin[tetAngle],Cos[tetAngle]}],
+        plainB = {0,-Sin[tetAngle],-Cos[tetAngle]},
+        plainC = {0,-Sin[tetAngle],Cos[tetAngle]},
         tau = 2 Pi /3
       },
+      With[{ NB1 = rt[plainB],
+      NC1 = rt[plainC]},
+      Print[{plainB,plainC}];
+      Print[{NB1,NC1}];
       With[{
           A = AfromLtauNBNC[L0,tau,NB1,NC1]},
+      Print[N[A]];
         With[{ B = {0,0,-L0/2},
             D = {-A[[1]],A[[2]],-A[[3]]}
           },
           With[{ res = UnifiedCompTwoPoints[L0,B,D],
               theta = ArcCos[-2/3]},
             Assert[Abs[res[[2]] - theta] < 0.00001];
-]]]]]]
+]]]]]]]
+
+
+(* Trying something new *)
+Clear[a,b,c,d,e,f,h,i,j,k,l,m,n,o,p,q,r,s,t,u,x,y]
+Solve[{a == h x + p, b == i x + q, c == j x + r, d == l x + s, e == m x + t, f == n x + u, d^2 == (a-d)^2 + (b-e)^2 + (c-f)^2,
+q == 0, t == 0, r == -u, p == -s},x]
+
+Solve[{a == h x + p, b == i x + q, c == j x + r, d == l x + s, e == m x + t, f == n x + u, z^2 == (a-d)^2 + (b-e)^2 + (c-f)^2,
+q == 0, t == 0, r == -u, p == -s},x]
+
+
+Solve[{a == h x + p, b == i x + q, c == j x + r, z^2 == (a)^2 + (b)^2 + (c)^2},
+,{x},Reals]
 
 \end{verbatim}
 
