@@ -1349,9 +1349,6 @@ RhoOmegaFromRTheta[r_,theta_] :=
   *)
 
   (* Given the cord length, how do I compute R? *)
-  ChordFromLD[L_,D_] := Sqrt[L^2 - D^2]
-  ThetaFromRC[R_,C_] :=
-  2 ArcSin[C/(2R)]
 
 
   (* Return basic helix params: r, theta, d, c *)
@@ -1769,10 +1766,41 @@ Attributes[withRec ] = {HoldFirst};
 withRec[x_, exprl_, expr2_] := 
  FixedPoint[With[{x = exprl}, #] &, expr2]
 
+(* Try this in the morning:
+Something like: Block[{}, Begin[Unique[]<>"`"]; do-whatever; End[]; return-value]
+Any symbols defined in do-whatever are put in the new context created by Begin, and the context is removed before the block ends.
+*)
+
 (* Phi is the amount of rotation needed to make the segment 
 align with the axis. I think that makes this negated, but we 
 may have to do a quadrant test. *)
 (* Same as: phi = VectorAngle[{H[[1]],0,H[[3]]},{0,0,1}]} *)
+
+ChordFromLD[L_,D_] := Sqrt[L^2 - D^2]
+ThetaFromRC[R_,C_] := 2 ArcSin[C/(2R)]
+
+KahnAxis[L_,D_] := Block[{x, y, z, A, B, C, Cb, Bb, H, da, phi, Bax, Bay, Baz, Ba, r, c, theta},
+  x = D[[1]];
+  y = D[[2]];
+  z = D[[3]];
+  A = {-x, y, -z};
+  B = {0, 0, -L/2};
+  C = {0, 0, L/2};
+  Cb = (B+D)/2 - C;
+  Bb = (A+C)/2 - B;
+  H = Normalize[Cross[Bb,Cb]];
+  da = (C - B) . Normalize[H];
+  phi = ArcCos[da/L];
+  Bax = Sin[phi] da / 2;
+  Baz = -Cos[phi] da / 2;
+  Bay = Bb[[2]] (Bax / Bb[[1]]);
+  Ba = {Bax,Bay,Baz};
+  r = Norm[Ba - B];
+  c = ChordFromLD[L,da];
+  theta = ThetaFromRC[r,c];
+  {r,theta,da,c,phi}
+]
+
 KahnAxis[L_,D_] :=
 With[{ x = D[[1]],
        y = D[[2]],
@@ -2109,7 +2137,8 @@ points (the rho/omega version can implement that. *)
 
 On[Assert];
 
-TestRegularTets[] :=
+TestR
+egularTets[] :=
 With[{
     L0 = 1/3,
     tetAngle = ArcTan[Sqrt[2]/2]},
@@ -2143,10 +2172,14 @@ With[{
       With[{ B = {0,0,-L0/2},
           D = {-A[[1]],A[[2]],-A[[3]]}
         },
-        With[{ res = KahnAxis[L0,D],
-            theta = ArcCos[-2/3]},
-          Assert[Abs[res[[2]] - theta] < 0.00001];
-]]]]]
+        With[{res = KahnAxis[L0,D],
+            thetaExp = ArcCos[-2/3]},
+            Block[{r,theta,da,c,phi},       
+            {r,theta,da,c,phi} = res;
+            Print[{r,theta,da,c,phi}];
+            Print[N[{r,theta 180 / Pi,da,c, phi 180 / Pi}]];
+          Assert[Abs[res[[2]] - thetaExp] < 0.00001];
+]]]]]]
 
 TestRegularTets2[] :=
 With[{
@@ -2171,9 +2204,9 @@ With[{
         With[{ B = {0,0,-L0/2},
             D = {-A[[1]],A[[2]],-A[[3]]}
           },
-          With[{ res = Kahn2[L0,B,D],
-              theta = ArcCos[-2/3]},
-            Assert[Abs[res[[2]] - theta] < 0.00001];
+          With[{ {r,theta,da,c,phi} = Kahn2[L0,B,D],
+              theta_exp = ArcCos[-2/3]},
+            Assert[Abs[theta - theta_exp] < 0.00001];
 ]]]]]]]
 
 
