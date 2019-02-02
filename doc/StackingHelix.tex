@@ -179,7 +179,7 @@ touching the interior of the cylindar? An approach to solving this problem from 
 may be useful. As shown in \cite{read2018transforming}, if the rotation angle $\theta/\pi$ is rational, the
 interior may in fact be n-gon prism, otherwise it will be a circle.
 
-\section{The Intrinsic Properties of Repeated Units}
+\section{The Intrinsic Properties of Periodic Chains}
 
 If we have chains of repeated 3D units conjoined identically, they generate a helix.
 Although it may have been known earlier, we call this Lord's Observation:
@@ -187,8 +187,8 @@ Although it may have been known earlier, we call this Lord's Observation:
 \begin{observation}[Lord's Observation]
   “In nature, helical structures arise when identical structural subunits combine sequentially, the orientational and translational relation between each unit and its predecessor remaining constant.”\cite{lord2002helical}
 \end{observation}
-Lord's Observation should perhaps be clarified that in fact identical objects conjoined via a rule
-produce chains of objects that are uniformly intersected by segmented helices (shelices) and that they may be degenerate in one of
+Lord's Observation may perhaps be clarified that in fact identical objects conjoined via a rule
+produce periodic chains of objects that are uniformly intersected by segmented helices (shelices) and that they may be degenerate in one of
 three ways that we might not strike us as a helix if we are not seeking them:
 \begin{enumerate}
 \item The segments may form a straight line.
@@ -218,9 +218,75 @@ and, conversely, we would like to be able to choose the construction of the subu
 
 In engineering, sometimes the term ``special helix''\cite{gu2012research} is use for helical curves on non-cylindrical surfaces. This paper use the term ``helix'' only in the sense of ``cylindrical helix''.
 
+\section{Periodic Chains Produce Segmented Helices}
 
-\subsection{KahnAxis, a modification of an algorithm by Kahn}
+A periodic chain is in fact a simple object which demonstrates tremendous symmetry.
+Before using this symmetry in the construction of the segmented helix, we
+prove that such a segmented helix indeed exists.
 
+\begin{theorem}
+  Consider $N$ identical objects which each have two points, $A$ and $B$,
+  and a vector $U$ not collinear with $A$ and $B$. Call
+  $\overline{AB}$ the axis of this object.
+  Consider the frame of reference for this object to have
+  its axis on the $z$-axis with $B$ in the positive direction, the
+  midpoint of the at the origin, and the up-vector pointing in the positive $y$ direciton.
+
+  Consider any rule that conjoins $A$ of object $i+1$ to $B$ such that
+  from the frame of reference of $i$, the object $i+1$ anything rigidly
+  attached to it is always in the same position in the frame of reference for $i$.
+  Infomally, $i+1$ ``looks the same'' to $i$, no matter what $i$ we choose, $i < N$.
+
+  A chain of $N$ identical rigid objects conjoined via a rule that
+  conjoins $A$ to $B$ in such a way that every vector 
+  of $B$ is always in the same position relative to a frame of reference
+  constructed from $A$ has a segmented helix whose segemts correspond
+  to the axes of these objects.
+\end{theorem}
+
+Note: At present this proof is invalid for the base case; I should prove the
+base case has the balance properties without rely on the existence of Kahn's algorithm.
+\begin{proof}
+  We will proceed by induction.
+
+  Base Case ($k < 3$):
+  Construct 3 such objects. By construction via Kahn's method, there is
+  a segmented helix matching these objects. Call this segmented helix $H$,
+  and define the  vectors
+  $V_{ai}, V_{bi}$ for $i \in \{1,2,3\}$, each in the frame of reference
+  for $i$ to be the vector from the joint to the nearest point on the
+  axis of $H$. (These happen to be the joint angle bisectors, if there is an object on
+  each side to form such a vector.)
+  By construction, these all have the same magnitude (the radius
+  of $H$) and the same direction (pointing directly at the axis of $H$
+  perpendicular to $H$.)
+
+  Inductive Case ($k+1$):
+  Assume there is a segmented helix coinciding with the first $k$ objects, and
+  consider the frame of reference of the $k$th object. The axis and any
+  other rigid property of the $k+1$th object stands in relation to object $k$
+  as $k$ stood to $k-1$. By induction, the $k$th object had a segment
+  of a segmented helix corresponding to its axis. Attach vectors $V_{Ak}$ and $V_{Bk}$
+  from the
+  joints of $k$ to the axis of the helix perpendicularly. Define these
+  vectors in the frame of reference for $k$.
+
+  To the $k-1$th, the tips of  $V_{Ak}$ and $V_{Bk}$ define
+  a line segment which lies on the axis of the segmented helix $H$, with the
+  tip of $V_{Ak}$ conincident with the tip of $V_{B(k-1)}$.
+
+  By our rule and by induction, since this is true of the $k-1$th object,
+  it is true of the $k$th object. There the $k+1$th objects $V$ vectors
+  point to a line segment which lies on the axis of $H$, extending it
+  in the same direction. The axis of the $k+1$th object therefore conicides 
+  with the $k+1$th segment of $H$. 
+
+  Therefore, by induction, identical objects conjoined by the same rule always
+  coincide with some segmented helix, whose parameters are discoverable by
+  Kahn's method.
+  \end{proof}
+
+\section{KahnAxis: Computing Segmented Helices from Periodic Chains}
 
 \begin{figure}
      \centering
@@ -233,10 +299,9 @@ Kahn\cite{kahn1989defining} has given a method for computing the axis of a helix
 This method uses the observation that the angle bisectors of the segments on a segmented helix are perpendiular
 and intersect the axis of the helix. Kahn's method was a prelude to some error-tolerant methods applicable to
 the realm of organic chemistry. In this paper we are concerned with pure geometry. Also, Kahn was writing in 1989,
-and we now have more convenient compute tools. We give here a modifcation of Kahn's algorithm, called KahnAxis,
+and we now have more convenient compute tools. We give here a modifcation of Kahn's algorithm, called {\em KahnAxis},
 which relies on our ability, working in the realm of pure geometry, to position the segments on the axes
 to simplify the derivation and computation.
-
 
 In the derivations below, we rely on certain facts about
 the segmented helix formed by the stack of objects:
@@ -273,8 +338,6 @@ generally skew lines. In fact, by taking advantage of the fact that the
 generating rule for an object chain requires similarity in every joint,
 we can arrange the objects as in \ref{fig:threemembersdiagram}.
 
-
-
 From there, he goes on to compute various parameters.
 
 We have modified this method by carefully arranging our axes
@@ -283,45 +346,42 @@ and the $z$ axis. This, in combination with symmetry and the knowledge
 that the helical axis is in the $XZ$ plane, lets us compute the
 points on the axis correcsponding to the joints directly from $\phi$.
 
+This algorithm coded below, is simple enough that Mathematica can
+actually produce symbolic closed-form formulae for all computed valued
+in terms of $L, x, y, z$, but they are less comprehensible to the
+human eye than this algorithm, although their existence opens
+the possibility that, for example, the derivative representing
+the change in $r$ with a change in $D$ could be calculated.
 \begin{lstlisting}
-KahnAxis[L_,D_] :=
-With[{ x = D[[1]],
-       y = D[[2]],
-       z = D[[3]]},
-  With[{ A = {-x,y,-z},
-         B = {0,0,-L/2},
-         C = {0,0,L/2}},
-    With[{ Cb = (B+D)/2 - C,
-           Bb = (A+C)/2 - B},
-       With[{ H = Normalize[Cross[Bb,Cb]] },
-          With[{ da = (C - B) . Normalize[H] },
-            With[{ phi = ArcCos[da/L]},
-              With[{ Bax = Sin[phi] da/2,
-                     Baz = -Cos[phi] da/2},
-                With[{ Bay = Bb[[2]] (Bax/Bb[[1]])},
-                  With[{ Ba = {Bax,Bay,Baz}},
-                     With[{ r = Norm[Ba-B]},
-                       With[{ c = ChordFromLD[L,da]},
-                         With[{ theta = ThetaFromRC[r,c]},
-                           {r,theta,da,c,phi}]]]]]]]]]]]]]
+ChordFromLDaxis[L_,Da_] := Sqrt[L^2 - Da^2]
+RotationFromRadiusChord[R_,C_] := 2 ArcSin[C/(2R)]
+KahnAxis[L_,{x_,y_,z_}] := Block[{A, B, C, D, Cb, Bb, H,
+                                  Bax, Bay, Baz, Ba, 
+                                  r, theta, da, c, phi},
+  D = {x,y,z};
+  A = {-x, y, -z};
+  B = {0, 0, -L/2};
+  C = {0, 0, L/2};
+  Cb = (B+D)/2 - C;
+  Bb = (A+C)/2 - B;
+  H = Normalize[Cross[Bb,Cb]];
+  da = (C - B) . Normalize[H];
+  phi = ArcCos[da/L];
+  Bax = Sin[phi] da / 2;
+  Baz = -Cos[phi] da / 2;
+  Bay = Bb[[2]] (Bax / Bb[[1]]);
+  Ba = {Bax,Bay,Baz};
+  r = Norm[Ba - B];
+  c = ChordFromLDaxis[L,da];
+  theta = RotationFromRadiusChord[r,c];
+  {r,theta,da,c,phi,H}
+]
 \end{lstlisting}
-
-The conjecture allows us to use the standard linear algebra formula for
-computing the closest points of two skew lines to find two points on the
-axis of the helix. The distances between these points is $d$, and the
-distances between these points ad the joints is $r$.
-
-Following the \url{https://en.wikipedia.org/wiki/Skew_lines}, we calculate:
-
-\begin{align}
-  \overline{X} &= \overline{F} + \lambda(\overline{F} - \overline{M_{FH}} \\
-  \overline{Y} &= \overline{G} + \lambda(\overline{F} - \overline{M_{FH}}  
-\end{align}
 
 
 Note that in Figure \ref{fig:threemembersdiagram} there is great
 room for confusion in terms of plane $\omega$ is actually
-measured against. The three triangles $FfG$, $FmG$, and $FgG$
+measured against. The three triangles $\triangle BB_aC$, $\triangle BM_aC$, and $\triangle BM_aC$
 are all in general not co-planar, that is, they are all at
 slight angles to each other.  
 
@@ -662,8 +722,6 @@ amino acids, which tend to be cross bonded.
 Need to answer the Math stack  exchange question.
 
 Need to understand possibility of further simplifying specification of object.
-
-Need to clean up Mathematica code, and make possibly use lstlisting environment for highlighting.
 
 \section{Acknowledgements}
 
@@ -1776,13 +1834,12 @@ align with the axis. I think that makes this negated, but we
 may have to do a quadrant test. *)
 (* Same as: phi = VectorAngle[{H[[1]],0,H[[3]]},{0,0,1}]} *)
 
-ChordFromLD[L_,D_] := Sqrt[L^2 - D^2]
-ThetaFromRC[R_,C_] := 2 ArcSin[C/(2R)]
-
-KahnAxis[L_,D_] := Block[{x, y, z, A, B, C, Cb, Bb, H, da, phi, Bax, Bay, Baz, Ba, r, c, theta},
-  x = D[[1]];
-  y = D[[2]];
-  z = D[[3]];
+ChordFromLDaxis[L_,Da_] := Sqrt[L^2 - Da^2]
+RotationFromRadiusChord[R_,C_] := 2 ArcSin[C/(2R)]
+KahnAxis[L_,{x_,y_,z_}] := Block[{A, B, C, D, Cb, Bb, H,
+                                  Bax, Bay, Baz, Ba, 
+                                  r, theta, da, c, phi},
+  D = {x,y,z};
   A = {-x, y, -z};
   B = {0, 0, -L/2};
   C = {0, 0, L/2};
@@ -1796,33 +1853,11 @@ KahnAxis[L_,D_] := Block[{x, y, z, A, B, C, Cb, Bb, H, da, phi, Bax, Bay, Baz, B
   Bay = Bb[[2]] (Bax / Bb[[1]]);
   Ba = {Bax,Bay,Baz};
   r = Norm[Ba - B];
-  c = ChordFromLD[L,da];
-  theta = ThetaFromRC[r,c];
-  {r,theta,da,c,phi}
+  c = ChordFromLDaxis[L,da];
+  theta = RotationFromRadiusChord[r,c];
+  {r,theta,da,c,phi,H}
 ]
 
-KahnAxis[L_,D_] :=
-With[{ x = D[[1]],
-       y = D[[2]],
-       z = D[[3]]},
-  With[{ A = {-x,y,-z},
-         B = {0,0,-L/2},
-         C = {0,0,L/2}},
-    With[{ Cb = (B+D)/2 - C,
-           Bb = (A+C)/2 - B},
-       With[{ H = Normalize[Cross[Bb,Cb]] },
-          With[{ da = (C - B) . Normalize[H] },
-            With[{ phi = ArcCos[da/L]},
-              With[{ Bax = Sin[phi] da/2,
-                     Baz = -Cos[phi] da/2},
-                With[{ Bay = Bb[[2]] (Bax/Bb[[1]])},
-                  With[{ Ba = {Bax,Bay,Baz}},
-                     With[{ r = Norm[Ba-B]},
-                       With[{ c = ChordFromLD[L,da]},
-                         With[{ theta = ThetaFromRC[r,c]},
-                    Print[{r,theta,da,c,phi}];
-                    Print[N[{r,theta 180 / Pi,da,c, phi 180 / Pi}]];
-                           {r,theta,da,c,phi}]]]]]]]]]]]]]
 
 
 
@@ -2174,11 +2209,11 @@ With[{
         },
         With[{res = KahnAxis[L0,D],
             thetaExp = ArcCos[-2/3]},
-            Block[{r,theta,da,c,phi},       
-            {r,theta,da,c,phi} = res;
+            Block[{r,theta,da,c,phi,H},       
+            {r,theta,da,c,phi,H} = res;
             Print[{r,theta,da,c,phi}];
             Print[N[{r,theta 180 / Pi,da,c, phi 180 / Pi}]];
-          Assert[Abs[res[[2]] - thetaExp] < 0.00001];
+          Assert[Abs[res[[2]] - thetaExp] < 0.00001]
 ]]]]]]
 
 TestRegularTets2[] :=
@@ -2224,67 +2259,6 @@ Solve[{a == h x + p, b == i x + q, c == j x + r, z^2 == (a)^2 + (b)^2 + (c)^2},
 
 \end{verbatim}
 
-\section{Proof that Repeted Units Produced Segmente Helices}
-
-\begin{theorem}
-  Consider $N$ identical objects which each have two points, $A$ and $B$,
-  and a vector $U$ not collinear with $A$ and $B$. Call
-  $\overline{AB}$ the axis of this object.
-  Consider the frame of reference for this object to have
-  its axis on the $z$-axis with $B$ in the positive direction, the
-  midpoint of the at the origin, and the up-vector pointing in the positive $y$ direciton.
-
-  Consider any rule that conjoins $A$ of object $i+1$ to $B$ such that
-  from the frame of reference of $i$, the object $i+1$ anything rigidly
-  attached to it is always in the same position in the frame of reference for $i$.
-  Infomally, $i+1$ ``looks the same'' to $i$, no matter what $i$ we choose, $i < N$.
-
-  A chain of $N$ identical rigid objects conjoined via a rule that
-  conjoins $A$ to $B$ in such a way that every vector 
-  of $B$ is always in the same position relative to a frame of reference
-  constructed from $A$ has a segmented helix whose segemts correspond
-  to the axes of these objects.
-\end{theorem}
-
-\begin{proof}
-  We will proceed by induction.
-
-  Base Case ($k < 3$):
-  Construct 3 such objects. By construction via Kahn's method, there is
-  a segmented helix matching these objects. Call this segmented helix $H$,
-  and define the  vectors
-  $V_{ai}, V_{bi}$ for $i \in \{1,2,3\}$, each in the frame of reference
-  for $i$ to be the vector from the joint to the nearest point on the
-  axis of $H$. (These happen to be the joint angle bisectors, if there is an object on
-  each side to form such a vector.)
-  By construction, these all have the same magnitude (the radius
-  of $H$) and the same direction (pointing directly at the axis of $H$
-  perpendicular to $H$.)
-
-  Inductive Case ($k+1$):
-  Assume there is a segmented helix coinciding with the first $k$ objects, and
-  consider the frame of reference of the $k$th object. The axis and any
-  other rigid property of the $k+1$th object stands in relation to object $k$
-  as $k$ stood to $k-1$. By induction, the $k$th object had a segment
-  of a segmented helix corresponding to its axis. Attach vectors $V_{Ak}$ and $V_{Bk}$
-  from the
-  joints of $k$ to the axis of the helix perpendicularly. Define these
-  vectors in the frame of reference for $k$.
-
-  To the $k-1$th, the tips of  $V_{Ak}$ and $V_{Bk}$ define
-  a line segment which lies on the axis of the segmented helix $H$, with the
-  tip of $V_{Ak}$ conincident with the tip of $V_{B(k-1)}$.
-
-  By our rule and by induction, since this is true of the $k-1$th object,
-  it is true of the $k$th object. There the $k+1$th objects $V$ vectors
-  point to a line segment which lies on the axis of $H$, extending it
-  in the same direction. The axis of the $k+1$th object therefore conicides 
-  with the $k+1$th segment of $H$. 
-
-  Therefore, by induction, identical objects conjoined by the same rule always
-  coincide with some segmented helix, whose parameters are discoverable by
-  Kahn's method.
-  \end{proof}
 
 \end{document}
 
