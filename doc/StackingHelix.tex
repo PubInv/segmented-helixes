@@ -250,17 +250,38 @@ prove that such a segmented helix indeed exists.
   We will proceed by induction.
 
   Base Case ($k == 3$):
-  Construct 3 such objects. By construction via Kahn's method, there is
-  a segmented helix matching these objects. Call this segmented helix $H$,
-  and define the  vectors
-  $V_{ai}, V_{bi}$ for $i \in \{1,2,3\}$, each in the frame of reference
-  for $i$ to be the vector from the joint to the nearest point on the
-  axis of $H$. (These happen to be the joint angle bisectors, if there is an object on
-  each side to form such a vector.)
-  By construction, these all have the same magnitude (the radius
-  of $H$) and the same direction (pointing directly at the axis of $H$
-  perpendicular to $H$.)
 
+  Take an object $AB$. By By Chasles' theorem, there is a screw axis $S$ and slide $d$ which moves the first object to
+  position where the second object $BC$ is. Construct the points $A'$, $B'$ and $C'$ as the closest points
+  to $A,B$ and $C$ on this axis. These points are colinear by construction.
+
+  Now add the object $CD$ to object $BC$ by our the rule of periodic chains. Consider the points
+  $B'$ and $C'$ from $A$'s frame of reference. Let $d = \| \overline C' - \overline B' \|$.
+  Construct the point $D'$ on our screw axis as the point closest to $D$ on that line.
+
+  Now because $C'D'$ in $BC$'s frame or reference must look like $B'C'$ in $A$'s frame of refrence,
+  must look like $B'C'$, the distance $\| \overline D' - \overline C' \| = d$.
+  From $A$'s frame of reference, $A'B'C'$ are colinear, the points $B'C'D'$ must be colinear in
+  $B$'s frame of reference.
+
+  In ANY frame of reference, if $A'B'C'$ are colinear and $B'C'D'$ are colinear, then $A'B'C'D'$
+  are colinear.
+
+  Now, looking backward from $CD$ towards $A$, the distance $A'B'$ must be the same as the
+  distance $B'C'$ so as to not violate our rule. So $d = \| A'B' \| = \| B'C' \| = \| C'D'\|$.
+  Similarly because by construction $r = \| B B' \| = \| C C' \|$, and $AA'$ is a rigid
+  transformation of $BB'$, so $r = \| A A' \|$. By symmetry, $r = \| D D' \|$.
+  Compute $\theta$ as the rotation about $S$ that takes $B B'$ into $C C'$. By our rule
+  of attachement, $\theta$ also takes $C C'$ into $D D'$ and $A A'$ into $B B'$.
+
+  Now construct a segmented helix, the radius $r$, distance,
+  and angle $\theta$. This segmented helix can be positioned coincident with $S$ so
+  that $H_0 = A$. Then $H_1=B$, $H_2=C$, and $H_3=D$.
+
+  Therefore, for the base case of three objects, there is a segmented helix whose
+  segments coincide with the axes of the objects.
+  
+  
   Inductive Case ($k+1$):
   Assume there is a segmented helix coinciding with the first $k$ objects, and
   consider the frame of reference of the $k$th object. The axis and any
@@ -284,7 +305,34 @@ prove that such a segmented helix indeed exists.
   Therefore, by induction, identical objects conjoined by the same rule always
   coincide with some segmented helix, whose parameters are discoverable by
   Kahn's method.
-  \end{proof}
+\end{proof}
+
+This theorem leads to the following corollary.
+
+\begin{corollary}
+  The axes of the object in a periodic chain are symmetric to the axis of the
+  segmented helix coincident to it. The signed angle between the axes of two adjacent
+  objects is the same in both directions.
+\end{corollary}
+
+\begin{proof}
+  The axes of each object coincide with a segment of a segmented helix.
+  A segmented helix is completely symmetric no matter if which direction
+  of the axis you look down. The angle between each pair of objects
+  is exactly the same.
+\end{proof}
+
+Note that the objects themselves may not be symmetric; for example,
+The $B$ face does not have to be the same size as the $A$ face. In fact,
+the object itself might be shaped like the letter ``C'', and not complete
+enclose the axis. Taking the idea further, the object might be spikey
+like a stellated polyhedron or a sea urchin, and still be joined by
+joints relatively close to the center of the object. In this paper
+we do not concern ourself with the issue of self-collision of the objects,
+which would have to be considered if one attempted to make a period chain
+of sea urchins.
+
+
 
 \section{KahnAxis: Computing Segmented Helices from Periodic Chains}
 
@@ -677,7 +725,7 @@ CRITICAL:
 \url{https://ieeexplore.ieee.org/stamp/stamp.jsp?tp=&arnumber=56653}
 
 
-This is a valuable reference
+THIS IS SUPER IMPORTANT. I STILL CAN'T TELL IF IT DOES WHAT WE ARE DOING.
 \url{http://www.12000.org/my_notes/screw_axis/index.htm}
 
 This paper considers only simple unbranched chains of objects. In the
@@ -737,6 +785,15 @@ A modern helix structure protein paper:
 
 QHELIX: A Computational Tool for the Improved Measurement of Inter-Helical Angles in Proteins
 \url{https://link.springer.com/article/10.1007/s10930-007-9097-9}
+
+Note:''On the Screw Axes and Other Special Lines Associated With Spatial Displacements of a Rigid Body''
+\url{http://manufacturingscience.asmedigitalcollection.asme.org/article.aspx?articleid=1439697}
+
+Note: An historical review of the theoretical development of rigid body displacements from Rodrigues parameters to the finite twist
+\url{https://www.sciencedirect.com/science/article/pii/S0094114X0500087X}
+
+Note: Might need to get this book.
+\url{https://link.springer.com/chapter/10.1007/978-3-319-31126-5_1}
 
 \subsection{To Be Done}
 
