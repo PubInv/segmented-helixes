@@ -313,6 +313,7 @@ This theorem leads to the following corollary.
   The axes of the object in a periodic chain are symmetric to the axis of the
   segmented helix coincident to it. The signed angle between the axes of two adjacent
   objects is the same in both directions.
+  \label{cor:symmetric}
 \end{corollary}
 
 \begin{proof}
@@ -332,7 +333,10 @@ we do not concern ourself with the issue of self-collision of the objects,
 which would have to be considered if one attempted to make a period chain
 of sea urchins.
 
-
+Corollary \ref{cor:symmetric} will be used in our development of KahnAxis algorithm
+and in our computation of shelix properties and to justify balancing face normals
+to produce an intrinsic out-vector and to apply the KahnAxis algorithm
+without actually assigning objects Cartesian coordinates.
 
 \section{KahnAxis: Computing Segmented Helices from Periodic Chains}
 
