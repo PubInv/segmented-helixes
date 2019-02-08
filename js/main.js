@@ -32,6 +32,123 @@ if (!Detector.webgl) {
     document.getElementById('threecontainer').innerHTML = "";
 }
 
+// Here I attempt to create an abstract prism object.
+
+function AbstractPrism(L,Nb,Nc) {
+    this.L = L;
+    this.Nb = Nb.clone().normalize();
+    this.Nc = Nc.clone().normalize();
+    this.up = new THREE.Vector3(0,1,0);
+}
+
+const PRISM_FACE_RATIO_LENGTH = 1/4;
+function CreatePrism(prism) {
+    // This object is a triangular prism. We will use
+    // parallelpiped and spheres to create it.
+
+    // First we have to compute the three
+    // points at the ends be rotating by the normals.
+    // We begin with Equilateral triangles at the ends.
+    // The axis is Z-aligned, and will have one edge
+    // pointing up.
+
+    const W = TRIANGLE_WIDTH = 1;
+    const H = TRIANGLE_HEIGHT = Math.sqrt(3)/2;
+    const BASE = -(1/3);
+    
+    var TB = new THREE.Vector3(0, H + BASE, 0);
+    var LB = new THREE.Vector3(-W/2, BASE, 0);
+    var RB = new THREE.Vector3(W/2, BASE, 0);
+
+    let PRISM_FACE_LENGTH = prism.L * PRISM_FACE_RATIO_LENGTH;
+    TB.multiplyScalar(PRISM_FACE_LENGTH);
+    LB.multiplyScalar(PRISM_FACE_LENGTH);
+    RB.multiplyScalar(PRISM_FACE_LENGTH);
+    
+    var TC = TB.clone();
+    var LC = LB.clone();
+    var RC = RB.clone();
+
+    // now we have to rotate these points.
+    var Q_to_Nb = new THREE.Quaternion();
+    Q_to_Nb.setFromUnitVectors(new THREE.Vector3(0,0,-1),
+                               prism.Nb);
+    var Q_to_Nc = new THREE.Quaternion();    
+    Q_to_Nc.setFromUnitVectors(new THREE.Vector3(0,0,1),
+                               prism.Nc);
+    TB.applyQuaternion(Q_to_Nb);
+    LB.applyQuaternion(Q_to_Nb);
+    RB.applyQuaternion(Q_to_Nb);    
+
+    TC.applyQuaternion(Q_to_Nc);
+    LC.applyQuaternion(Q_to_Nc);
+    RC.applyQuaternion(Q_to_Nc);
+    
+    // Now translate them...
+    var transB = new THREE.Matrix4();
+    var transC = new THREE.Matrix4();
+
+    transB.makeTranslation(0,0,-prism.L/2);
+    transC.makeTranslation(0,0,prism.L/2);
+
+    TB.applyMatrix4(transB);
+    LB.applyMatrix4(transB);
+    RB.applyMatrix4(transB);
+    
+    TC.applyMatrix4(transC);
+    LC.applyMatrix4(transC);
+    RC.applyMatrix4(transC);        
+
+    console.log(TB,LB,RB);
+    console.log(TC,LC,RC);
+
+    // now that we have the points, we can
+    // construct the objects....
+    // Joint Radius = 
+    var objects = [];
+    let colors = [d3.color("DarkRed"), d3.color("DarkOrange"), d3.color("Blue")];
+    let SR = PRISM_FACE_LENGTH/6;
+    objects.push(createSphere(SR,TB,colors[0].hex()));
+    objects.push(createSphere(SR,LB,colors[1].hex()));
+    objects.push(createSphere(SR,RB,colors[2].hex()));
+
+    objects.push(createSphere(SR,TC,colors[0].hex()));
+    objects.push(createSphere(SR,LC,colors[1].hex()));
+    objects.push(createSphere(SR,RC,colors[2].hex()));
+
+    var scolors = [d3.color("DarkRed"), d3.color("DarkOrange"), d3.color("Indigo")];
+var smats = [new THREE.Color(0x8B0000),
+             new THREE.Color(0xFF8C00),
+             new THREE.Color(0x000082)];
+
+    objects.push(create_actuator_pure(TB,LB,SR,SR/2,smats[0]));
+    objects.push(create_actuator_pure(LB,RB,SR,SR/2,smats[1]));
+    objects.push(create_actuator_pure(RB,TB,SR,SR/2,smats[2]));
+
+    objects.push(create_actuator_pure(TB,LB,SR,SR/2,smats[0]));
+    objects.push(create_actuator_pure(LB,RB,SR,SR/2,smats[1]));
+    objects.push(create_actuator_pure(RB,TB,SR,SR/2,smats[2]));
+
+    objects.push(create_actuator_pure(TB,TC,SR,SR/2,smats[0]));
+    objects.push(create_actuator_pure(LB,LC,SR,SR/2,smats[0]));
+    objects.push(create_actuator_pure(RB,RC,SR,SR/2,smats[0]));
+
+    return objects;
+}
+
+
+function testCreatePrism() {
+    // var p = new AbstractPrism(1,
+    //                           new THREE.Vector3(-1,-0.5,-2),
+    //                           new THREE.Vector3(1,-0.3,2));
+    var p = new AbstractPrism(1,
+                               new THREE.Vector3(0,-0.3,-1),
+                               new THREE.Vector3(3,-0.6,1));
+    var TP = CreatePrism(p);
+    console.log(TP);
+    TP.forEach(o => { am.scene.add(o); });
+}
+
 function addShadowedLight(scene, x, y, z, color, intensity) {
     var directionalLight = new THREE.DirectionalLight(color, intensity);
     directionalLight.position.set(x, y, z);
@@ -101,6 +218,32 @@ function create_actuator(b_a, b_z, pos, cmat) {
     mesh.castShadow = false;;
     mesh.receiveShadow = true;
     am.scene.add(mesh);
+    mesh.structureKind = "member";
+    mesh.name = b_a.name + " " + b_z.name;
+    return mesh;
+}
+
+function create_actuator_pure(b_a, b_z,jr,w, cmat) {
+    var len = b_z.distanceTo(b_a) + -jr;
+    var quat = new THREE.Quaternion();
+
+    var pos = new THREE.Vector3(b_z.x, b_z.y, b_z.z);
+    pos.add(b_a);
+    pos.divideScalar(2);
+    
+    var mesh = createParalellepiped(
+        w,
+        w,
+        len,
+        pos,
+        quat,
+        cmat);
+
+    mesh.lookAt(b_z);
+
+    mesh.castShadow = false;;
+    mesh.receiveShadow = true;
+//    am.scene.add(mesh);
     mesh.structureKind = "member";
     mesh.name = b_a.name + " " + b_z.name;
     return mesh;
@@ -1505,6 +1648,12 @@ function set_outputs(radius,theta,travel,phi) {
 // in Mathematica.
 // However, the point here is to render something.
 // I suppose at first I can render lines.
+
+function format_num(num,digits) {
+    return parseFloat(Math.round(num * 10**digits) / 10**digits).toFixed(digits);
+}
+
+var PHI_SPRITE;
 function onComputeDelix() {
     clearAm();
     
@@ -1550,7 +1699,14 @@ function onComputeDelix() {
     create_vertex_mesh(new THREE.Vector3(1,0,0),d3.color("red"));
     create_vertex_mesh(new THREE.Vector3(0,1,0),d3.color("green"));
     create_vertex_mesh(new THREE.Vector3(0,0,1),d3.color("blue"));
-    
+
+    if (PHI_SPRITE) {
+        am.grid_scene.remove(PHI_SPRITE);
+    }
+    PHI_SPRITE = makeTextSprite("phi="+format_num(phi * 180/Math.PI,2),{fontsize: 20 },"red");
+    PHI_SPRITE.position.set(0,0.05,0);
+    am.grid_scene.add(PHI_SPRITE);
+
 }
 
 function onExecute() {
@@ -2328,6 +2484,8 @@ $( document ).ready(function() {
     $(function () { main(); });
     
     onComputeDelix();
+
+    testCreatePrism();
     
 });
 
