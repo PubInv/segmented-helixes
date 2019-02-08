@@ -41,7 +41,7 @@ function AbstractPrism(L,Nb,Nc) {
     this.up = new THREE.Vector3(0,1,0);
 }
 
-const PRISM_FACE_RATIO_LENGTH = 1/4;
+const PRISM_FACE_RATIO_LENGTH = 1/2;
 function CreatePrism(prism) {
     // This object is a triangular prism. We will use
     // parallelpiped and spheres to create it.
@@ -88,8 +88,13 @@ function CreatePrism(prism) {
     var transB = new THREE.Matrix4();
     var transC = new THREE.Matrix4();
 
+    let b = new THREE.Vector3(0,0,0);
+    let c = new THREE.Vector3(0,0,0);    
+
     transB.makeTranslation(0,0,-prism.L/2);
     transC.makeTranslation(0,0,prism.L/2);
+    b.applyMatrix4(transB);
+    c.applyMatrix4(transC);    
 
     TB.applyMatrix4(transB);
     LB.applyMatrix4(transB);
@@ -101,13 +106,35 @@ function CreatePrism(prism) {
 
     console.log(TB,LB,RB);
     console.log(TC,LC,RC);
+    // for convenience, should I make the instance vectors
+    // part of this object? Or should I add the matrices,
+    // effective make it a "screw" transformation
+    return {p: prism,
+            b: b,
+            c: c,
+            nb: prism.Nb,
+            nc: prism.Nc,
+            tb: TB, lb : LB, rb : RB,
+            tc : TC, lc : LC, rc : RC};
 
+}
+function renderPrismInstance(p_i) {
     // now that we have the points, we can
     // construct the objects....
-    // Joint Radius = 
     var objects = [];
     let colors = [d3.color("DarkRed"), d3.color("DarkOrange"), d3.color("Blue")];
-    let SR = PRISM_FACE_LENGTH/6;
+
+    let L = p_i.p.L;
+    let PRISM_FACE_LENGTH = L * PRISM_FACE_RATIO_LENGTH;
+    let SR = PRISM_FACE_LENGTH/10;
+
+    let TB = p_i.tb;
+    let LB = p_i.lb;
+    let RB = p_i.rb;
+    
+    let TC = p_i.tc;
+    let LC = p_i.lc;
+    let RC = p_i.rc;        
     objects.push(createSphere(SR,TB,colors[0].hex()));
     objects.push(createSphere(SR,LB,colors[1].hex()));
     objects.push(createSphere(SR,RB,colors[2].hex()));
@@ -116,37 +143,189 @@ function CreatePrism(prism) {
     objects.push(createSphere(SR,LC,colors[1].hex()));
     objects.push(createSphere(SR,RC,colors[2].hex()));
 
+    // These are the joint axes....
+    objects.push(createSphere(SR,new THREE.Vector3(0,0,-L/2),colors[0].hex()));
+    objects.push(createSphere(SR,new THREE.Vector3(0,0,L/2),colors[0].hex()));
+    
+
     var scolors = [d3.color("DarkRed"), d3.color("DarkOrange"), d3.color("Indigo")];
 var smats = [new THREE.Color(0x8B0000),
              new THREE.Color(0xFF8C00),
              new THREE.Color(0x000082)];
 
-    objects.push(create_actuator_pure(TB,LB,SR,SR/2,smats[0]));
-    objects.push(create_actuator_pure(LB,RB,SR,SR/2,smats[1]));
-    objects.push(create_actuator_pure(RB,TB,SR,SR/2,smats[2]));
+    let w = SR/4;
+    objects.push(create_actuator_pure(TB,LB,SR,SR/2,memo_color_mat(smats[0])));
+    objects.push(create_actuator_pure(LB,RB,SR,SR/2,memo_color_mat(smats[1])));
+    objects.push(create_actuator_pure(RB,TB,SR,SR/2,memo_color_mat(smats[2])));
 
-    objects.push(create_actuator_pure(TB,LB,SR,SR/2,smats[0]));
-    objects.push(create_actuator_pure(LB,RB,SR,SR/2,smats[1]));
-    objects.push(create_actuator_pure(RB,TB,SR,SR/2,smats[2]));
+    objects.push(create_actuator_pure(TC,LC,SR,SR/2,memo_color_mat(smats[0])));
+    objects.push(create_actuator_pure(LC,RC,SR,SR/2,memo_color_mat(smats[1])));
+    objects.push(create_actuator_pure(RC,TC,SR,SR/2,memo_color_mat(smats[2])));
 
-    objects.push(create_actuator_pure(TB,TC,SR,SR/2,smats[0]));
-    objects.push(create_actuator_pure(LB,LC,SR,SR/2,smats[0]));
-    objects.push(create_actuator_pure(RB,RC,SR,SR/2,smats[0]));
+    objects.push(create_actuator_pure(TB,TC,SR,SR/2,memo_color_mat(smats[0])));
+    objects.push(create_actuator_pure(LB,LC,SR,SR/2,memo_color_mat(smats[0])));
+    objects.push(create_actuator_pure(RB,RC,SR,SR/2,memo_color_mat(smats[0])));
 
+    // Need to return the points here, and the up vector, not just the meshes...
+    // That is an "instance of an abstract prism".
     return objects;
 }
 
+function applyMatrix4ToPrism(nu,trans) {
+    nu.tb.applyMatrix4(trans);
+    nu.lb.applyMatrix4(trans);
+    nu.rb.applyMatrix4(trans);
+    
+    nu.tc.applyMatrix4(trans);
+    nu.lc.applyMatrix4(trans);
+    nu.rc.applyMatrix4(trans);
+
+    nu.b.applyMatrix4(trans);
+    nu.c.applyMatrix4(trans);
+}
+
+function applyQuaternionToPrism(nu,q) {
+    nu.tb.applyQuaternion(q);
+    nu.lb.applyQuaternion(q);
+    nu.rb.applyQuaternion(q);
+    
+    nu.tc.applyQuaternion(q);
+    nu.lc.applyQuaternion(q);
+    nu.rc.applyQuaternion(q);
+
+    nu.b.applyQuaternion(q);
+    nu.c.applyQuaternion(q);
+}
+
+
+let p0 = new AbstractPrism(1,
+                              new THREE.Vector3(1,.1,-1),
+                              new THREE.Vector3(0,0.3,1));
 
 function testCreatePrism() {
     // var p = new AbstractPrism(1,
     //                           new THREE.Vector3(-1,-0.5,-2),
     //                           new THREE.Vector3(1,-0.3,2));
-    var p = new AbstractPrism(1,
-                               new THREE.Vector3(0,-0.3,-1),
-                               new THREE.Vector3(3,-0.6,1));
-    var TP = CreatePrism(p);
+    // var p = new AbstractPrism(1,
+    //                            new THREE.Vector3(0,-0.3,-1),
+    //                           new THREE.Vector3(0,-0.6,1));
+
+    var p_i = CreatePrism(p0);
+    var TP = renderPrismInstance(p_i);
     console.log(TP);
     TP.forEach(o => { am.scene.add(o); });
+}
+
+// Add the novel prism to the old prism by placing the B face
+// aginst the C face of the old with a twist of tau and return.
+// note that old is a prism instance, not a mesh instance,
+// and it has a link to the abstract prism inside it.
+function adjoinPrism(old,tau) {
+    // First, we copy the old prism in exactly the same position
+
+    var nu = Object.assign({},old);
+    nu.p = Object.assign({}, old.p);
+    console.log(old,nu);
+    nu.b = old.b.clone();
+    nu.c = old.c.clone();
+    
+    nu.tb = old.tb.clone();
+    nu.lb = old.lb.clone();
+    nu.rb = old.rb.clone();
+
+    nu.tc = old.tc.clone();
+    nu.lc = old.lc.clone();
+    nu.rc = old.rc.clone();
+    
+    // Then we translate along the axis of the old prism
+    var av = new THREE.Vector3(0,0,0).subVectors(nu.c,nu.b);
+    console.log("AV",av.length(),av);
+    var trans = new THREE.Matrix4();
+    trans.makeTranslation(av.x,av.y,av.z);
+
+    console.log("BC before",nu.b,nu.c);
+    applyMatrix4ToPrism(nu,trans);
+    console.log("BC after",nu.b,nu.c);    
+    
+    var av = new THREE.Vector3(0,0,0).subVectors(nu.c,nu.b);
+    console.log("AV000",av.length(),av);
+    console.assert(av.length() == nu.p.L);
+
+    
+    var b_trans = new THREE.Matrix4();
+    b_trans.makeTranslation(-nu.b.x,-nu.b.y,-nu.b.z);
+    var b_trans_r = new THREE.Matrix4();
+    b_trans_r.makeTranslation(nu.b.x,nu.b.y,nu.b.z);
+
+    
+    var av = new THREE.Vector3(0,0,0).subVectors(nu.c,nu.b);
+    console.log("AV001",av.length(),av);
+    console.assert(av.length() == nu.p.L);    
+
+    
+    applyMatrix4ToPrism(nu,b_trans);
+
+    var av = new THREE.Vector3(0,0,0).subVectors(nu.c,nu.b);
+    console.log("AV001",av.length(),av);
+    console.assert(av.length() == nu.p.L);    
+
+    
+    // At this, point b had better be at the origin...
+    console.log(nu);
+    console.assert(nu.b.length() == 0);
+    
+    // Then we rotate about the joint (we may actually do this first)
+    var Q_to_Nb = new THREE.Quaternion();
+    Q_to_Nb.setFromUnitVectors(nu.p.Nb,
+                               new THREE.Vector3(0,0,-1));
+    var Q_to_Nc = new THREE.Quaternion();    
+    Q_to_Nc.setFromUnitVectors(new THREE.Vector3(0,0,1),
+                               nu.p.Nc);
+    var av = new THREE.Vector3(0,0,0).subVectors(nu.c,nu.b);
+    console.log("AVA",av.length(),av);
+    console.assert(av.length() == nu.p.L);    
+
+    applyQuaternionToPrism(nu,Q_to_Nb);
+    applyQuaternionToPrism(nu,Q_to_Nc);
+    
+    var av = new THREE.Vector3(0,0,0).subVectors(nu.c,nu.b);
+    console.log("AVX",av.length(),av);
+    console.assert(av.length() == nu.p.L);    
+
+    console.log("AFTER rotation",nu);
+    applyMatrix4ToPrism(nu,b_trans_r);
+
+    var diff = new THREE.Vector3();
+    diff.subVectors(old.c,nu.b);
+    console.assert(diff.length() == 0);
+
+
+    var av =  new THREE.Vector3(0,0,0).subVectors(nu.c,nu.b);
+    console.log("AVY",av.length(),av);
+    console.assert(av.length() == nu.p.L);    
+
+    
+    // So that the normal of the C face is the opposite of the B face.
+    // Finally we apply the twist...
+    // We return the abstract prism so created.
+
+    return nu;
+}
+
+const NUM_PRISMS_FOR_TEST = 20;
+function testAdjoinPrism() {
+    // var p = new AbstractPrism(1,
+    //                            new THREE.Vector3(0,-0.1,-1),
+    //                           new THREE.Vector3(0,-0.3,1));
+
+    var p_i = CreatePrism(p0);
+    for(let i = 0; i < NUM_PRISMS_FOR_TEST; i++) {
+        var p_c = adjoinPrism(p_i,0);
+        var TP = renderPrismInstance(p_c);
+        TP.forEach(o => { am.scene.add(o); });
+        p_i = p_c;
+    }
+    
 }
 
 function addShadowedLight(scene, x, y, z, color, intensity) {
@@ -2486,6 +2665,7 @@ $( document ).ready(function() {
     onComputeDelix();
 
     testCreatePrism();
-    
+
+    testAdjoinPrism();
 });
 
