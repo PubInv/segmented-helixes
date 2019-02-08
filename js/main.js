@@ -143,6 +143,9 @@ function renderPrismInstance(p_i) {
     objects.push(createSphere(SR,LC,colors[1].hex()));
     objects.push(createSphere(SR,RC,colors[2].hex()));
 
+    objects.push(createSphere(SR,p_i.b,colors[2].hex()));
+    objects.push(createSphere(SR,p_i.c,colors[2].hex()));
+
     // These are the joint axes....
     objects.push(createSphere(SR,new THREE.Vector3(0,0,-L/2),colors[0].hex()));
     objects.push(createSphere(SR,new THREE.Vector3(0,0,L/2),colors[0].hex()));
@@ -197,10 +200,13 @@ function applyQuaternionToPrism(nu,q) {
     nu.c.applyQuaternion(q);
 }
 
+var INITIAL_NORM_POINT_Y = -0.7;
+var INITIAL_NORM_POINT_X = -0.62;
 
-let p0 = new AbstractPrism(1,
-                              new THREE.Vector3(1,.1,-1),
-                              new THREE.Vector3(0,0.3,1));
+var p0 = new AbstractPrism(
+    1,
+    new THREE.Vector3(INITIAL_NORM_POINT_X,INITIAL_NORM_POINT_Y,-1),
+    new THREE.Vector3(-INITIAL_NORM_POINT_X,INITIAL_NORM_POINT_Y,1));
 
 function testCreatePrism() {
     // var p = new AbstractPrism(1,
@@ -211,6 +217,9 @@ function testCreatePrism() {
     //                           new THREE.Vector3(0,-0.6,1));
 
     var p_i = CreatePrism(p0);
+    // We shall place this upward, for the purpose of
+    // making it easier to see...
+    
     var TP = renderPrismInstance(p_i);
     console.log(TP);
     TP.forEach(o => { am.scene.add(o); });
@@ -239,40 +248,24 @@ function adjoinPrism(old,tau) {
     
     // Then we translate along the axis of the old prism
     var av = new THREE.Vector3(0,0,0).subVectors(nu.c,nu.b);
-    console.log("AV",av.length(),av);
     var trans = new THREE.Matrix4();
     trans.makeTranslation(av.x,av.y,av.z);
 
-    console.log("BC before",nu.b,nu.c);
     applyMatrix4ToPrism(nu,trans);
-    console.log("BC after",nu.b,nu.c);    
-    
-    var av = new THREE.Vector3(0,0,0).subVectors(nu.c,nu.b);
-    console.log("AV000",av.length(),av);
-    console.assert(av.length() == nu.p.L);
-
     
     var b_trans = new THREE.Matrix4();
     b_trans.makeTranslation(-nu.b.x,-nu.b.y,-nu.b.z);
     var b_trans_r = new THREE.Matrix4();
     b_trans_r.makeTranslation(nu.b.x,nu.b.y,nu.b.z);
 
-    
-    var av = new THREE.Vector3(0,0,0).subVectors(nu.c,nu.b);
-    console.log("AV001",av.length(),av);
-    console.assert(av.length() == nu.p.L);    
 
     
     applyMatrix4ToPrism(nu,b_trans);
 
     var av = new THREE.Vector3(0,0,0).subVectors(nu.c,nu.b);
-    console.log("AV001",av.length(),av);
-    console.assert(av.length() == nu.p.L);    
-
     
     // At this, point b had better be at the origin...
-    console.log(nu);
-    console.assert(nu.b.length() == 0);
+    console.assert(near(nu.b.length(),0,1e-4));    
     
     // Then we rotate about the joint (we may actually do this first)
     var Q_to_Nb = new THREE.Quaternion();
@@ -281,28 +274,17 @@ function adjoinPrism(old,tau) {
     var Q_to_Nc = new THREE.Quaternion();    
     Q_to_Nc.setFromUnitVectors(new THREE.Vector3(0,0,1),
                                nu.p.Nc);
-    var av = new THREE.Vector3(0,0,0).subVectors(nu.c,nu.b);
-    console.log("AVA",av.length(),av);
-    console.assert(av.length() == nu.p.L);    
 
     applyQuaternionToPrism(nu,Q_to_Nb);
     applyQuaternionToPrism(nu,Q_to_Nc);
     
-    var av = new THREE.Vector3(0,0,0).subVectors(nu.c,nu.b);
-    console.log("AVX",av.length(),av);
-    console.assert(av.length() == nu.p.L);    
-
-    console.log("AFTER rotation",nu);
     applyMatrix4ToPrism(nu,b_trans_r);
 
     var diff = new THREE.Vector3();
     diff.subVectors(old.c,nu.b);
-    console.assert(diff.length() == 0);
+    console.assert(near(diff.length(),0,1e-4));
 
 
-    var av =  new THREE.Vector3(0,0,0).subVectors(nu.c,nu.b);
-    console.log("AVY",av.length(),av);
-    console.assert(av.length() == nu.p.L);    
 
     
     // So that the normal of the C face is the opposite of the B face.
@@ -312,13 +294,19 @@ function adjoinPrism(old,tau) {
     return nu;
 }
 
-const NUM_PRISMS_FOR_TEST = 20;
+const NUM_PRISMS_FOR_TEST = 50;
+var WORLD_HEIGHT = 2.5;
+var GTRANS = new THREE.Matrix4().makeTranslation(0,WORLD_HEIGHT,0);
+
 function testAdjoinPrism() {
     // var p = new AbstractPrism(1,
     //                            new THREE.Vector3(0,-0.1,-1),
     //                           new THREE.Vector3(0,-0.3,1));
 
     var p_i = CreatePrism(p0);
+
+    applyMatrix4ToPrism(p_i,GTRANS);
+    
     for(let i = 0; i < NUM_PRISMS_FOR_TEST; i++) {
         var p_c = adjoinPrism(p_i,0);
         var TP = renderPrismInstance(p_c);
@@ -1790,7 +1778,7 @@ function generator_init(params) {
 // The helix is parallel to the vector v.
 // The helix is centered on the y axis, and the two points
 // at n = -1, n = 0, or centered on the z axis.
-function RenderHelix(l,r,d,theta,v,phi) {
+function RenderHelix(l,r,d,theta,v,phi,trans) {
     const MAX_POINTS = 100;
     // One way to effect this is to compute a z-axis aligned helix,
     // Then rotate it parallel to v, then translate it on the
@@ -1799,10 +1787,15 @@ function RenderHelix(l,r,d,theta,v,phi) {
     var points3D = new THREE.Geometry();        
     for (var i=0; i<MAX_POINTS; i++) {
         var n = i - (MAX_POINTS/2) + 0.5;
-        var y = r * Math.cos(n*theta);
+        // we subtract r to make this centered on the zero line,
+        // BUT THIS IS STILL NOT RIGHT!!!
+        var y = r * Math.cos(n*theta) - r;
         var x = r * Math.sin(n*theta);            
         var z = n *d;
-        points3D.vertices.push(new THREE.Vector3(x,y,z));
+        // We will apply the global translation here...
+        var p = new THREE.Vector3(x,y,z);
+        p.applyMatrix4(trans);
+        points3D.vertices.push(p);
     }
     var line2 = new THREE.Line(points3D, new THREE.LineBasicMaterial({color: "red"}));
     line2.rotation.y = phi;
@@ -1872,7 +1865,7 @@ function onComputeDelix() {
     set_outputs(r,theta,d,phi);
     
 
-    RenderHelix(1,r,d,theta,new THREE.Vector3(0,0,1),-phi);
+    RenderHelix(1,r,d,theta,new THREE.Vector3(0,0,1),-phi,GTRANS);
 
     create_vertex_mesh(new THREE.Vector3(0,0,0),d3.color("white"));
     create_vertex_mesh(new THREE.Vector3(1,0,0),d3.color("red"));
@@ -2664,7 +2657,10 @@ $( document ).ready(function() {
     
     onComputeDelix();
 
-    testCreatePrism();
+//    testCreatePrism();
+
+    INITIAL_NORM_POINT_Y = Math.cos(ANGLE_RHO_d * 180 / Math.PI);
+    INITIAL_NORM_POINT_X = Math.sin(ANGLE_OMEGA_d * 180 / Math.PI);
 
     testAdjoinPrism();
 });
