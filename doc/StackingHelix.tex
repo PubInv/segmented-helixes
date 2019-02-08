@@ -149,7 +149,7 @@ A segmented helix may be thought of as function that given an integer gives back
 
 $d$ is the distance or {\em travel} along the $z$-axis between adjacent joints, and $\theta$ is the rotation around the $z$-axis
 between adjacent points. $r$ is the radius of the shelix. If we think of the shelix as describing a polyline in 3-space, we would like to investigate
-the properties of that polyvinyl.
+the properties of that polyline.
 
 \begin{itemize}
 \item $L$ is the distance between any two adjacent points.
@@ -493,7 +493,21 @@ it remains the case that the second object can be rotated about the normals. To
 define the joining rule, we must attach an {\em up vector} to each object. Then a joining
 rule is ``place the second object against the first, joint point coincident to joint point,
 and twist it so that its up vector differs by $\tau$ degrees from the up vector of the first
-object.''
+object.'' In this definition, the up vectors are considered to be measured against the plane
+containing the two axes meeting in a joint.
+
+Define the {\em joint plane} to be the plane which contians the two axes meeting in a joint.
+Define the {\em joint line} to be the line throught the joint perpendicular to the joint plane.
+Define the {\em joint angle} to be the angle of the first axis to the second measured about
+the joint line.
+The twist $\tau$ is the change in the a vector attached to the object rotated about the joint
+line by the joint angle. That is, take any vector attached to the first object, place it at
+the joint, rotate it about the joint line via the joint angle. $\tau$ is the difference
+between the angle of this vector measured against the joint plane and the angle of the
+up vector of the second object measured against the joint plane.
+
+If the objects are macroscopic objects which have faces, this is the same as the rotation
+of the axis of the second object relative to the first in the plane of the coincident faces.
 
 \begin{itemize}
 \item An object with two identified faces, labeled $F_A$ and $F_b$. These faces are in
@@ -2110,6 +2124,7 @@ With[{k = Normalize[NB],
     v0]
   ]
 
+(* Apparently I am treating tau as the rotation about the normal. *)
 ADirFromParam[L_,v0_,tau_,NB_] :=
 With[{k = Normalize[NB]},
   With[{ rt = RotationTransform[tau,k]},
@@ -2258,8 +2273,7 @@ points (the rho/omega version can implement that. *)
 
 On[Assert];
 
-TestR
-egularTets[] :=
+TestRegularTets[] :=
 With[{
     L0 = 1/3,
     tetAngle = ArcTan[Sqrt[2]/2]},
