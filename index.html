@@ -32,6 +32,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
     <link rel="stylesheet" href="./css/main.css">
 
     <script src="https://code.jquery.com/jquery-1.12.4.js"></script>
+
     <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
     <script src="./js/scijs-newton-raphson.js"></script>
     <script src="./js/tm_bundle.js"></script>
@@ -76,13 +77,34 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
   <input type="text" id="angle_omega" readonly style="border:0; color:#f6931f; font-weight:bold;">
     <div id="angle_omega_slider"></div>
 
-    <!--
     <label>Rho (deg): <input id="rho" />  </label>
     <label>Omega (deg): <input id="omega" /> </label><br />
--->
+
         </div>
+
+        
         <button id="compute-delix">GO!</button>        
     </section>
+
+    <section>
+      <p>
+    <label for="radius_output">Radius:</label>      
+    <input type="text" id="radius_output" readonly style="border:0; color:#f6931f; font-weight:bold;">
+    </p>
+          <p>
+    <label for="theta_output">Theta:</label>          
+    <input type="text" id="theta_output" readonly style="border:0; color:#f6931f; font-weight:bold;">
+    </p>
+          <p>
+    <label for="travel_output">Travel:</label>              
+    <input type="text" id="travel_output" readonly style="border:0; color:#f6931f; font-weight:bold;">
+    </p>
+          <p>
+    <label for="phi_output">Phi:</label>                  
+      <input type="text" id="phi_output" readonly style="border:0; color:#f6931f; font-weight:bold;">
+    </p>
+    </section>      
+    
     <section id="textsection">
         <h1 id="message_banner">Basic Usage -- Test Discrete Helix Math</h1>
         <h2> This is an interactive 3D simulation. To change the view, place your mouse in the view area, and
