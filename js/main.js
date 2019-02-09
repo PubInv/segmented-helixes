@@ -294,7 +294,7 @@ function adjoinPrism(old,tau) {
     return nu;
 }
 
-const NUM_PRISMS_FOR_TEST = 50;
+const NUM_PRISMS_FOR_TEST = 10;
 var WORLD_HEIGHT = 2.5;
 var GTRANS = new THREE.Matrix4().makeTranslation(0,WORLD_HEIGHT,0);
 
@@ -645,7 +645,7 @@ function UnifiedComp(L,rho,omega) {
     const L2q = (L/2) + q; 
     const A = new THREE.Vector3(-x,y,-L2q);
     const D = new THREE.Vector3(x,y,L2q);
-    console.log(A,B,C,D);
+    console.log("ABCD",A,B,C,D);
     const Bb = new THREE.Vector3(x,-y,u);
     const Cb = new THREE.Vector3(-x,-y,-u);
     const BbXCb = new THREE.Vector3().crossVectors(Bb,Cb);
@@ -1778,18 +1778,20 @@ function generator_init(params) {
 // The helix is parallel to the vector v.
 // The helix is centered on the y axis, and the two points
 // at n = -1, n = 0, or centered on the z axis.
-function RenderHelix(l,r,d,theta,v,phi,trans) {
+function RenderHelix(l,r,d,theta,v,phi,wh) {
     const MAX_POINTS = 100;
     // One way to effect this is to compute a z-axis aligned helix,
     // Then rotate it parallel to v, then translate it on the
     // z axis so that the certain points on the on the z-axis.
     // In fact the rotation is purely about the y-axis.
+    var init_y  = r * Math.cos(0.5*theta);
+    var trans = new THREE.Matrix4().makeTranslation(0,wh - init_y,0);
     var points3D = new THREE.Geometry();        
     for (var i=0; i<MAX_POINTS; i++) {
         var n = i - (MAX_POINTS/2) + 0.5;
         // we subtract r to make this centered on the zero line,
         // BUT THIS IS STILL NOT RIGHT!!!
-        var y = r * Math.cos(n*theta) - r;
+        var y = r * Math.cos(n*theta);
         var x = r * Math.sin(n*theta);            
         var z = n *d;
         // We will apply the global translation here...
@@ -1814,6 +1816,95 @@ function set_outputs(radius,theta,travel,phi) {
     $( "#travel_output" ).val( travel );
     $( "#phi_output" ).val( phi * 180 / Math.PI );            
 }
+
+// These functions are taken from the Mathematica code.
+
+function V0fromLNB(L,Nb,Nc,delta) {
+    var rt = new THREE.Matrix4();
+    rt.makeRotationAxis(new THREE.Vector3(1,0,0),-delta);
+    var v0 = Nb.clone();
+    v0.applyMatrix4(rt);
+    v0.normalize();
+    return v0.multiplyScalar(L);
+}
+
+function ADirFromParam(L,v0,tau,Nb) {
+    var k = Nb.clone();
+    k.normalize();
+    var rt = new THREE.Matrix4();
+    rt.makeRotationAxis(k,tau);
+    vc = v0.clone();
+    vc.applyMatrix4(rt);
+    vc.normalize();
+    vc.multiplyScalar(L);
+    return vc;
+}
+
+function ComputeBalancingRotation(Nb,Nc) {
+    var b = Nb.clone();
+    b.normalize();
+    var c = Nc.clone();
+    c.normalize();
+    // Note: Mathemtaica uses a different order
+    var ba = Math.atan2(b.y,b.x);
+    var ca = Math.atan2(c.y,c.x);
+    var mx = (b.x+c.x)/2;
+    var my = (b.y+c.y)/2;
+    var theta = -(ba+ca)/2 + -Math.PI/2;
+    var rt = new THREE.Matrix4();
+    rt.makeRotationAxis(new THREE.Vector3(0,0,-1),-theta);
+    b.applyMatrix4(rt);
+    c.applyMatrix4(rt);
+    return [theta,b,c];
+}
+
+function testComputeBalancingRotation() {
+    var B = new THREE.Vector3(1,1/2,1);
+    var C = new THREE.Vector3(-1/2,-1,-1);
+    var res = ComputeBalancingRotation(B,C);
+    console.log(res);
+    var theta = res[0];
+    var Br = res[1];
+    var Cr = res[2];
+    var Bp = new THREE.Vector2(Br.x,Br.y);
+    var Cp = new THREE.Vector2(Cr.x,Cr.y);
+    console.assert(Bp.x == -Cp.x);
+    console.assert(Bp.y <= 0);
+    console.assert(Cp.y <= 0);
+}
+
+function AfromLtauNbNc(L,tau,Nb,Nc) {
+    
+}
+
+
+// This function is a broken play at present.
+function computeRhoOmegaFromNorms() {
+    // I am not sure this is correct.
+    // NOTE: This is all wrong. If we have the
+    // points A,B,C,D fro which we compute the
+    // angles rho, omega, the normals must be half
+    // the angles.
+    const q = QFromRhoOmega(L,-rho,-omega);
+    INITIAL_NORM_POINT_X = q * Math.tan(-omega);
+    INITIAL_NORM_POINT_Y = q * Math.tan(-rho);
+    const L2q = (L/2) + q;
+    const B = new THREE.Vector3(0,0,-L/2);
+    const C = new THREE.Vector3(0,0,L/2);
+    // TODO: These signs are NOT RIGHT
+    var A = new THREE.Vector3(INITIAL_NORM_POINT_X,-INITIAL_NORM_POINT_Y,-L2q);
+    var D = new THREE.Vector3(-INITIAL_NORM_POINT_X,-INITIAL_NORM_POINT_Y,L2q);
+    console.log("TEST ABCD",A,B,C,D);
+    var Nb = new THREE.Vector3(0,0,0).subVectors(A,B);
+    var Nc = new THREE.Vector3(0,0,0).subVectors(D,C);
+    console.log(Nb,Nc);
+    p0 = new AbstractPrism(
+        L,
+        Nb,
+        Nc);
+    testAdjoinPrism();
+}
+
 // Here I will attempt to do several things:
 // First, to compute the 4 points corresponding to rho and omega.
 // Secondly, I will compute the intrinsic parameters as I have done
@@ -1850,12 +1941,13 @@ function onComputeDelix() {
         omega_deg = ANGLE_OMEGA_d;                    
     }
 
-    const rho = parseFloat(rho_deg) * Math.PI / 180;        
-    const omega = parseFloat(omega_deg) * Math.PI / 180;
+    var rho = parseFloat(rho_deg) * Math.PI / 180;        
+    var omega = parseFloat(omega_deg) * Math.PI / 180;
     
     console.log(rho_deg,omega_deg);
-
-    const res = UnifiedComp(1,rho,omega);
+    
+    let L = 1;
+    const res = UnifiedComp(L,rho,omega);
     const r = res[0];
     const theta = res[1];
     const d = res[2];
@@ -1863,9 +1955,11 @@ function onComputeDelix() {
     console.log("r,theta,d,phi",res);
     console.log("theta",theta*180/Math.PI);
     set_outputs(r,theta,d,phi);
-    
 
-    RenderHelix(1,r,d,theta,new THREE.Vector3(0,0,1),-phi,GTRANS);
+
+
+    
+    RenderHelix(L,r,d,theta,new THREE.Vector3(0,0,1),-phi,WORLD_HEIGHT);
 
     create_vertex_mesh(new THREE.Vector3(0,0,0),d3.color("white"));
     create_vertex_mesh(new THREE.Vector3(1,0,0),d3.color("red"));
@@ -2659,9 +2753,11 @@ $( document ).ready(function() {
 
 //    testCreatePrism();
 
-    INITIAL_NORM_POINT_Y = Math.cos(ANGLE_RHO_d * 180 / Math.PI);
-    INITIAL_NORM_POINT_X = Math.sin(ANGLE_OMEGA_d * 180 / Math.PI);
+//    INITIAL_NORM_POINT_Y = Math.cos(ANGLE_RHO_d * 180 / Math.PI);
+//    INITIAL_NORM_POINT_X = Math.sin(ANGLE_OMEGA_d * 180 / Math.PI);
 
-    testAdjoinPrism();
+    //    testAdjoinPrism();
+
+    testComputeBalancingRotation();
 });
 
