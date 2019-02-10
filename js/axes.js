@@ -117,7 +117,7 @@ function labelAxis(width, data, direction){
 
 // This was written by Lee Stemkoski
 // https://stemkoski.github.io/Three.js/Sprite-Text-Labels.html
-function makeTextSprite( message, parameters )
+function makeTextSprite( message, parameters, color = "yellow" )
 {
 	if ( parameters === undefined ) parameters = {};
 
@@ -133,7 +133,7 @@ function makeTextSprite( message, parameters )
 
 
 	// text color
-        context.fillStyle = "yellow";
+        context.fillStyle = color;
 
 	context.fillText( message, 0, fontsize);
 

@@ -42,7 +42,9 @@ function AbstractPrism(L,Nb,Nc) {
 }
 
 const PRISM_FACE_RATIO_LENGTH = 1/2;
-function CreatePrism(prism) {
+// absp is an abstract prism.
+// posZ => c is in positive z direction.
+function CreatePrism(absp) {
     // This object is a triangular prism. We will use
     // parallelpiped and spheres to create it.
 
@@ -60,7 +62,7 @@ function CreatePrism(prism) {
     var LB = new THREE.Vector3(-W/2, BASE, 0);
     var RB = new THREE.Vector3(W/2, BASE, 0);
 
-    let PRISM_FACE_LENGTH = prism.L * PRISM_FACE_RATIO_LENGTH;
+    let PRISM_FACE_LENGTH = absp.L * PRISM_FACE_RATIO_LENGTH;
     TB.multiplyScalar(PRISM_FACE_LENGTH);
     LB.multiplyScalar(PRISM_FACE_LENGTH);
     RB.multiplyScalar(PRISM_FACE_LENGTH);
@@ -72,10 +74,10 @@ function CreatePrism(prism) {
     // now we have to rotate these points.
     var Q_to_Nb = new THREE.Quaternion();
     Q_to_Nb.setFromUnitVectors(new THREE.Vector3(0,0,-1),
-                               prism.Nb);
+                               absp.Nb);
     var Q_to_Nc = new THREE.Quaternion();    
     Q_to_Nc.setFromUnitVectors(new THREE.Vector3(0,0,1),
-                               prism.Nc);
+                               absp.Nc);
     TB.applyQuaternion(Q_to_Nb);
     LB.applyQuaternion(Q_to_Nb);
     RB.applyQuaternion(Q_to_Nb);    
@@ -91,8 +93,8 @@ function CreatePrism(prism) {
     let b = new THREE.Vector3(0,0,0);
     let c = new THREE.Vector3(0,0,0);    
 
-    transB.makeTranslation(0,0,-prism.L/2);
-    transC.makeTranslation(0,0,prism.L/2);
+    transB.makeTranslation(0,0,-absp.L/2);
+    transC.makeTranslation(0,0,absp.L/2);
     b.applyMatrix4(transB);
     c.applyMatrix4(transC);    
 
@@ -109,11 +111,11 @@ function CreatePrism(prism) {
     // for convenience, should I make the instance vectors
     // part of this object? Or should I add the matrices,
     // effective make it a "screw" transformation
-    return {p: prism,
+    return {p: absp,
             b: b,
             c: c,
-            nb: prism.Nb,
-            nc: prism.Nc,
+            nb: absp.Nb,
+            nc: absp.Nc,
             tb: TB, lb : LB, rb : RB,
             tc : TC, lc : LC, rc : RC};
 
@@ -203,7 +205,7 @@ function applyQuaternionToPrism(nu,q) {
 var INITIAL_NORM_POINT_Y = -0.7;
 var INITIAL_NORM_POINT_X = -0.62;
 
-var p0 = new AbstractPrism(
+var GLOBAL_P0 = new AbstractPrism(
     1,
     new THREE.Vector3(INITIAL_NORM_POINT_X,INITIAL_NORM_POINT_Y,-1),
     new THREE.Vector3(-INITIAL_NORM_POINT_X,INITIAL_NORM_POINT_Y,1));
@@ -216,7 +218,7 @@ function testCreatePrism() {
     //                            new THREE.Vector3(0,-0.3,-1),
     //                           new THREE.Vector3(0,-0.6,1));
 
-    var p_i = CreatePrism(p0);
+    var p_i = CreatePrism(GLOBAL_P0);
     // We shall place this upward, for the purpose of
     // making it easier to see...
     
@@ -229,7 +231,12 @@ function testCreatePrism() {
 // aginst the C face of the old with a twist of tau and return.
 // note that old is a prism instance, not a mesh instance,
 // and it has a link to the abstract prism inside it.
-function adjoinPrism(old,tau) {
+// NOTE: This is not currently applying tau!
+// NOTE: with faces reversed, this still produces
+// positive z.
+// Note, we need to allow adjunction to face B as well
+// as face C. Right now this adjoints a copy to face C.
+function adjoinPrism(old,tau,joinToC) {
     // First, we copy the old prism in exactly the same position
 
     var nu = Object.assign({},old);
@@ -247,46 +254,73 @@ function adjoinPrism(old,tau) {
     nu.rc = old.rc.clone();
     
     // Then we translate along the axis of the old prism
-    var av = new THREE.Vector3(0,0,0).subVectors(nu.c,nu.b);
+    var av = (joinToC) ?
+        new THREE.Vector3(0,0,0).subVectors(nu.c,nu.b) :
+        new THREE.Vector3(0,0,0).subVectors(nu.b,nu.c) 
+        ;
     var trans = new THREE.Matrix4();
     trans.makeTranslation(av.x,av.y,av.z);
 
     applyMatrix4ToPrism(nu,trans);
-    
-    var b_trans = new THREE.Matrix4();
-    b_trans.makeTranslation(-nu.b.x,-nu.b.y,-nu.b.z);
-    var b_trans_r = new THREE.Matrix4();
-    b_trans_r.makeTranslation(nu.b.x,nu.b.y,nu.b.z);
-
 
     
-    applyMatrix4ToPrism(nu,b_trans);
+    var p_trans = new THREE.Matrix4();
+    (joinToC) ?
+        p_trans.makeTranslation(-nu.b.x,-nu.b.y,-nu.b.z):
+        p_trans.makeTranslation(-nu.c.x,-nu.c.y,-nu.c.z);
+    var p_trans_r = new THREE.Matrix4();
+    (joinToC) ?
+        p_trans_r.makeTranslation(nu.b.x,nu.b.y,nu.b.z) :
+        p_trans_r.makeTranslation(nu.c.x,nu.c.y,nu.c.z);
+    
+    applyMatrix4ToPrism(nu,p_trans);
 
-    var av = new THREE.Vector3(0,0,0).subVectors(nu.c,nu.b);
+    var av =
+        (joinToC) ?
+        new THREE.Vector3(0,0,0).subVectors(nu.c,nu.b):
+        new THREE.Vector3(0,0,0).subVectors(nu.b,nu.c);
     
     // At this, point b had better be at the origin...
-    console.assert(near(nu.b.length(),0,1e-4));    
+    if (joinToC) {
+        console.assert(near(nu.b.length(),0,1e-4));
+    } else {
+        console.assert(near(nu.c.length(),0,1e-4));        
+    }
     
     // Then we rotate about the joint (we may actually do this first)
     var Q_to_Nb = new THREE.Quaternion();
-    Q_to_Nb.setFromUnitVectors(nu.p.Nb,
-                               new THREE.Vector3(0,0,-1));
     var Q_to_Nc = new THREE.Quaternion();    
-    Q_to_Nc.setFromUnitVectors(new THREE.Vector3(0,0,1),
-                               nu.p.Nc);
+    if (joinToC) {
+        Q_to_Nb.setFromUnitVectors(nu.p.Nb,
+                                   new THREE.Vector3(0,0,-1));
+        Q_to_Nc.setFromUnitVectors(new THREE.Vector3(0,0,1),
+                                   nu.p.Nc);
+    } else {
+        Q_to_Nc.setFromUnitVectors(nu.p.Nc,
+                                   new THREE.Vector3(0,0,1));
+        Q_to_Nb.setFromUnitVectors(new THREE.Vector3(0,0,-1),
+                                   nu.p.Nb);
+    }
 
-    applyQuaternionToPrism(nu,Q_to_Nb);
-    applyQuaternionToPrism(nu,Q_to_Nc);
+    // I'm assuming order doesn't matter here.
+    if (joinToC) {
+        applyQuaternionToPrism(nu,Q_to_Nb);
+        applyQuaternionToPrism(nu,Q_to_Nc);
+    } else {
+        applyQuaternionToPrism(nu,Q_to_Nc);
+        applyQuaternionToPrism(nu,Q_to_Nb);
+    }
     
-    applyMatrix4ToPrism(nu,b_trans_r);
+    applyMatrix4ToPrism(nu,p_trans_r);
 
     var diff = new THREE.Vector3();
-    diff.subVectors(old.c,nu.b);
+    if (joinToC) {
+        diff.subVectors(old.c,nu.b);
+    } else {
+        diff.subVectors(old.c,nu.b);        
+    }
     console.assert(near(diff.length(),0,1e-4));
 
-
-
-    
     // So that the normal of the C face is the opposite of the B face.
     // Finally we apply the twist...
     // We return the abstract prism so created.
@@ -295,23 +329,35 @@ function adjoinPrism(old,tau) {
 }
 
 const NUM_PRISMS_FOR_TEST = 10;
-var WORLD_HEIGHT = 2.5;
+var WORLD_HEIGHT = 1.5;
 var GTRANS = new THREE.Matrix4().makeTranslation(0,WORLD_HEIGHT,0);
 
-function testAdjoinPrism() {
+function createAdjoinPrism(abs) {
     // var p = new AbstractPrism(1,
     //                            new THREE.Vector3(0,-0.1,-1),
     //                           new THREE.Vector3(0,-0.3,1));
 
-    var p_i = CreatePrism(p0);
-
-    applyMatrix4ToPrism(p_i,GTRANS);
+    var p_i = CreatePrism(abs);
+    // We shall place this upward, for the purpose of
+    // making it easier to see...
     
+    applyMatrix4ToPrism(p_i,GTRANS);
+    var TP = renderPrismInstance(p_i);
+    TP.forEach(o => { am.scene.add(o); });
+
+    var cur = p_i;
     for(let i = 0; i < NUM_PRISMS_FOR_TEST; i++) {
-        var p_c = adjoinPrism(p_i,0);
+        var p_c = adjoinPrism(cur,0,true);
         var TP = renderPrismInstance(p_c);
         TP.forEach(o => { am.scene.add(o); });
-        p_i = p_c;
+        cur = p_c;
+    }
+    var cur = p_i;
+    for(let i = 0; i < NUM_PRISMS_FOR_TEST; i++) {
+        var p_c = adjoinPrism(cur,0,false);
+        var TP = renderPrismInstance(p_c);
+        TP.forEach(o => { am.scene.add(o); });
+        cur = p_c;
     }
     
 }
@@ -667,6 +713,49 @@ function UnifiedComp(L,rho,omega) {
     return [r,theta2,di,c,phi];
 }
 
+function ChordFromLDaxis(L,Da) {
+    return Math.sqrt((L**2) - (Da**2));
+}
+function RotationFromRadiusChord(R,C) {
+    return 2 * Math.asin(C / (2 * R));
+}
+function KahnAxis(L,D) {
+    let x = D.x;
+    let y = D.y;
+    let z = D.z;
+    let A = new THREE.Vector3(-x,y,-z);
+    let B = new THREE.Vector3(0,0,-L/2);
+    let C = new THREE.Vector3(0,0,L/2);
+    
+    let Cb = B.clone();
+    Cb.add(D);
+    Cb.multiplyScalar(1/2);
+    Cb.sub(C);
+    
+    let Bb = A.clone();    
+    Bb.add(C);
+    Bb.multiplyScalar(1/2);
+    Bb.sub(B);
+
+    let H = new THREE.Vector3(0,0,0);
+    H.crossVectors(Bb,Cb);
+    H.normalize();
+    let CmB = C.clone();
+    CmB.sub(B);
+    let da = CmB.dot(H);
+    let phi = Math.acos(da/L);
+    let Bax = Math.sin(phi) * da /2;
+    let Ba = new THREE.Vector3(Bax,
+                               Bb.y * ( Bax / Bb.x),
+                               -Math.cos(phi) * da /2);
+    var Ba_m_B = Ba.clone();
+    Ba_m_B.sub(B);
+    let r = Ba_m_B.length();
+    let c = ChordFromLDaxis(L,da);
+    let theta = RotationFromRadiusChord(r,c);
+    return [r,theta,da,c,phi,H];
+}
+
 function test_UnifiedComp() {
     const res = UnifiedComp(1,Math.PI/10,Math.PI/30);
     console.log(res);
@@ -674,9 +763,30 @@ function test_UnifiedComp() {
     console.assert(near(res[0],0.688145,1e-4));
     console.assert(near(res[1],0.704444,1e-4));        
 }
-test_UnifiedComp();
 
 
+
+function testRegularTetsKahnAxis()
+{
+    let L0 = 1/3;
+    let tetAngle = Math.atan(Math.sqrt(2)/2);
+    let NB1 = new THREE.Vector3(0,-Math.sin(tetAngle),-Math.cos(tetAngle));
+    let NC1 = new THREE.Vector3(0,-Math.sin(tetAngle),Math.cos(tetAngle));
+    let tau = 2 * Math.PI /3;    
+    let A = AfromLtauNbNc(L0,tau,NB1,NC1);
+    let B = new THREE.Vector3(0,0,-L0/2);
+    let D = new THREE.Vector3(-A.x,A.y,-A.z);
+    let res = KahnAxis(L0,D);
+    let r = res[0];
+    let theta = res[1];
+    let da = res[2];
+    let c = res[3];
+    let phi = res[4];
+    let theta_exp = Math.acos(-2/3);
+    console.log(r,theta * 180 / Math.PI,
+                da,c, phi * 180 / Math.PI);
+    console.assert(near(theta,theta_exp,0.00001));    
+}
 function test_some_calculations() {
 
     // var v = [new THREE.Vector3( Math.sqrt(8/9),-1/3,0),
@@ -1789,11 +1899,9 @@ function RenderHelix(l,r,d,theta,v,phi,wh) {
     var points3D = new THREE.Geometry();        
     for (var i=0; i<MAX_POINTS; i++) {
         var n = i - (MAX_POINTS/2) + 0.5;
-        // we subtract r to make this centered on the zero line,
-        // BUT THIS IS STILL NOT RIGHT!!!
         var y = r * Math.cos(n*theta);
         var x = r * Math.sin(n*theta);            
-        var z = n *d;
+        var z = n * d;
         // We will apply the global translation here...
         var p = new THREE.Vector3(x,y,z);
         p.applyMatrix4(trans);
@@ -1850,12 +1958,139 @@ function ComputeBalancingRotation(Nb,Nc) {
     var ca = Math.atan2(c.y,c.x);
     var mx = (b.x+c.x)/2;
     var my = (b.y+c.y)/2;
+    // This should perhaps be a subtraction between ba and ca!
     var theta = -(ba+ca)/2 + -Math.PI/2;
     var rt = new THREE.Matrix4();
     rt.makeRotationAxis(new THREE.Vector3(0,0,-1),-theta);
     b.applyMatrix4(rt);
     c.applyMatrix4(rt);
     return [theta,b,c];
+}
+
+function testComputeBalancingRoation1() {
+       let L = 1;
+    let NB0 = new THREE.Vector3(0, -0.25254006068835666,-0.967586439418991);
+    let NC0 = new THREE.Vector3(0,0.31337745420390184,0.9496286491027328);
+    var res = ComputeBalancingRotation(Nb,Nc);
+}
+
+
+// This is a serious question here...
+// if we are really attempting to compute "A"
+// in space, then we cannot throw away the
+// rotational angle from Compute Balancing Rotation....
+// We need to rotate back by that amount, I guess.
+// We have code that renders the adjoining prisms...
+// The ultimate test is really that this must
+// return the same thing as that code! We know
+// the Adjoining Prism method is right, becase
+// we an see it lining up in its rendering.
+// So tomorrow: Write a test to make sure this
+// matches the adjoinging prism. Then
+// figure out what is wrong with this code.
+function AfromLtauNbNc(L,tau,NBu,NCu) {
+    let res = ComputeBalancingRotation(NBu,NCu);
+    let Nb = res[1];
+    let Nc = res[2];
+    let Z = new THREE.Vector3(0,0,1);
+    let delta = Z.angleTo(Nc);
+    let v0 = V0fromLNB(L,Nb,Nc,delta);
+    console.assert(near(L,v0.length(),1e-5));
+    let Ad = ADirFromParam(L,v0,tau,Nb);
+    let B = new THREE.Vector3(0,0,-L/2);
+    var result = Ad.clone();
+    result.add(B);
+
+    var abs0 = new AbstractPrism(1,NBu,NCu);
+    var abs1 = new AbstractPrism(1,NCu,NBu);    
+    var p_i0 = CreatePrism(abs0);
+    var p_c0 = adjoinPrism(p_i0,0);
+
+    var p_i1 = CreatePrism(abs1);
+    var p_c1 = adjoinPrism(p_i1,0);
+
+    // now the coordinate of the joint of the new
+    // prism is what we want...
+    var nu_j0 = p_c0.c;
+    var nu_j1 = p_c1.c;    
+
+
+    let A = new THREE.Vector3(0,0,0);
+    A.sub(nu_j0);
+    let D = nu_j1.clone();
+    console.log("VALUES",result,A,D);
+    //    return result;
+    // I return this, or the negation, how can it not
+    // be right when it is physcially right?
+    console.log("LENS",Math.sqrt(A.x**2 + A.y**2),
+                Math.sqrt(D.x**2 + D.y**2)
+               );
+
+    // now I will attempt to compute the
+
+    var a0 = Math.atan2(A.y,A.x);
+    var a1 = Math.atan2(D.y,D.x);
+
+    var am = (a0-a1)/2;
+    console.log("angles",
+                a0 * 180 / Math.PI,
+                a1 * 180 / Math.PI,
+                am * 180 / Math.PI);
+    let Ps = ComputeBalancingRotation(A,D);
+    console.log(Ps);
+    let Avec = Ps[1].clone();
+    Avec.add(B);
+    return A;
+}
+
+function testAfromLtauNbNn(tau) {
+    let L = 1;
+    let NB0 = new THREE.Vector3(0,-Math.sin(Math.PI/8),-Math.cos(Math.PI/8));
+    let NC0 = new THREE.Vector3(0,-Math.sin(Math.PI/8),Math.cos(Math.PI/8));
+    let tetAngle = Math.atan(Math.sqrt(2)/2);
+    let NB1 = new THREE.Vector3(0,-Math.sin(tetAngle),-Math.cos(tetAngle));
+    let NC1 = new THREE.Vector3(0,-Math.sin(tetAngle),Math.cos(tetAngle));
+    let AA = AfromLtauNbNc(L,tau,NB1,NC1);
+    return AA;
+}
+
+function testAfromLtauNbNnKeepsYPure() {
+    let L = 1;
+    let NB0 = new THREE.Vector3(0, -0.25254006068835666,-0.967586439418991);
+    let NC0 = new THREE.Vector3(0,0.31337745420390184,0.9496286491027328);
+    let tau = 0;
+    let A = AfromLtauNbNc(L,tau,NB0,NC0);
+    console.assert(A.x == 0);
+}
+
+
+// This deosn't work---Unified need to be separated
+function testRegularTetsUnified() {
+    let L0 = 1;
+    let tetAngle = Math.atan(Math.sqrt(2)/2);
+    /* Rotation by an aribitrary amount should give us the same number. */
+    testRot = Math.PI / 5;
+    var rt = new THREE.Matrix4();
+    rt.makeRotationAxis(new THREE.Vector3(0,0,1),testRot);
+    let plainB = new THREE.Vector3(0,-Math.sin(tetAngle),-Math.cos(tetAngle));
+    let plainC = new THREE.Vector3(0,-Math.sin(tetAngle),Math.cos(tetAngle));
+    let tau = 2 * Math.PI /3;
+    var NB1 = plainB.clone();
+    NB1.applyMatrix4(rt);
+    var NC1 = plainC.clone();
+    NC1.applyMatrix4(rt);
+    var A = AfromLtauNbNc(L0,tau,NB1,NC1);
+    let B = new THREE.Vector3(0,0,-L0/2);
+    let D = new THREE.Vector3(-A.x,A.y,-A.z);
+    let res = UnifiedComp(L0,B,D);
+   //    let res = KahnAxis(L0,D);
+    let r = res[0];
+    let theta = res[1];
+    let da = res[2];
+    let c = res[3];
+    let phi = res[4];
+    let theta_exp = Math.acos(-2/3);
+    console.assert(near(theta,theta_exp,0.00001));
 }
 
 function testComputeBalancingRotation() {
@@ -1873,8 +2108,53 @@ function testComputeBalancingRotation() {
     console.assert(Cp.y <= 0);
 }
 
-function AfromLtauNbNc(L,tau,Nb,Nc) {
+// This needs to work. We also must test other
+// examples of colinearity between the projection
+// of Nb and Nc
+function testComputeBalancingRotation1() {
+    let Nb = new THREE.Vector3(0, -0.25254006068835666,-0.967586439418991);
+    let Nc = new THREE.Vector3(0,0.31337745420390184,0.9496286491027328);
+    var res = ComputeBalancingRotation(Nb,Nc);
+    console.log(res);
+    var theta = res[0];
+    var Br = res[1];
+    var Cr = res[2];
+    var Bp = new THREE.Vector2(Br.x,Br.y);
+    var Cp = new THREE.Vector2(Cr.x,Cr.y);
+    console.assert(Bp.x == -Cp.x);
+    console.assert(Bp.y <= 0);
+    console.assert(Cp.y <= 0);
+}
+
+function testComputeBalancingRotation2() {
     
+    let Nb = new THREE.Vector3(-1/3,-1 ,-1);
+    let Nc = new THREE.Vector3(-1/6,-1,1);
+    Nb.normalize();
+    Nc.normalize();
+    for(var i = 0; i < 10; i++) {
+        // we'll test through 20 degrees
+        let phi = 2 * i * Math.PI / 180;
+        var nb = Nb.clone();
+        var nc = Nc.clone();
+        var rt = new THREE.Matrix4();
+        rt.makeRotationAxis(new THREE.Vector3(0,0,1),phi);
+        nb.applyMatrix4(rt);
+        nc.applyMatrix4(rt);
+        var res = ComputeBalancingRotation(nb,nc);
+        var theta = res[0];
+        var Br = res[1];
+        var Cr = res[2];
+//        console.log(theta * 180 / Math.PI, Br, Cr);
+        var Bp = new THREE.Vector2(Br.x,Br.y);
+        var Cp = new THREE.Vector2(Cr.x,Cr.y);
+        Bp.normalize();
+        Cp.normalize();
+//        console.log(Bp,Cp);
+        console.assert(near(Bp.x,-Cp.x,1e-4));
+        console.assert(Bp.y <= 0);
+        console.assert(Cp.y <= 0);
+    }
 }
 
 
@@ -1923,43 +2203,85 @@ function onComputeDelix() {
     var wf = document.getElementById('wireframe').checked;
     var bc = document.getElementById('blendcolor').checked;
 
-    var rho_deg_input = document.getElementById('rho');
-    var omega_deg_input = document.getElementById('omega');
+    var norms = $("#construct_via_norms").prop('checked');
 
-    if (isNumeric(rho_deg_input.value)) {
-        rho_deg = parseFloat(rho_deg_input.value);
-        $( "#angle_rho" ).val( rho_deg);
+    var res;
+    var r;
+    var theta;
+    var d;
+    var phi;
+    let L0 = 1;
+    if (norms) {
+
+        var Nb = new THREE.Vector3(NORMAL_B_X,
+                                   NORMAL_B_Y,
+                                   -NORMAL_B_Z
+                                  );
+        var Nc = new THREE.Vector3(NORMAL_C_X,
+                                   NORMAL_C_Y,
+                                   NORMAL_C_Z
+                                  );
+        Nb.normalize();
+        Nc.normalize();
+        GLOBAL_P0 = new AbstractPrism(
+            1,
+            Nb,
+            Nc);
+        createAdjoinPrism(GLOBAL_P0);
+ 
+        //        let tau = 2 * Math.PI /3;
+        let tau = 0;
+        let A = AfromLtauNbNc(L0,tau,Nb,Nc);
+//        let B = new THREE.Vector3(0,0,-L0/2);
+        let D = new THREE.Vector3(-A.x,-A.y,-A.z);
+        let Dclone = D.clone();
+        Dclone.applyMatrix4(GTRANS);
+        
+        create_vertex_mesh(Dclone,d3.color("purple"));        
+        console.log("D input =",D);
+        res = KahnAxis(L0,D);
+
         
     } else {
-        rho_deg = ANGLE_RHO_d;
-    }
-    if (isNumeric(omega_deg_input.value)) {
-        omega_deg = parseFloat(omega_deg_input.value);
-        $( "#angle_omega" ).val( omega_deg);            
+        var rho_deg_input = document.getElementById('rho');
+        var omega_deg_input = document.getElementById('omega');
+
+        if (isNumeric(rho_deg_input.value)) {
+            rho_deg = parseFloat(rho_deg_input.value);
+            $( "#angle_rho" ).val( rho_deg);
+            
+        } else {
+            rho_deg = ANGLE_RHO_d;
+        }
+        if (isNumeric(omega_deg_input.value)) {
+            omega_deg = parseFloat(omega_deg_input.value);
+            $( "#angle_omega" ).val( omega_deg);            
+            
+        } else {
+            omega_deg = ANGLE_OMEGA_d;                    
+        }
+
+        var rho = parseFloat(rho_deg) * Math.PI / 180;        
+        var omega = parseFloat(omega_deg) * Math.PI / 180;
         
-    } else {
-        omega_deg = ANGLE_OMEGA_d;                    
+        console.log(rho_deg,omega_deg);
+        
+        res = UnifiedComp(L0,rho,omega);
     }
 
-    var rho = parseFloat(rho_deg) * Math.PI / 180;        
-    var omega = parseFloat(omega_deg) * Math.PI / 180;
-    
-    console.log(rho_deg,omega_deg);
-    
-    let L = 1;
-    const res = UnifiedComp(L,rho,omega);
-    const r = res[0];
-    const theta = res[1];
-    const d = res[2];
-    const phi = res[4];
+    r = res[0];
+    theta = res[1];
+    d = res[2];
+    phi = res[4];
     console.log("r,theta,d,phi",res);
     console.log("theta",theta*180/Math.PI);
     set_outputs(r,theta,d,phi);
 
 
-
     
-    RenderHelix(L,r,d,theta,new THREE.Vector3(0,0,1),-phi,WORLD_HEIGHT);
+    RenderHelix(L0,r,d,theta,new THREE.Vector3(0,0,1),-phi,WORLD_HEIGHT);
+    
+    RenderHelix(L0,r,d,theta,new THREE.Vector3(0,0,1),-phi,WORLD_HEIGHT);    
 
     create_vertex_mesh(new THREE.Vector3(0,0,0),d3.color("white"));
     create_vertex_mesh(new THREE.Vector3(1,0,0),d3.color("red"));
@@ -2735,11 +3057,140 @@ $(function() {
 });
 
 
+var NORMAL_B_X = 0;
+var NORMAL_B_Y = 0;
+var NORMAL_B_Z = 1;
+var NORMAL_C_X = 0;
+var NORMAL_C_Y = 0;
+var NORMAL_C_Z = 1;
+
+{
+$(function() {
+    $( "#normal_b_x_slider" ).slider({
+	range: "max",
+	min: -1,
+	max: 1,
+	value: NORMAL_B_X,
+	step: 0.001,	
+	slide: function( event, ui ) {
+	    $( "#b_x" ).val( ui.value );
+	    NORMAL_B_X = ui.value;
+            console.log(NORMAL_B_X);
+            onComputeDelix();
+	}
+    });
+    $( "#b_x" ).val( $( "#normal_b_slider" ).slider( "value" ) );
+});
+
+$(function() {
+    $( "#normal_b_y_slider" ).slider({
+	range: "max",
+	min: -1,
+	max: 1,
+	value: NORMAL_B_Y,
+	step: 0.001,	
+	slide: function( event, ui ) {
+	    $( "#b_y" ).val( ui.value );
+	    NORMAL_B_Y = ui.value;
+            console.log(NORMAL_B_Y);
+            onComputeDelix();
+	}
+    });
+    $( "#b_y" ).val( $( "#normal_b_slider" ).slider( "value" ) );
+});
+
+$(function() {
+    $( "#normal_b_z_slider" ).slider({
+	range: "max",
+	min: -1,
+	max: 1,
+	value: NORMAL_B_Z,
+	step: 0.001,	
+	slide: function( event, ui ) {
+	    $( "#b_z" ).val( ui.value );
+	    NORMAL_B_Z = ui.value;
+            console.log(NORMAL_B_Z);
+            onComputeDelix();
+	}
+    });
+    $( "#b_z" ).val( $( "#normal_b_slider" ).slider( "value" ) );
+});
+}
+
+{
+$(function() {
+    $( "#normal_c_x_slider" ).slider({
+	range: "max",
+	min: -1,
+	max: 1,
+	value: NORMAL_C_X,
+	step: 0.001,	
+	slide: function( event, ui ) {
+	    $( "#c_x" ).val( ui.value );
+	    NORMAL_C_X = ui.value;
+            console.log(NORMAL_C_X);
+            onComputeDelix();
+	}
+    });
+    $( "#c_x" ).val( $( "#normal_c_slider" ).slider( "value" ) );
+});
+
+$(function() {
+    $( "#normal_c_y_slider" ).slider({
+	range: "max",
+	min: -1,
+	max: 1,
+	value: NORMAL_C_Y,
+	step: 0.001,	
+	slide: function( event, ui ) {
+	    $( "#c_y" ).val( ui.value );
+	    NORMAL_C_Y = ui.value;
+            console.log(NORMAL_C_Y);
+            onComputeDelix();
+	}
+    });
+    $( "#c_y" ).val( $( "#normal_c_slider" ).slider( "value" ) );
+});
+
+$(function() {
+    $( "#normal_c_z_slider" ).slider({
+	range: "max",
+	min: -1,
+	max: 1,
+	value: NORMAL_C_Z,
+	step: 0.001,	
+	slide: function( event, ui ) {
+	    $( "#c_z" ).val( ui.value );
+	    NORMAL_C_Z = ui.value;
+            console.log(NORMAL_C_Z);
+            onComputeDelix();
+	}
+    });
+    $( "#c_z" ).val( $( "#normal_c_slider" ).slider( "value" ) );
+});
+}
+
 
 const INIT_RHO = 10;
 const INIT_OMEGA = 55;
 $( document ).ready(function() {
     console.log( "ready!" );
+
+    test_UnifiedComp();
+    
+    testComputeBalancingRotation();
+    testComputeBalancingRotation1();
+    testComputeBalancingRotation2();        
+
+    testAfromLtauNbNnKeepsYPure();
+    
+    var A = testAfromLtauNbNn(0);    
+    // This cannot be tested until it is separated
+//    testRegularTetsUnified();
+    testRegularTetsKahnAxis();
+
+    $("#construct_via_norms").prop('checked', true);
+
     $( "#angle_omega_slider" ).slider( "value",INIT_RHO );
     $( "#angle_omega" ).val( INIT_RHO );
     ANGLE_OMEGA_d = INIT_RHO;
@@ -2747,17 +3198,31 @@ $( document ).ready(function() {
     $( "#angle_rho" ).val( INIT_OMEGA );
     ANGLE_RHO_d = INIT_OMEGA;
 
+    $( "#normal_b_x_slider" ).slider( "value",NORMAL_B_X );
+    $( "#normal_b_x" ).val( NORMAL_B_X );
+    $( "#b_x" ).val( "" );    
+    $( "#normal_b_y_slider" ).slider( "value",NORMAL_B_Y );
+    $( "#normal_b_y" ).val( NORMAL_B_Y );
+    $( "#b_y" ).val( "" );        
+    $( "#normal_b_z_slider" ).slider( "value",NORMAL_B_Z );
+    $( "#normal_b_z" ).val( NORMAL_B_Z );
+    $( "#b_z" ).val( "" );            
+
+    $( "#normal_c_x_slider" ).slider( "value",NORMAL_C_X );
+    $( "#normal_c_x" ).val( NORMAL_C_X );
+    $( "#c_x" ).val( "" );
+    
+    $( "#normal_c_y_slider" ).slider( "value",NORMAL_C_Y );
+    $( "#normal_c_y" ).val( NORMAL_C_Y );
+    $( "#c_y" ).val( "" );
+    
+    $( "#normal_c_z_slider" ).slider( "value",NORMAL_C_Z );
+    $( "#normal_c_z" ).val( NORMAL_C_Z );
+    $( "#c_z" ).val( "" );                
+    
+    
     $(function () { main(); });
     
     onComputeDelix();
-
-//    testCreatePrism();
-
-//    INITIAL_NORM_POINT_Y = Math.cos(ANGLE_RHO_d * 180 / Math.PI);
-//    INITIAL_NORM_POINT_X = Math.sin(ANGLE_OMEGA_d * 180 / Math.PI);
-
-    //    testAdjoinPrism();
-
-    testComputeBalancingRotation();
 });
 

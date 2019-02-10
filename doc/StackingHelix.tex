@@ -2166,7 +2166,26 @@ With[{C = {1,1/2,1},
         Print[8888888];
         Print[N[Bp]];
         Print[N[Cp]];
-          Assert[N[Bp[[1]]] == -N[Cp[[1]]]];
+        Assert[N[Bp[[1]]] == -N[Cp[[1]]]];
+        Assert[Bp[[2]] < 0];
+        Assert[Cp[[2]] < 0];
+        res
+  ]]]]
+
+(* This is untested, I am not sure what will happend here *)
+TestComputeBalancingRotation1[] :=
+With[{C = {0,0.3,1},
+    B = {0,-0.2,-1}},
+  With[{res = ComputeBalancingRotation[B,C]},
+    Print[res];
+    With[{ theta = res[[1]],
+        Br = res[[2]],
+        Cr = res[[3]]},
+      With[{Bp = Normalize[{Br[[1]],Br[[2]]}],
+          Cp = Normalize[{Cr[[1]],Cr[[2]]}]},
+        Print[8888888];
+        Print[N[Bp]];
+        Print[N[Cp]];
         Assert[N[Bp[[1]]] == -N[Cp[[1]]]];
         Assert[Bp[[2]] < 0];
         Assert[Cp[[2]] < 0];
