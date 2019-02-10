@@ -168,8 +168,8 @@ var smats = [new THREE.Color(0x8B0000),
     objects.push(create_actuator_pure(RC,TC,SR,SR/2,memo_color_mat(smats[2])));
 
     objects.push(create_actuator_pure(TB,TC,SR,SR/2,memo_color_mat(smats[0])));
-    objects.push(create_actuator_pure(LB,LC,SR,SR/2,memo_color_mat(smats[0])));
-    objects.push(create_actuator_pure(RB,RC,SR,SR/2,memo_color_mat(smats[0])));
+    objects.push(create_actuator_pure(LB,LC,SR,SR/2,memo_color_mat(smats[1])));
+    objects.push(create_actuator_pure(RB,RC,SR,SR/2,memo_color_mat(smats[2])));
 
     // Need to return the points here, and the up vector, not just the meshes...
     // That is an "instance of an abstract prism".
@@ -310,6 +310,14 @@ function adjoinPrism(old,tau,joinToC) {
         applyQuaternionToPrism(nu,Q_to_Nc);
         applyQuaternionToPrism(nu,Q_to_Nb);
     }
+
+    // DANGER: I'm not sure this is really
+    // correct---this is very confusing.
+    var rt = new THREE.Matrix4();
+    rt.makeRotationAxis(joinToC ? nu.p.Nc : nu.p.Nb,tau);
+    applyMatrix4ToPrism(nu,rt);
+
+
     
     applyMatrix4ToPrism(nu,p_trans_r);
 
@@ -317,18 +325,17 @@ function adjoinPrism(old,tau,joinToC) {
     if (joinToC) {
         diff.subVectors(old.c,nu.b);
     } else {
-        diff.subVectors(old.c,nu.b);        
+        diff.subVectors(old.b,nu.c);        
     }
     console.assert(near(diff.length(),0,1e-4));
 
     // So that the normal of the C face is the opposite of the B face.
-    // Finally we apply the twist...
-    // We return the abstract prism so created.
 
+    
     return nu;
 }
 
-const NUM_PRISMS_FOR_TEST = 10;
+const NUM_PRISMS_FOR_TEST = 4;
 var WORLD_HEIGHT = 1.5;
 var GTRANS = new THREE.Matrix4().makeTranslation(0,WORLD_HEIGHT,0);
 
@@ -713,8 +720,10 @@ function UnifiedComp(L,rho,omega) {
     return [r,theta2,di,c,phi];
 }
 
+
+
 function ChordFromLDaxis(L,Da) {
-    return Math.sqrt((L**2) - (Da**2));
+        return Math.sqrt((L**2) - (Da**2));
 }
 function RotationFromRadiusChord(R,C) {
     return 2 * Math.asin(C / (2 * R));
@@ -737,17 +746,34 @@ function KahnAxis(L,D) {
     Bb.multiplyScalar(1/2);
     Bb.sub(B);
 
+    console.log("Bb,Cb", Bb,Cb);
+
     let H = new THREE.Vector3(0,0,0);
     H.crossVectors(Bb,Cb);
     H.normalize();
+    console.log("H =", H);
     let CmB = C.clone();
     CmB.sub(B);
     let da = CmB.dot(H);
     let phi = Math.acos(da/L);
     let Bax = Math.sin(phi) * da /2;
-    let Ba = new THREE.Vector3(Bax,
+    // This be undefinied if phi = PI/2.
+    // if phi = PI/2, then B on the axis is
+    // the intersection of the Bb and Cb,
+    // which will also have x and z = 0.
+    var Ba;
+    if (near(phi,Math.PI/2,1e-4)) {
+        let psi = Math.atan2(Bb.y,Bb.z);
+        console.log("check",psi  * 180/ Math.PI);
+        Ba = new THREE.Vector3(0,
+                               Math.tan(psi)* L/2,
+                               0);
+        
+    } else {
+        Ba = new THREE.Vector3(Bax,
                                Bb.y * ( Bax / Bb.x),
                                -Math.cos(phi) * da /2);
+    }
     var Ba_m_B = Ba.clone();
     Ba_m_B.sub(B);
     let r = Ba_m_B.length();
@@ -787,6 +813,28 @@ function testRegularTetsKahnAxis()
                 da,c, phi * 180 / Math.PI);
     console.assert(near(theta,theta_exp,0.00001));    
 }
+
+function testKahnAxisYTorus()
+{
+    let L0 = 2;
+    let angle = Math.PI/7;
+    let NB1 = new THREE.Vector3(0,-Math.sin(angle),-Math.cos(angle));
+    let NC1 = new THREE.Vector3(0,-Math.sin(angle),Math.cos(angle));
+    let tau = 0;    
+    let A = AfromLtauNbNc(L0,tau,NB1,NC1);
+    let B = new THREE.Vector3(0,0,-L0/2);
+    let D = new THREE.Vector3(-A.x,A.y,-A.z);
+    let res = KahnAxis(L0,D);
+    let r = res[0];
+    let theta = res[1];
+    let da = res[2];
+    let c = res[3];
+    let phi = res[4];
+    console.log(r,theta * 180 / Math.PI,
+                da,c, phi * 180 / Math.PI);
+    console.assert((theta * 180/ Math.PI) != 180);    
+}
+
 function test_some_calculations() {
 
     // var v = [new THREE.Vector3( Math.sqrt(8/9),-1/3,0),
@@ -1953,25 +2001,71 @@ function ComputeBalancingRotation(Nb,Nc) {
     b.normalize();
     var c = Nc.clone();
     c.normalize();
+    // Note: if b and c are collinear, we want to
+    // use the angle of the one with longest projection in XY.
+    // If they are opposite, we have a zig-zig,
+    // if they point the same way we have a 
+    
     // Note: Mathemtaica uses a different order
-    var ba = Math.atan2(b.y,b.x);
-    var ca = Math.atan2(c.y,c.x);
-    var mx = (b.x+c.x)/2;
-    var my = (b.y+c.y)/2;
+    var pb = new THREE.Vector2(b.x,b.y);
+    var pc = new THREE.Vector2(c.x,c.y);    
+    var ba = pb.angle();
+    var ca = pc.angle();
+    console.log("BA,CA", ba * 180 / Math.PI, ca * 180 / Math.PI);
+    var theta;
+    
+    if (near(ba,ca,1e-3)) {
+        theta = -ba;
+    } else if (near(ba,-ca)) {
+        if (pb.length() == pc.length()) {
+            console.log("WARING---collinear opposing normals!");
+            theta = -ba;
+        } else if (pb.length() < pc.length()) {
+            theta = -ca;
+        }
+    } else {
     // This should perhaps be a subtraction between ba and ca!
-    var theta = -(ba+ca)/2 + -Math.PI/2;
+    // the -90 degrees is to make the average point straight down.
+    // Do we want the average or the difference here?
+        // theta = -(ba+ca)/2;
+        // Is it better to find the midpoint between
+        // the normalized vectors, find it's angle,
+        // and rotate by the amount that puts it straight down?
+        let ban = pb.clone().normalize();
+        let can = pc.clone().normalize();
+        let m = ban.clone().add(can);
+        theta = -m.angle();
+    }
+    // now, instead of pointing at the x-axis, we point at the negative y axis.
+    theta += -Math.PI/2;
+    console.log("theta = ",theta * 180 / Math.PI)
     var rt = new THREE.Matrix4();
-    rt.makeRotationAxis(new THREE.Vector3(0,0,-1),-theta);
+    rt.makeRotationAxis(new THREE.Vector3(0,0,1),theta);
     b.applyMatrix4(rt);
     c.applyMatrix4(rt);
     return [theta,b,c];
 }
 
-function testComputeBalancingRoation1() {
-       let L = 1;
-    let NB0 = new THREE.Vector3(0, -0.25254006068835666,-0.967586439418991);
-    let NC0 = new THREE.Vector3(0,0.31337745420390184,0.9496286491027328);
+function testComputeBalancingRotation0() {
+    let L = 1;
+    // This should be 45 degrees
+    let Nb = new THREE.Vector3(1/2,1/2,-1);
+    // This should be 0
+    let Nc = new THREE.Vector3(0,0,1);
+    // our rotation should be -22.5 + 90
     var res = ComputeBalancingRotation(Nb,Nc);
+    var theta = res[0];
+    var Br = res[1];
+    var Cr = res[2];
+    console.log(theta * 180 / Math.PI, Br, Cr);
+    var Bp = new THREE.Vector2(Br.x,Br.y);
+    var Cp = new THREE.Vector2(Cr.x,Cr.y);
+    Bp.normalize();
+    Cp.normalize();
+    //        console.log(Bp,Cp);
+    console.assert(Bp.length() == 0 || Cp.length() == 0 || near(Bp.x,-Cp.x,1e-4));
+    console.assert(Bp.y <= 0);
+    console.assert(Cp.y <= 0);
 }
 
 
@@ -2001,46 +2095,20 @@ function AfromLtauNbNc(L,tau,NBu,NCu) {
     var result = Ad.clone();
     result.add(B);
 
-    var abs0 = new AbstractPrism(1,NBu,NCu);
-    var abs1 = new AbstractPrism(1,NCu,NBu);    
+
+
+    // This is code based on building the physical prism.
+    // in a sense it is more accurate. The fact
+    // that these values don't match is a serious problem.
+
+    var abs0 = new AbstractPrism(L,NBu,NCu);
     var p_i0 = CreatePrism(abs0);
-    var p_c0 = adjoinPrism(p_i0,0);
+    
+    var p_c0 = adjoinPrism(p_i0,tau,false);
+    console.log("COMPARE",result,p_c0.b);
 
-    var p_i1 = CreatePrism(abs1);
-    var p_c1 = adjoinPrism(p_i1,0);
-
-    // now the coordinate of the joint of the new
-    // prism is what we want...
-    var nu_j0 = p_c0.c;
-    var nu_j1 = p_c1.c;    
-
-
-    let A = new THREE.Vector3(0,0,0);
-    A.sub(nu_j0);
-    let D = nu_j1.clone();
-    console.log("VALUES",result,A,D);
-    //    return result;
-    // I return this, or the negation, how can it not
-    // be right when it is physcially right?
-    console.log("LENS",Math.sqrt(A.x**2 + A.y**2),
-                Math.sqrt(D.x**2 + D.y**2)
-               );
-
-    // now I will attempt to compute the
-
-    var a0 = Math.atan2(A.y,A.x);
-    var a1 = Math.atan2(D.y,D.x);
-
-    var am = (a0-a1)/2;
-    console.log("angles",
-                a0 * 180 / Math.PI,
-                a1 * 180 / Math.PI,
-                am * 180 / Math.PI);
-    let Ps = ComputeBalancingRotation(A,D);
-    console.log(Ps);
-    let Avec = Ps[1].clone();
-    Avec.add(B);
-    return A;
+    //   return result;
+    return p_c0.b;
 }
 
 function testAfromLtauNbNn(tau) {
@@ -2093,19 +2161,24 @@ function testRegularTetsUnified() {
     console.assert(near(theta,theta_exp,0.00001));
 }
 
-function testComputeBalancingRotation() {
+function testComputeBalancingRotation3() {
     var B = new THREE.Vector3(1,1/2,1);
     var C = new THREE.Vector3(-1/2,-1,-1);
     var res = ComputeBalancingRotation(B,C);
-    console.log(res);
+    
+    console.log(res);    
     var theta = res[0];
     var Br = res[1];
     var Cr = res[2];
+    console.log(theta * 180 / Math.PI, Br, Cr);
     var Bp = new THREE.Vector2(Br.x,Br.y);
     var Cp = new THREE.Vector2(Cr.x,Cr.y);
-    console.assert(Bp.x == -Cp.x);
-    console.assert(Bp.y <= 0);
-    console.assert(Cp.y <= 0);
+    Bp.normalize();
+    Cp.normalize();
+    //        console.log(Bp,Cp);
+    console.assert(Bp.length() == 0 || Cp.length() == 0 || near(Bp.x,-Cp.x,1e-4));
+    console.assert(Bp.y <= 1e-6);
+    console.assert(Cp.y <= 1e-6);
 }
 
 // This needs to work. We also must test other
@@ -2115,15 +2188,20 @@ function testComputeBalancingRotation1() {
     let Nb = new THREE.Vector3(0, -0.25254006068835666,-0.967586439418991);
     let Nc = new THREE.Vector3(0,0.31337745420390184,0.9496286491027328);
     var res = ComputeBalancingRotation(Nb,Nc);
-    console.log(res);
+
+    console.log(res);    
     var theta = res[0];
     var Br = res[1];
     var Cr = res[2];
+    console.log(theta * 180 / Math.PI, Br, Cr);
     var Bp = new THREE.Vector2(Br.x,Br.y);
     var Cp = new THREE.Vector2(Cr.x,Cr.y);
-    console.assert(Bp.x == -Cp.x);
-    console.assert(Bp.y <= 0);
-    console.assert(Cp.y <= 0);
+    Bp.normalize();
+    Cp.normalize();
+    //        console.log(Bp,Cp);
+    console.assert(Bp.length() == 0 || Cp.length() == 0 || near(Bp.x,-Cp.x,1e-4));
+    console.assert(Bp.y <= 1e-6);
+    console.assert(Cp.y <= 1e-6);
 }
 
 function testComputeBalancingRotation2() {
@@ -2152,8 +2230,8 @@ function testComputeBalancingRotation2() {
         Cp.normalize();
 //        console.log(Bp,Cp);
         console.assert(near(Bp.x,-Cp.x,1e-4));
-        console.assert(Bp.y <= 0);
-        console.assert(Cp.y <= 0);
+        console.assert(Bp.y <= 1e-6);
+        console.assert(Cp.y <= 1e-6);
     }
 }
 
@@ -2215,7 +2293,7 @@ function onComputeDelix() {
 
         var Nb = new THREE.Vector3(NORMAL_B_X,
                                    NORMAL_B_Y,
-                                   -NORMAL_B_Z
+                                   NORMAL_B_Z
                                   );
         var Nc = new THREE.Vector3(NORMAL_C_X,
                                    NORMAL_C_Y,
@@ -2233,7 +2311,7 @@ function onComputeDelix() {
         let tau = 0;
         let A = AfromLtauNbNc(L0,tau,Nb,Nc);
 //        let B = new THREE.Vector3(0,0,-L0/2);
-        let D = new THREE.Vector3(-A.x,-A.y,-A.z);
+        let D = new THREE.Vector3(A.x,A.y,-A.z);
         let Dclone = D.clone();
         Dclone.applyMatrix4(GTRANS);
         
@@ -3059,7 +3137,7 @@ $(function() {
 
 var NORMAL_B_X = 0;
 var NORMAL_B_Y = 0;
-var NORMAL_B_Z = 1;
+var NORMAL_B_Z = -1;
 var NORMAL_C_X = 0;
 var NORMAL_C_Y = 0;
 var NORMAL_C_Z = 1;
@@ -3177,10 +3255,14 @@ $( document ).ready(function() {
     console.log( "ready!" );
 
     test_UnifiedComp();
+
+    testComputeBalancingRotation0();
     
-    testComputeBalancingRotation();
     testComputeBalancingRotation1();
-    testComputeBalancingRotation2();        
+    
+    testComputeBalancingRotation2();
+
+    testComputeBalancingRotation3();    
 
     testAfromLtauNbNnKeepsYPure();
     
@@ -3188,6 +3270,8 @@ $( document ).ready(function() {
     // This cannot be tested until it is separated
 //    testRegularTetsUnified();
     testRegularTetsKahnAxis();
+
+    testKahnAxisYTorus();
 
     $("#construct_via_norms").prop('checked', true);
 
