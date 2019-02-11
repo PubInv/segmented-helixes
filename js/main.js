@@ -106,8 +106,6 @@ function CreatePrism(absp) {
     LC.applyMatrix4(transC);
     RC.applyMatrix4(transC);        
 
-    console.log(TB,LB,RB);
-    console.log(TC,LC,RC);
     // for convenience, should I make the instance vectors
     // part of this object? Or should I add the matrices,
     // effective make it a "screw" transformation
@@ -241,7 +239,6 @@ function adjoinPrism(old,tau,joinToC) {
 
     var nu = Object.assign({},old);
     nu.p = Object.assign({}, old.p);
-    console.log(old,nu);
     nu.b = old.b.clone();
     nu.c = old.c.clone();
     
@@ -335,20 +332,23 @@ function adjoinPrism(old,tau,joinToC) {
     return nu;
 }
 
-const NUM_PRISMS_FOR_TEST = 4;
+const NUM_PRISMS_FOR_TEST = 2;
 var WORLD_HEIGHT = 1.5;
 var GTRANS = new THREE.Matrix4().makeTranslation(0,WORLD_HEIGHT,0);
 
-function createAdjoinPrism(abs) {
+function createAdjoinPrism(p_i) {
     // var p = new AbstractPrism(1,
     //                            new THREE.Vector3(0,-0.1,-1),
     //                           new THREE.Vector3(0,-0.3,1));
 
-    var p_i = CreatePrism(abs);
+//    var p_i = CreatePrism(abs);
     // We shall place this upward, for the purpose of
     // making it easier to see...
-    
-    applyMatrix4ToPrism(p_i,GTRANS);
+
+
+    // Take this out, and input an instance!
+///    applyMatrix4ToPrism(p_i,trans1);
+//    applyMatrix4ToPrism(p_i,trans2);    
     var TP = renderPrismInstance(p_i);
     TP.forEach(o => { am.scene.add(o); });
 
@@ -746,8 +746,6 @@ function KahnAxis(L,D) {
     Bb.multiplyScalar(1/2);
     Bb.sub(B);
 
-    console.log("Bb,Cb", Bb,Cb);
-
     let H = new THREE.Vector3(0,0,0);
     H.crossVectors(Bb,Cb);
     H.normalize();
@@ -764,7 +762,6 @@ function KahnAxis(L,D) {
     var Ba;
     if (near(phi,Math.PI/2,1e-4)) {
         let psi = Math.atan2(Bb.y,Bb.z);
-        console.log("check",psi  * 180/ Math.PI);
         Ba = new THREE.Vector3(0,
                                Math.tan(psi)* L/2,
                                0);
@@ -1996,6 +1993,15 @@ function ADirFromParam(L,v0,tau,Nb) {
     return vc;
 }
 
+function condition_angle(angle) {
+    if (angle < (-2 * Math.PI)) {
+        return condition_angle(angle + (2 * Math.PI));
+    } else if (angle > (2 * Math.PI)) {
+        return condition_angle(angle - (2 * Math.PI));
+    } else {
+        return angle;
+    }
+}
 function ComputeBalancingRotation(Nb,Nc) {
     var b = Nb.clone();
     b.normalize();
@@ -2011,12 +2017,11 @@ function ComputeBalancingRotation(Nb,Nc) {
     var pc = new THREE.Vector2(c.x,c.y);    
     var ba = pb.angle();
     var ca = pc.angle();
-    console.log("BA,CA", ba * 180 / Math.PI, ca * 180 / Math.PI);
     var theta;
     
     if (near(ba,ca,1e-3)) {
         theta = -ba;
-    } else if (near(ba,-ca)) {
+    } else if (near(ba-ca, Math.PI, 1e-3) || near(ba-ca, -Math.PI, 1e-3)) {
         if (pb.length() == pc.length()) {
             console.log("WARING---collinear opposing normals!");
             theta = -ba;
@@ -2038,6 +2043,7 @@ function ComputeBalancingRotation(Nb,Nc) {
     }
     // now, instead of pointing at the x-axis, we point at the negative y axis.
     theta += -Math.PI/2;
+    theta = condition_angle(theta);
     console.log("theta = ",theta * 180 / Math.PI)
     var rt = new THREE.Matrix4();
     rt.makeRotationAxis(new THREE.Vector3(0,0,1),theta);
@@ -2101,8 +2107,13 @@ function AfromLtauNbNc(L,tau,NBu,NCu) {
     // in a sense it is more accurate. The fact
     // that these values don't match is a serious problem.
 
-    var abs0 = new AbstractPrism(L,NBu,NCu);
+    var abs0 = new AbstractPrism(L,Nb,Nc);
     var p_i0 = CreatePrism(abs0);
+
+    var rt = new THREE.Matrix4();
+    rt.makeRotationAxis(new THREE.Vector3(0,0,-1),res[0]);
+    
+    applyMatrix4ToPrism(p_i0,rt);
     
     var p_c0 = adjoinPrism(p_i0,tau,false);
     console.log("COMPARE",result,p_c0.b);
@@ -2128,7 +2139,7 @@ function testAfromLtauNbNnKeepsYPure() {
     let NC0 = new THREE.Vector3(0,0.31337745420390184,0.9496286491027328);
     let tau = 0;
     let A = AfromLtauNbNc(L,tau,NB0,NC0);
-    console.assert(A.x == 0);
+    console.assert(near(A.x,0,1e-6));
 }
 
 
@@ -2200,8 +2211,7 @@ function testComputeBalancingRotation1() {
     Cp.normalize();
     //        console.log(Bp,Cp);
     console.assert(Bp.length() == 0 || Cp.length() == 0 || near(Bp.x,-Cp.x,1e-4));
-    console.assert(Bp.y <= 1e-6);
-    console.assert(Cp.y <= 1e-6);
+    console.assert((Bp.y + Cp.y) <= 1e-6);
 }
 
 function testComputeBalancingRotation2() {
@@ -2301,23 +2311,44 @@ function onComputeDelix() {
                                   );
         Nb.normalize();
         Nc.normalize();
-        GLOBAL_P0 = new AbstractPrism(
-            1,
-            Nb,
-            Nc);
-        createAdjoinPrism(GLOBAL_P0);
  
         //        let tau = 2 * Math.PI /3;
         let tau = 0;
-        let A = AfromLtauNbNc(L0,tau,Nb,Nc);
-//        let B = new THREE.Vector3(0,0,-L0/2);
-        let D = new THREE.Vector3(A.x,A.y,-A.z);
-        let Dclone = D.clone();
-        Dclone.applyMatrix4(GTRANS);
+        let bal = ComputeBalancingRotation(Nb.clone(),Nc.clone());
+
+        let rotation = bal[0];
+        console.log("rotation: ",rotation * 180 / Math.PI);
+
+        var rt = new THREE.Matrix4();
+        rt.makeRotationAxis(new THREE.Vector3(0,0,-1),rotation);
         
+        let A = AfromLtauNbNc(L0,tau,Nb,Nc);
+        let D = new THREE.Vector3(-A.x,A.y,-A.z);
+        res = KahnAxis(L0,D);
+        
+        let Dclone = D.clone();
+
+        Dclone.applyMatrix4(rt);
+        Dclone.applyMatrix4(GTRANS);
+
         create_vertex_mesh(Dclone,d3.color("purple"));        
         console.log("D input =",D);
-        res = KahnAxis(L0,D);
+        
+        GLOBAL_P0 = new AbstractPrism(
+            L0,
+            Nb,
+            Nc);
+
+          var p_i = CreatePrism( GLOBAL_P0);
+        // We shall place this upward, for the purpose of
+        // making it easier to see...
+
+
+        // Take this out, and input an instance!
+        applyMatrix4ToPrism(p_i,rt);
+        applyMatrix4ToPrism(p_i,GTRANS);
+        
+        createAdjoinPrism(p_i);
 
         
     } else {
