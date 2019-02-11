@@ -334,7 +334,7 @@ function adjoinPrism(old,tau,joinToC) {
     return nu;
 }
 
-const NUM_PRISMS_FOR_TEST = 10;
+const NUM_PRISMS_FOR_TEST = 30;
 var WORLD_HEIGHT = 1.5;
 var GTRANS = new THREE.Matrix4().makeTranslation(0,WORLD_HEIGHT,0);
 
@@ -798,7 +798,7 @@ function testRegularTetsKahnAxis()
     let NB1 = new THREE.Vector3(0,-Math.sin(tetAngle),-Math.cos(tetAngle));
     let NC1 = new THREE.Vector3(0,-Math.sin(tetAngle),Math.cos(tetAngle));
     let tau = 2 * Math.PI /3;    
-    let A = AfromLtauNbNc(L0,tau,NB1,NC1);
+    let A = AfromLtauNbNc(L0,tau,NB1,NC1)[0];
     let B = new THREE.Vector3(0,0,-L0/2);
     let D = new THREE.Vector3(-A.x,A.y,-A.z);
     let res = KahnAxis(L0,D);
@@ -820,7 +820,7 @@ function testKahnAxisYTorus()
     let NB1 = new THREE.Vector3(0,-Math.sin(angle),-Math.cos(angle));
     let NC1 = new THREE.Vector3(0,-Math.sin(angle),Math.cos(angle));
     let tau = 0;    
-    let A = AfromLtauNbNc(L0,tau,NB1,NC1);
+    let A = AfromLtauNbNc(L0,tau,NB1,NC1)[0];
     let B = new THREE.Vector3(0,0,-L0/2);
     let D = new THREE.Vector3(-A.x,A.y,-A.z);
     let res = KahnAxis(L0,D);
@@ -2029,6 +2029,8 @@ function ComputeBalancingRotation(Nb,Nc) {
             theta = -ba;
         } else if (pb.length() < pc.length()) {
             theta = -ca;
+        } else {
+            theta = -ba;
         }
     } else {
     // This should perhaps be a subtraction between ba and ca!
@@ -2091,9 +2093,13 @@ function testComputeBalancingRotation0() {
 // matches the adjoinging prism. Then
 // figure out what is wrong with this code.
 function AfromLtauNbNc(L,tau,NBu,NCu) {
+    
     let res = ComputeBalancingRotation(NBu,NCu);
+    let theta = res[0];
     let Nb = res[1];
     let Nc = res[2];
+
+    // This is the alternative means of computation.
     let Z = new THREE.Vector3(0,0,1);
     let delta = Z.angleTo(Nc);
     let v0 = V0fromLNB(L,Nb,Nc,delta);
@@ -2109,22 +2115,129 @@ function AfromLtauNbNc(L,tau,NBu,NCu) {
     // in a sense it is more accurate. The fact
     // that these values don't match is a serious problem.
 
-    var abs0 = new AbstractPrism(L,Nb,Nc);
-    var p_i0 = CreatePrism(abs0);
+    var abs0 = new AbstractPrism(L,NBu,NCu);
+    var p_i = CreatePrism(abs0);
 
     var rt = new THREE.Matrix4();
-    rt.makeRotationAxis(new THREE.Vector3(0,0,-1),res[0]);
+    rt.makeRotationAxis(new THREE.Vector3(0,0,1),theta);
     
-    applyMatrix4ToPrism(p_i0,rt);
+    applyMatrix4ToPrism(p_i,rt);
+    p_i.p.Nb.applyMatrix4(rt);
+    p_i.p.Nc.applyMatrix4(rt);
     
-    var p_c0 = adjoinPrism(p_i0,tau,false);
-    var p_d0 = adjoinPrism(p_i0,tau,true);
-    console.log("COMPARE",result,p_c0.b,p_d0.c);
+    var p_b = adjoinPrism(p_i,tau,false);
+    var p_c = adjoinPrism(p_i,tau,true);
     // The x values of these two should be the oppoosite
 
+    console.assert(near(p_b.b.x,-p_c.c.x,1e-4));
+    console.assert(near(p_b.b.y,p_c.c.y,1e-4));
+    let fb = new THREE.Vector2(p_b.b.x,p_b.b.y);
+    let fc = new THREE.Vector2(p_c.c.x,p_c.c.y);
+    console.log("fb",fb.length(),fb,fb.angle() * 180/Math.PI);
+    console.log("fc",fc.length(),fc,fc.angle() * 180/Math.PI);
+    let psi = -((fb.angle()+fc.angle())/2 - ( 3 * Math.PI / 2));
+    console.log("psi",psi);
+    res[0] += psi;
+
+    rt.makeRotationAxis(new THREE.Vector3(0,0,1),psi);
+    
+    applyMatrix4ToPrism(p_i,rt);
+    p_i.p.Nb.applyMatrix4(rt);
+    p_i.p.Nc.applyMatrix4(rt);
+    
+    var p_b = adjoinPrism(p_i,tau,false);
+    var p_c = adjoinPrism(p_i,tau,true);
+    // The x values of these two should be the oppoosite
+
+    console.assert(near(p_b.b.x,-p_c.c.x,1e-4));
+    console.assert(near(p_b.b.y,p_c.c.y,1e-4));
+    
+    if (!near(p_b.b.x,-p_c.c.x,1e-4)) {
+        debugger;
+    }
+    if (!near(p_b.b.y,p_c.c.y,1e-4)) {
+        debugger;
+    }
+
     //   return result;
-    return p_c0.b;
+    return [p_b.b,res];
 }
+
+
+// The fundamental problem here is that theta
+// is NOT being computed as the best theta that can be
+// returned. It is off by a few degrees.  This is a
+// problem in ComputingBalance!!!
+function testAfromLfailureCase1() {
+    let Nb = new THREE.Vector3(-0.36496094853172817,0,-0.9310228278870616);
+    let Nc = new THREE.Vector3(-0.39460613482779394,-0.40696332067835117,0.8238123900371481);
+    let L = 1;
+    let tau = 0;
+    let res = AfromLtauNbNc(L,tau,Nb,Nc);
+}
+
+function testAfromLtauMultiple() {
+    // my goal here is to test with a variety of
+    // vaules, and in each case to make sure that
+    // we have found a rotation angle that "balances"
+    // This means that A and D should have the same
+    // x and y value.  We have two ways of
+    // testing this, which provides us an independent calculation.
+    const NUM_TEST = 13; 
+
+    console.log("XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX");
+    for(var i = 0; i < NUM_TEST; i++) {
+        var Nbx = -1 + i*(2/NUM_TEST);
+        for(var j = 0; j < NUM_TEST; j++) {
+            var Nby = -1 + j*(2/NUM_TEST);
+            for(var k = 0; k < NUM_TEST; k++) {
+                var Ncx = -1 + k*(2/NUM_TEST);
+                for(var l = 0; l < NUM_TEST; l++) {
+                    var Ncy = -1 + l*(2/NUM_TEST);
+                    let Nb = new THREE.Vector3(Nbx,Nby,-1);
+                    let Nc = new THREE.Vector3(Ncx,Ncy,1);
+                    Nb.normalize();
+                    Nc.normalize();
+                    let L = 1;
+                    let tau = 0;
+                    let res = AfromLtauNbNc(L,tau,Nb,Nc);
+                    let A = res[0];
+                    let vs = res[1];
+                    let theta = vs[0];
+                    // This is code based on building the physical prism.
+                    // in a sense it is more accurate. The fact
+                    // that these values don't match is a serious problem.
+
+                    var abs = new AbstractPrism(L,Nb,Nc);
+                    var p_i = CreatePrism(abs);
+                    
+                    var rt = new THREE.Matrix4();
+
+                    console.log("theta",theta);
+                    rt.makeRotationAxis(new THREE.Vector3(0,0,1),theta);
+
+                    console.log("P_Ibegin",p_i);
+                    applyMatrix4ToPrism(p_i,rt);
+                    p_i.p.Nb.applyMatrix4(rt);
+                    p_i.p.Nc.applyMatrix4(rt);
+
+                    console.log("P_Iend",p_i);                    
+    
+                    var p_b = adjoinPrism(p_i,tau,false);
+                    var p_c = adjoinPrism(p_i,tau,true);
+                    console.log(Nb,Nc);
+                    console.log("COMPARE",theta,p_b,p_c);                    
+                    console.assert(near(p_b.b.x,-p_c.c.x,1e-4));
+                    console.assert(near(p_b.b.y,p_c.c.y,1e-4));
+                    return;
+                }
+            }
+        }
+    }
+    
+    
+}
+
 
 function testAfromLtauNbNn(tau) {
     let L = 1;
@@ -2142,7 +2255,7 @@ function testAfromLtauNbNnKeepsYPure() {
     let NB0 = new THREE.Vector3(0, -0.25254006068835666,-0.967586439418991);
     let NC0 = new THREE.Vector3(0,0.31337745420390184,0.9496286491027328);
     let tau = 0;
-    let A = AfromLtauNbNc(L,tau,NB0,NC0);
+    let A = AfromLtauNbNc(L,tau,NB0,NC0)[0];
     console.assert(near(A.x,0,1e-6));
 }
 
@@ -2162,7 +2275,7 @@ function testRegularTetsUnified() {
     NB1.applyMatrix4(rt);
     var NC1 = plainC.clone();
     NC1.applyMatrix4(rt);
-    var A = AfromLtauNbNc(L0,tau,NB1,NC1);
+    var A = AfromLtauNbNc(L0,tau,NB1,NC1)[0];
     let B = new THREE.Vector3(0,0,-L0/2);
     let D = new THREE.Vector3(-A.x,A.y,-A.z);
     let res = UnifiedComp(L0,B,D);
@@ -2326,8 +2439,10 @@ function onComputeDelix() {
         var rt = new THREE.Matrix4();
         rt.makeRotationAxis(new THREE.Vector3(0,0,-1),rotation);
         
-        let A = AfromLtauNbNc(L0,tau,Nb,Nc);
-        let D = new THREE.Vector3(-A.x,A.y,-A.z);
+        let A = AfromLtauNbNc(L0,tau,Nb,Nc)[0];
+
+        // My helix appears to be going backward...
+        let D = new THREE.Vector3(A.x,A.y,-A.z);
         res = KahnAxis(L0,D);
         
         let Dclone = D.clone();
@@ -3303,12 +3418,18 @@ $( document ).ready(function() {
 
     testAfromLtauNbNnKeepsYPure();
     
-    var A = testAfromLtauNbNn(0);    
+//    var A = testAfromLtauNbNn(0)[0];    
     // This cannot be tested until it is separated
 //    testRegularTetsUnified();
     testRegularTetsKahnAxis();
 
     testKahnAxisYTorus();
+
+
+    testAfromLfailureCase1();
+
+    
+    testAfromLtauMultiple();
 
     $("#construct_via_norms").prop('checked', true);
 
