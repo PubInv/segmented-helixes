@@ -125,7 +125,7 @@ function renderPrismInstance(p_i) {
 
     let L = p_i.p.L;
     let PRISM_FACE_LENGTH = L * PRISM_FACE_RATIO_LENGTH;
-    let SR = PRISM_FACE_LENGTH/10;
+    let SR = PRISM_FACE_LENGTH/20;
 
     let TB = p_i.tb;
     let LB = p_i.lb;
@@ -2118,7 +2118,9 @@ function AfromLtauNbNc(L,tau,NBu,NCu) {
     applyMatrix4ToPrism(p_i0,rt);
     
     var p_c0 = adjoinPrism(p_i0,tau,false);
-    console.log("COMPARE",result,p_c0.b);
+    var p_d0 = adjoinPrism(p_i0,tau,true);
+    console.log("COMPARE",result,p_c0.b,p_d0.c);
+    // The x values of these two should be the oppoosite
 
     //   return result;
     return p_c0.b;
@@ -2330,7 +2332,7 @@ function onComputeDelix() {
         
         let Dclone = D.clone();
 
-        Dclone.applyMatrix4(rt);
+//        Dclone.applyMatrix4(rt);
         Dclone.applyMatrix4(GTRANS);
 
         create_vertex_mesh(Dclone,d3.color("purple"));        
