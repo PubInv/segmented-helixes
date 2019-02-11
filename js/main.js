@@ -38,7 +38,6 @@ function AbstractPrism(L,Nb,Nc) {
     this.L = L;
     this.Nb = Nb.clone().normalize();
     this.Nc = Nc.clone().normalize();
-    this.up = new THREE.Vector3(0,1,0);
 }
 
 const PRISM_FACE_RATIO_LENGTH = 1/2;
@@ -174,6 +173,9 @@ var smats = [new THREE.Color(0x8B0000),
     return objects;
 }
 
+// TODO--I think this function needs to apply
+// the transformation to the normals of the abstract prism
+// as well, if it is a rotation about z.
 function applyMatrix4ToPrism(nu,trans) {
     nu.tb.applyMatrix4(trans);
     nu.lb.applyMatrix4(trans);
@@ -332,7 +334,7 @@ function adjoinPrism(old,tau,joinToC) {
     return nu;
 }
 
-const NUM_PRISMS_FOR_TEST = 2;
+const NUM_PRISMS_FOR_TEST = 10;
 var WORLD_HEIGHT = 1.5;
 var GTRANS = new THREE.Matrix4().makeTranslation(0,WORLD_HEIGHT,0);
 
@@ -2316,7 +2318,7 @@ function onComputeDelix() {
         let tau = 0;
         let bal = ComputeBalancingRotation(Nb.clone(),Nc.clone());
 
-        let rotation = bal[0];
+        let rotation = -bal[0];
         console.log("rotation: ",rotation * 180 / Math.PI);
 
         var rt = new THREE.Matrix4();
@@ -2347,6 +2349,8 @@ function onComputeDelix() {
         // Take this out, and input an instance!
         applyMatrix4ToPrism(p_i,rt);
         applyMatrix4ToPrism(p_i,GTRANS);
+        p_i.p.Nb.applyMatrix4(rt);
+        p_i.p.Nc.applyMatrix4(rt);
         
         createAdjoinPrism(p_i);
 
