@@ -2115,6 +2115,16 @@ function AfromLtauNbNc(L,tau,NBu,NCu) {
     // in a sense it is more accurate. The fact
     // that these values don't match is a serious problem.
 
+    // NOTE: This is all pretty horrible.
+    // There are several problems:
+    // Why am I not computing the angle correctly on the first
+    // try?
+    // Why does the code above, which should compute it with
+    // having to do all this physical simulation, not work?
+    // Why I am very slighly off (the helix doesn't quite
+    // pierce the joint in a centered way)?
+    // Why do some values clearly get far out of whack?
+
     var abs0 = new AbstractPrism(L,NBu,NCu);
     var p_i = CreatePrism(abs0);
 
@@ -2442,7 +2452,9 @@ function onComputeDelix() {
         let A = AfromLtauNbNc(L0,tau,Nb,Nc)[0];
 
         // My helix appears to be going backward...
-        let D = new THREE.Vector3(A.x,A.y,-A.z);
+        // I am not sure why I should not have to negate A here!!!
+//        let D = new THREE.Vector3(-A.x,A.y,-A.z);
+        let D = new THREE.Vector3(A.x,A.y,-A.z);        
         res = KahnAxis(L0,D);
         
         let Dclone = D.clone();
@@ -2507,9 +2519,6 @@ function onComputeDelix() {
     console.log("theta",theta*180/Math.PI);
     set_outputs(r,theta,d,phi);
 
-
-    
-    RenderHelix(L0,r,d,theta,new THREE.Vector3(0,0,1),-phi,WORLD_HEIGHT);
     
     RenderHelix(L0,r,d,theta,new THREE.Vector3(0,0,1),-phi,WORLD_HEIGHT);    
 
