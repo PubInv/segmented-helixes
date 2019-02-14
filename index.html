@@ -65,7 +65,10 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
     <div id="threecontainer"></div>
     <section>
       <h1>Construction via Norms</h1>
-        <label>Construct via Norms:<input type="checkbox" id="construct_via_norms" value="true" /></label><br />
+        <div id=stack>
+        <label>Construct via Norms:<input type="checkbox" id="construct_via_norms" value="true" /></label>
+        </br>
+        <br />
 <table style="width:100%">
   <tr>
     <th width='10%'>Coord</th>
@@ -73,6 +76,15 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
     <th width='60%'>Slider</th>
     <th width='20%'>Text Input</th>    
   </tr>
+
+  <tr>
+    <td><label for="tau_d">Tau</label></td>
+    <td> <input type="text" id="tau_d" readonly style="border:0; color:#f6931f; font-weight:bold;">
+</td> 
+    <td> <div id="tau_slider"></div> </td>
+    <td>  &nbsp;  &nbsp; <label>Tau (Twist) <input id="tau_txt" />  </label> </td>
+  </tr>
+  
   <tr>
     <td><label for="normal_b_x">B x</label></td>
     <td> <input type="text" id="normal_b_x" readonly style="border:0; color:#f6931f; font-weight:bold;">
@@ -138,30 +150,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
     </p>
     </section>
     
-    <section id="main-content">
-      <h1>Construction via Joint Angles</h1>
-        <div id=stack>
-        <label><input type="checkbox" id="wireframe" value="true" />Wireframe</label><br />
-        <label><input type="checkbox" id="blendcolor" value="true" />Blend Vertex Color</label><br />
-        </div>
-        <div id="intrinsics">
-
-    <label for="angle_rho">Angle Rho (degrees)</label>
-  <input type="text" id="angle_rho" readonly style="border:0; color:#f6931f; font-weight:bold;">
-    <div id="angle_rho_slider"></div>
-
-    <label for="angle_omega">Angle Omega (degrees)</label>
-  <input type="text" id="angle_omega" readonly style="border:0; color:#f6931f; font-weight:bold;">
-    <div id="angle_omega_slider"></div>
-
-    <label>Rho (deg): <input id="rho" />  </label>
-    <label>Omega (deg): <input id="omega" /> </label><br />
-
-        </div>
-
-        
-        <button id="compute-delix">GO!</button>        
-    </section>
     
     <section id="textsection">
         <h1 id="message_banner">Basic Usage -- Test Discrete Helix Math</h1>
