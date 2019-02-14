@@ -234,8 +234,6 @@ function testCreatePrism() {
 // NOTE: This is not currently applying tau!
 // NOTE: with faces reversed, this still produces
 // positive z.
-// Note, we need to allow adjunction to face B as well
-// as face C. Right now this adjoints a copy to face C.
 function adjoinPrism(old,tau,joinToC) {
     // First, we copy the old prism in exactly the same position
 
@@ -285,6 +283,12 @@ function adjoinPrism(old,tau,joinToC) {
     } else {
         console.assert(near(nu.c.length(),0,1e-4));        
     }
+
+    // At this point I may be making an incorrect assumptiong that
+    // the up vectors are the same. It is not clear to me what
+    // the quaternion is doing with the up vectors. The basic goal
+    // here is to rotate the new prism so that it is face-to-face
+    // with the old one.
     
     // Then we rotate about the joint (we may actually do this first)
     var Q_to_Nb = new THREE.Quaternion();
@@ -311,7 +315,7 @@ function adjoinPrism(old,tau,joinToC) {
     }
 
     // DANGER: I'm not sure this is really
-    // correct---this is very confusing.
+    // correct---this is very confusing.  This has not been tested.
     var rt = new THREE.Matrix4();
     rt.makeRotationAxis(joinToC ? nu.p.Nc : nu.p.Nb,tau);
     applyMatrix4ToPrism(nu,rt);
@@ -327,6 +331,9 @@ function adjoinPrism(old,tau,joinToC) {
         diff.subVectors(old.b,nu.c);        
     }
     console.assert(near(diff.length(),0,1e-4));
+    if (!near(diff.length(),0,1e-4)) {
+        console.log("DIFF",diff);
+    }
 
     // So that the normal of the C face is the opposite of the B face.
 
@@ -2004,6 +2011,11 @@ function condition_angle(angle) {
         return angle;
     }
 }
+// I am starting to think this is conceptually flawed.
+// We don't actually care about balancing the normals, we care about
+// balancing the joint vectors. I have been confused about this.
+// This needs to take tau, and either compute or balance the face vectors!
+// That will mean this has to be a function of tau.
 function ComputeBalancingRotation(Nb,Nc) {
     var b = Nb.clone();
     b.normalize();
@@ -2079,6 +2091,8 @@ function testComputeBalancingRotation0() {
 }
 
 
+
+
 // This is a serious question here...
 // if we are really attempting to compute "A"
 // in space, then we cannot throw away the
@@ -2094,20 +2108,25 @@ function testComputeBalancingRotation0() {
 // figure out what is wrong with this code.
 function AfromLtauNbNc(L,tau,NBu,NCu) {
     
-    let res = ComputeBalancingRotation(NBu,NCu);
-    let theta = res[0];
-    let Nb = res[1];
-    let Nc = res[2];
+    // let res = ComputeBalancingRotation(NBu,NCu);
+    // let theta = res[0];
+    // let Nb = res[1];
+    // let Nc = res[2];
 
+
+    // I now believe this approach is completely wrong.
+    // We actually need to balance the vectors of the adjoined prisms.
+    // Although it may be too much, I need to somehow start with the
+    // math from adjoining and simplify it!
     // This is the alternative means of computation.
-    let Z = new THREE.Vector3(0,0,1);
-    let delta = Z.angleTo(Nc);
-    let v0 = V0fromLNB(L,Nb,Nc,delta);
-    console.assert(near(L,v0.length(),1e-5));
-    let Ad = ADirFromParam(L,v0,tau,Nb);
-    let B = new THREE.Vector3(0,0,-L/2);
-    var result = Ad.clone();
-    result.add(B);
+    // let Z = new THREE.Vector3(0,0,1);
+    // let delta = Z.angleTo(Nc);
+    // let v0 = V0fromLNB(L,Nb,Nc,delta);
+    // console.assert(near(L,v0.length(),1e-5));
+    // let Ad = ADirFromParam(L,v0,tau,Nb);
+    // let B = new THREE.Vector3(0,0,-L/2);
+    // var result = Ad.clone();
+    // result.add(B);
 
 
 
@@ -2129,26 +2148,30 @@ function AfromLtauNbNc(L,tau,NBu,NCu) {
     var p_i = CreatePrism(abs0);
 
     var rt = new THREE.Matrix4();
-    rt.makeRotationAxis(new THREE.Vector3(0,0,1),theta);
+//    rt.makeRotationAxis(new THREE.Vector3(0,0,1),theta);
     
-    applyMatrix4ToPrism(p_i,rt);
-    p_i.p.Nb.applyMatrix4(rt);
-    p_i.p.Nc.applyMatrix4(rt);
+//    applyMatrix4ToPrism(p_i,rt);
+//    p_i.p.Nb.applyMatrix4(rt);
+//    p_i.p.Nc.applyMatrix4(rt);
     
     var p_b = adjoinPrism(p_i,tau,false);
     var p_c = adjoinPrism(p_i,tau,true);
     // The x values of these two should be the oppoosite
 
-    console.assert(near(p_b.b.x,-p_c.c.x,1e-4));
-    console.assert(near(p_b.b.y,p_c.c.y,1e-4));
+//    console.assert(near(p_b.b.x,-p_c.c.x,1e-4));
+//    console.assert(near(p_b.b.y,p_c.c.y,1e-4));
     let fb = new THREE.Vector2(p_b.b.x,p_b.b.y);
     let fc = new THREE.Vector2(p_c.c.x,p_c.c.y);
     console.log("fb",fb.length(),fb,fb.angle() * 180/Math.PI);
     console.log("fc",fc.length(),fc,fc.angle() * 180/Math.PI);
     let psi = -((fb.angle()+fc.angle())/2 - ( 3 * Math.PI / 2));
     console.log("psi",psi);
-    res[0] += psi;
+    let res = [];
+    res[0] = psi;
+    res[1] = null;
 
+    // The fact that psi is not Beta somehow means my balancing computation
+    // above is not correct (by definition.)
     rt.makeRotationAxis(new THREE.Vector3(0,0,1),psi);
     
     applyMatrix4ToPrism(p_i,rt);
