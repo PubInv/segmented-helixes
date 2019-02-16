@@ -156,24 +156,45 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
         <h2> This is an interactive 3D simulation. To change the view, place your mouse in the view area, and
             hold and "drag" the mouse to rotate the image.
             The mouse wheel or a drag on your trackpad should zoom you in or out.</h2>
-        <p>A mathematical investigation of the Tetrahelix and <a href="https://en.wikipedia.org/wiki/Boerdijk%E2%80%93Coxeter_helix">Boerdijk-Coxeter helix</a>, which provides a new
-            formulaic way of producing a continuum of untwisted tetrahelices.</p>
-        <p>All of the code on this site is released under the GNU General Public License, and I hope you will
-          reuse it. </p>
         <h2>Creating a Helix</h2>
-        This is a test page in order to a math principle that came out of the Mathathon
+        <p>This is a test page in order to a math principle that came out of the Mathathon
         where we publicly developed a a lot of "generators".
 
         <p> We observed that every regular generator created a helix (though sometimes a a degenerate helix.) In fact, we now know every repeated transformation involving a
           translation and a similar change in angle produces a discrete helix. As far as I have been able to find, this has been articulated only
-          by Eric Lord in a <a href=" https://www.researchgate.net/publication/226976531_Helical_Structures_The_Geometry_of_Protein_Helices_and_Nanotubes">paper from 2002</a>.
-</p>
-        <p> I worked an an algorithm --- it is actually a closed-form expression, but too complex to be treated as such---which computes the intrinsic properties of the discrete helix from the intrinsic properties of a stacked object.
+          by Eric Lord in a <a href="https://www.researchgate.net/publication/226976531_Helical_Structures_The_Geometry_of_Protein_Helices_and_Nanotubes">paper from 2002</a>.
+        </p>
+<q>
+  In nature, helical structures arise when identical structural subunits combine sequentially, the orientational and translational relation between each unit
+  and its predecessor remaining constant.
+</q>
+
+        <p> The fundamental goal of this page is to be able to relate the intrinsic properties of the structural subunits and the rule for their placement
+          to the radius, travel, and pitch of the resulting segmented helix. In the virtual world rendered above, the "structural subunit" is
+          rendered as a prism with a triangular cross-section. The "rule" for the adjoining is face-to-face so that the normals of these faces
+          are aligned in opposite directions through the centroid of the face of the prism. It is important to understand that the same math
+          applies to molecules, which do not have flat faces, but where bonding forces constuct the relationship which generates the segmented helix.</p>
+        <p>
+          In the view above, the segmented helix which matches the joints is drawn as a thin green line. You will note that it always intersects
+          the joints, verifying its correctness, although it is computed in a completely different way---as a helix.  The prism placement is NOT done this way---it is an iteration of laying the prisms face-to-face according to a fixed rule.
+        </p>
+        <p>
+          The "radius" of a segmented helix is the distance from a segment joint to the axis. "Theta" is the rotation about the axis between the two joints on one segment. "Travel" is the distance along the axis between two joints. "Phi" is the angle that a segment makes with axis.
           </p>
+        <p>
+          Although a work-in-progress, at this repo you will find a <a href="https://github.com/PubInv/segmented-helixes/blob/master/doc/StackingHelix.pdf">technical paper</a> describing the math in greater detail, and giving the Mathematica code that implements it. (The same math is implemented in JavaScript on this page.)
+          </p>
+        
+        <p> I have developed an algorithm---it is actually a closed-form expression, but too complex to be treated as such---which computes the intrinsic properties of the discrete helix from the intrinsic properties of a stacked object. This is closely related to an algorithm <a href="https://www.researchgate.net/profile/Peter_Kahn/publication/220667044_Defining_the_axis_of_a_helix/links/5b86ab1e299bf1d5a730ff2e/Defining-the-axis-of-a-helix.pdf">published</a> by Peter Kahn in 1989.
+        </p>
+        <p> I have extended Kahn's work by developing the math to apply his algorithm from the face-normals. The insight to do this is that the object can always be positioned in space so that the joints on either side are symmetrically arranged about an axis. </p>
         <p> This page is my attempt to demonstrate this mathematics, and turn it into
           a tool that can be used by anyone withough Mathematica.
-          </p>
-
+        </p>
+        
+        <p>All of the code on this site is released under the GNU General Public License, and I hope you will
+          reuse it. </p>
+        <p>This project is part of Public Invention. To assist on this project, contact Robert L. Read &lt; read.robert@gmail.com &gt;</p>
     </section>
     <script src="./js/main.js"></script>
 </body>
