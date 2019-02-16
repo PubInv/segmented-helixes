@@ -1777,7 +1777,7 @@ function clearAm() {
         if (obj.type == "Mesh" && obj.name != "GROUND") {
             am.scene.remove(obj);
         }
-        if (obj.name == "HELIX") {
+        if ((obj.name == "HELIX") || (obj.name == "AXIS")) {
             am.scene.remove(obj);            
         }
     }
@@ -2457,6 +2457,8 @@ function onComputeDelix() {
         p_i.p.Nc.applyMatrix4(rt);
         
         createAdjoinPrism(p_i,tau_v,NUM_PRISMS);
+
+
         
     } else {
         var rho_deg_input = document.getElementById('rho');
@@ -2499,6 +2501,38 @@ function onComputeDelix() {
     create_vertex_mesh(new THREE.Vector3(1,0,0),d3.color("red"));
     create_vertex_mesh(new THREE.Vector3(0,1,0),d3.color("green"));
     create_vertex_mesh(new THREE.Vector3(0,0,1),d3.color("blue"));
+
+        // now we would like to draw the axis of the helix...
+        // we have the vector H from the KahnAxis algorithm.
+        // We have to find one point on the helix---
+        // We know the helix intersects the y axis,
+        // and we have the radius, which is the distance
+        // to the joints.
+        // First, let me just draw one at the origin
+        // in the correct direction
+    var points3D = new THREE.Geometry();
+    let H = res[5];
+
+    // we compute y via Pythagoras from the a line
+    // from the y-axis to a joint--- yd is always slightly
+    // less than radius because it is the distance to
+    // the midpoint of a segment.
+    let Qsq = r**2 + (d/2)**2 - (L0/2)**2;
+    let yd = Math.sqrt(Qsq);
+    // I unfortunately have some kind of sign error here...
+    H.multiplyScalar(100);    
+    H.setY(WORLD_HEIGHT - yd);
+    H.setX(-H.x);
+    var Hn = H.clone();
+    Hn.multiplyScalar(-1);
+    Hn.setY(H.y);
+    points3D.vertices.push(H);
+    points3D.vertices.push(Hn);
+    
+    var axis_line = new THREE.Line(points3D, new THREE.LineBasicMaterial({color: "green"}));
+    axis_line.name = "AXIS";    
+    am.scene.add(axis_line);
+    
 
     if (PHI_SPRITE) {
         am.grid_scene.remove(PHI_SPRITE);
