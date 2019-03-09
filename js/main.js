@@ -15,10 +15,10 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 // var tm = UGLY_GLOBAL_SINCE_I_CANT_GET_MY_MODULE_INTO_THE_BROWSER;
-var OPERATION = "normal"; // "normal" or "helices"
+// var OPERATION = "normal"; // "normal" or "helices"
 
-const CHIRALITY_CCW = 1;
-const CHIRALITY_CW = 0;
+// const CHIRALITY_CCW = 1;
+// const CHIRALITY_CW = 0;
 var TET_DISTANCE = 0.5;
 
 // const MAX_PARAMETRIC_STEPS = 1000;
@@ -102,35 +102,24 @@ var smats = [new THREE.Color(0x8B0000),
 var INITIAL_NORM_POINT_Y = -0.7;
 var INITIAL_NORM_POINT_X = -0.62;
 
+var WORLD_HEIGHT = 1.5;
+var GTRANS = new THREE.Matrix4().makeTranslation(0,WORLD_HEIGHT,0);
 var GLOBAL_P0 = new AbstractPrism(
     1,
     new THREE.Vector3(INITIAL_NORM_POINT_X,INITIAL_NORM_POINT_Y,-1),
     new THREE.Vector3(-INITIAL_NORM_POINT_X,INITIAL_NORM_POINT_Y,1));
 
 function testCreatePrism() {
-    // var p = new AbstractPrism(1,
-    //                           new THREE.Vector3(-1,-0.5,-2),
-    //                           new THREE.Vector3(1,-0.3,2));
-    // var p = new AbstractPrism(1,
-    //                            new THREE.Vector3(0,-0.3,-1),
-    //                           new THREE.Vector3(0,-0.6,1));
-
     var p_i = CreatePrism(GLOBAL_P0,PRISM_FACE_RATIO_LENGTH);
+    
     // We shall place this upward, for the purpose of
     // making it easier to see...
-    
     var TP = renderPrismInstance(p_i);
     console.log(TP);
     TP.forEach(o => { am.scene.add(o); });
 }
 
-
-
-var WORLD_HEIGHT = 1.5;
-var GTRANS = new THREE.Matrix4().makeTranslation(0,WORLD_HEIGHT,0);
-
 function createAdjoinPrism(p_i,tau,num) {
-
     var TP = renderPrismInstance(p_i);
     TP.forEach(o => { am.scene.add(o); });
 
@@ -276,29 +265,6 @@ var scolors = [d3.color("DarkRed"), d3.color("DarkOrange"), d3.color("Indigo")];
 var smats = [new THREE.Color(0x8B0000),
              new THREE.Color(0xFF8C00),
              new THREE.Color(0x000082)];
-// function load_NTetHelix(am, helix, tets, pvec, hparams) {
-//     var len = hparams.len;
-//     var rho = hparams.rho;
-//     var d = hparams.d;
-//     var radius = hparams.radius;
-//     var lambda = hparams.lambda;
-//     var chi = hparams.chirality;
-//     var n = tets + 3;
-
-//     var coords = [];
-
-
-//     for (var i = 0; i < n; i++) {
-
-//         var myRho = rho;
-//         var rail = i % 3;
-//         var num = Math.floor(i / 3);
-//         var q = tm.H_general(chi, num, rail, myRho, d, radius);
-//         var v = new THREE.Vector3(q[0], q[1], q[2]);
-//         coords.push(v);
-//     }
-//     return load_NTetHelixAux(am, helix, tets, pvec, coords);
-// }
 
 function create_vertex_mesh(pos, c) {
     var mesh = createSphere(am.JOINT_RADIUS/2, pos, c.hex());
@@ -307,91 +273,6 @@ function create_vertex_mesh(pos, c) {
     am.scene.add(mesh);
 }
 
-
-// function add_vertex(am, d, i, params) {
-//     var colors = [d3.color("DarkRed"), d3.color("DarkOrange"), d3.color("Blue")];
-//     var darkgreen = d3.color("#008000");
-//     var dcolor = [null, darkgreen, d3.color("purple")];
-
-//     var vertices = params.vertices;
-//     var indices = params.indices;
-//     var prev = params.prev;
-//     var helix = params.helix;
-//     var v;
-//     var c;
-//     var th;
-//     if (i < 3) return;
-//     if (i == 3) {
-//         var base = get_base(params.init_pos, params.l);
-//         params.vertices = vertices = base.v.slice(0);
-//         th = [0, 1, 2, 3];
-//         indices.push(th, th, th, th); //First 3 are dummy copies to align indices and vertices
-//         v = base.v[i];
-//         if (params.wireframe == true) {
-//             create_vertex_mesh(base.v[0], base.vc[0]);
-//             create_vertex_mesh(base.v[1], base.vc[1]);
-//             create_vertex_mesh(base.v[2], base.vc[2]);
-//             create_actuator(base.v[0], base.v[1], null, memo_color_mat(cto3(base.ec[2])));
-//             create_actuator(base.v[1], base.v[2], null, memo_color_mat(cto3(base.ec[0])));
-//             create_actuator(base.v[2], base.v[0], null, memo_color_mat(cto3(base.ec[1])));
-//         }
-//         else {
-//             var geometry = new THREE.Geometry();
-//             geometry.vertices.push(vertices[0],vertices[1],vertices[2]);
-//             if (params.blendcolor == true) {
-//                 geometry.faces.push(new THREE.Face3(0, 1, 2, undefined, [cto3(base.ec[0]),cto3(base.ec[1]),cto3(base.ec[2])]));
-//             }
-//             else {
-//                 geometry.faces.push(new THREE.Face3(0, 1, 2, undefined, new THREE.Color(0)));
-//             }
-//             var material = new THREE.MeshBasicMaterial({vertexColors: THREE.VertexColors});
-//             var mesh = new THREE.Mesh(geometry, material);
-//             am.scene.add(mesh);
-//         }
-//     } else {
-//         //                var d = get_direction(i - 3, vertices, indices);
-//         switch (d) {
-//         case 0: th = [prev[1], prev[2], prev[3], i]; break;
-//         case 1: th = [prev[0], prev[3], prev[2], i]; break;
-//         case 2: th = [prev[3], prev[0], prev[1], i]; break;
-//         case 3: th = [prev[2], prev[1], prev[0], i]; break;
-//         }
-//         var l = params.l
-//         v = get_vertex(i, vertices, indices, vertices[th[0]], vertices[th[1]], vertices[th[2]], [l[0]+l[3],l[1]+l[4],l[2]+l[5]], params.l, params.m);
-//         vertices.push(v);
-//         indices.push(th);
-//     }
-//     c = get_colors(i, vertices, indices);
-//     if (params.wireframe == true) {
-//         create_vertex_mesh(v, c[3]);
-
-//         for (var k = 0; k < Math.min(3, i); k++) {
-//             var tcolor = new THREE.Color(c[k].hex());
-//             var cmat = memo_color_mat(tcolor);
-//             var mesh = create_actuator(vertices[th[k]], vertices[th[3]], null, cmat);
-//         }
-//     }
-//     else {
-//         var geometry = new THREE.Geometry();
-//         geometry.vertices.push(vertices[th[0]],vertices[th[1]],vertices[th[2]],vertices[th[3]]);
-//         if (params.blendcolor == true) {
-//             geometry.faces.push(
-//                 new THREE.Face3(2, 3, 0, undefined, [cto3(c[2]),cto3(c[3]),cto3(c[0])]),
-//                 new THREE.Face3(3, 2, 1, undefined, [cto3(c[3]),cto3(c[2]),cto3(c[1])]),
-//                 new THREE.Face3(1, 0, 3, undefined, [cto3(c[1]),cto3(c[0]),cto3(c[3])]));
-//         }
-//         else {
-//             geometry.faces.push(
-//                 new THREE.Face3(2, 3, 0, undefined, cto3(c[1])),
-//                 new THREE.Face3(3, 2, 1, undefined, cto3(c[0])),
-//                 new THREE.Face3(1, 0, 3, undefined, cto3(c[2])));
-//         }
-//         var material = new THREE.MeshBasicMaterial({vertexColors: THREE.VertexColors});
-//         var mesh = new THREE.Mesh(geometry, material);
-//         am.scene.add(mesh);
-//     }
-//     params.prev = th;
-// }
 function cto3(c) {
     return new THREE.Color(c.hex());
 }
@@ -424,51 +305,6 @@ function get_vertex(n, v, i, pa, pb, pc, s, l, m) {
 var colors = [d3.color("DarkRed"), d3.color("DarkOrange"), d3.color("Indigo"), d3.color("purple"), d3.color("black")];
 function get_colors(n, v, i) {
     return [d3.color("DarkRed"), d3.color("DarkOrange"), d3.color("Indigo"), d3.color("purple")];
-}
-// I believe all of these must in principle be locatable by initial position
-// if we are to allow parametric curves to start in different positions.
-// I believe we should hold invariant that "init_pos" passed into
-// initialParameters below is always respected.
-// var cs = [];
-// cs[0] = new THREE.Vector3(0, 0, 0);
-// cs[1] = new THREE.Vector3(3, 0, 0);
-// cs[2] = new THREE.Vector3(.5, -Math.sqrt(3) / 2, 0);
-
-function calculate_tetrahedron(l) {
-    var v = [new THREE.Vector3( l[1]/2,0,0),
-             new THREE.Vector3(      0,0,0),
-             new THREE.Vector3(-l[1]/2,0,0),
-             new THREE.Vector3(      0,0,0)];
-    v1 = v[1];
-    v3 = v[3];
-    s0 = l[0]*l[0];
-    s1 = l[1]*l[1];
-    s2 = l[2]*l[2];
-    s3 = l[3]*l[3];
-    s4 = l[4]*l[4];
-    s5 = l[5]*l[5];
-    var x1 = v1.x = -(s2-s0)/2/l[1];
-    var x3 = v3.x = -(s3-s5)/2/l[1];
-    var xm = (x1+x3)/2;
-    var xyz1s = (s2+s0-s1/2)/2;
-    var xyz3s = (s3+s5-s1/2)/2;
-    var zs = (xyz1s+xyz3s-s4/2)/2-xm*xm;
-    var z = Math.sqrt(zs);
-    var zd = (s4/4-xyz1s+zs)/2/z;
-    var z1 = v1.z = ((3*(s2+s0)+(s3+s5)-2*s1-2*s4)/8-x1*xm)/z;
-    v3.z = 2*z-z1;
-    v1.y = -(v3.y=Math.sqrt(xyz1s-x1*x1-z1*z1));
-    return v;
-}
-
-
-// v [a, b, c, d], vc[a, b, c, d], ec[cb, ac, ba, ad, bd, cd]
-function get_base(init_pos, l) {
-    var v = calculate_tetrahedron(l);
-    // now shift this dtetrhedron by the init_pos...
-    v.forEach(vec => vec.add(init_pos));
-    return { v: v,
-             vc: [colors[3], colors[3], colors[3], colors[3]], ec: [colors[4], colors[4], colors[4], colors[0], colors[1], colors[2]] };
 }
 
 var AM = function () {
@@ -567,18 +403,6 @@ var AM = function () {
     this.JOINT_RADIUS *= 3;
 
 }
-AM.prototype.push_body_mesh_pair = function (body, mesh) {
-    this.meshes.push(mesh);
-    this.bodies.push(body);
-}
-AM.prototype.remove_body_mesh_pair = function (body, mesh) {
-    for (var i = this.meshes.length - 1; i >= 0; i--) {
-        if (this.meshes[i].name === mesh.name) {
-            this.meshes.splice(i, 1);
-            this.bodies.splice(i, 1);
-        }
-    }
-}
 
 AM.prototype.clear_non_floor_body_mesh_pairs = function () {
     this.meshes = [];
@@ -631,14 +455,7 @@ function initGraphics() {
 
     var PERSPECTIVE_NEAR = 0.3;
 
-
-    // if (OPERATION == "helices") {
-    //     var width = 10;
-    //     var height = width * (window.innerHeight * am.window_height_factor) / window.innerWidth;
-    //     am.camera = new THREE.OrthographicCamera(width / - 2, width / 2, height / 2, height / - 2, 1, 1000);
-    // } else {
         am.camera = new THREE.PerspectiveCamera(60, window.innerWidth / (window.innerHeight * am.window_height_factor), PERSPECTIVE_NEAR, 2000);
-//    }
 
     //   am.camera.aspect = window.innerWidth / (window.innerHeight * am.window_height_factor);
 
@@ -725,7 +542,7 @@ AM.prototype.remove_body_mesh_pair = function (body, mesh) {
             this.bodies.splice(i, 1);
         }
     }
-    delete mesh["ammo_obj"];
+//    delete mesh["ammo_obj"];
     for (var i = this.rigidBodies.length - 1; i >= 0; i--) {
         if (this.rigidBodies[i].name === body.name) {
             this.rigidBodies.splice(i, 1);
@@ -819,9 +636,7 @@ function render() {
     // note this....
     //    am.renderer.autoClear = true;        
     am.renderer.render(am.scene, am.camera);
-//    if (OPERATION == "normal") {
-        am.renderer.render(am.grid_scene, am.camera);
-//    }
+    am.renderer.render(am.grid_scene, am.camera);
     am.renderer.autoClear = false;
     am.renderer.render(am.sceneOrtho, am.cameraOrtho);
 }
@@ -875,9 +690,6 @@ function clearAm() {
 
 // This is the new experimental computation...
 var computeDelix;
-
-// MAIN FUNCTION
-
 
 function main() {
     computeDelix = document.getElementById('compute-delix');        
@@ -982,6 +794,7 @@ function onComputeDelix() {
         let D = new THREE.Vector3(A.x,A.y,-A.z);        
         res = KahnAxis(L0,D);
 
+        
         GLOBAL_P0 = new AbstractPrism(
             L0,
             Nb,
