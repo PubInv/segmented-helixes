@@ -142,7 +142,10 @@ function makeTextSprite( message, parameters, color = "yellow" )
 			texture.minFilter = THREE.LinearFilter;
 			texture.needsUpdate = true;
 
-	var spriteMaterial = new THREE.SpriteMaterial({ map: texture, useScreenCoordinates: false});
+    var spriteMaterial = new THREE.SpriteMaterial({ map: texture
+//                                                    ,
+//                                                    useScreenCoordinates: false
+                                                  });
 	var sprite = new THREE.Sprite( spriteMaterial );
 	return sprite;
 }

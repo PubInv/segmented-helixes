@@ -761,7 +761,7 @@ function onComputeDelix() {
     var wf = wfgui ? wfgui.checked : true;
     var bc = bcgui ? bcgui.checked : false;    
 
-    var norms = $("#construct_via_norms").prop('checked');
+//    var norms = $("#construct_via_norms").prop('checked');
 
     var res;
     var r;
@@ -769,7 +769,7 @@ function onComputeDelix() {
     var d;
     var phi;
     let L0 = 1;
-    if (norms) {
+//    if (norms) {
 
         var Nb = new THREE.Vector3(NORMAL_B_X,
                                    NORMAL_B_Y,
@@ -813,35 +813,32 @@ function onComputeDelix() {
         p_i.p.Nc.applyMatrix4(rt);
         
         createAdjoinPrism(p_i,tau_v,NUM_PRISMS);
+    // } else {
+    //     var rho_deg_input = document.getElementById('rho');
+    //     var omega_deg_input = document.getElementById('omega');
 
-
-        
-    } else {
-        var rho_deg_input = document.getElementById('rho');
-        var omega_deg_input = document.getElementById('omega');
-
-        if (isNumeric(rho_deg_input.value)) {
-            rho_deg = parseFloat(rho_deg_input.value);
-            $( "#angle_rho" ).val( rho_deg);
+    //     if (isNumeric(rho_deg_input.value)) {
+    //         rho_deg = parseFloat(rho_deg_input.value);
+    //         $( "#angle_rho" ).val( rho_deg);
             
-        } else {
-            rho_deg = ANGLE_RHO_d;
-        }
-        if (isNumeric(omega_deg_input.value)) {
-            omega_deg = parseFloat(omega_deg_input.value);
-            $( "#angle_omega" ).val( omega_deg);            
+    //     } else {
+    //         rho_deg = ANGLE_RHO_d;
+    //     }
+    //     if (isNumeric(omega_deg_input.value)) {
+    //         omega_deg = parseFloat(omega_deg_input.value);
+    //         $( "#angle_omega" ).val( omega_deg);            
             
-        } else {
-            omega_deg = ANGLE_OMEGA_d;                    
-        }
+    //     } else {
+    //         omega_deg = ANGLE_OMEGA_d;                    
+    //     }
 
-        var rho = parseFloat(rho_deg) * Math.PI / 180;        
-        var omega = parseFloat(omega_deg) * Math.PI / 180;
+    //     var rho = parseFloat(rho_deg) * Math.PI / 180;        
+    //     var omega = parseFloat(omega_deg) * Math.PI / 180;
         
-        console.log(rho_deg,omega_deg);
+    //     console.log(rho_deg,omega_deg);
         
-        res = UnifiedComp(L0,rho,omega);
-    }
+    //     res = UnifiedComp(L0,rho,omega);
+    // }
 
     r = res[0];
     theta = res[1];
@@ -1094,12 +1091,27 @@ $(function() {
 const INIT_RHO = 10;
 const INIT_OMEGA = 55;
 
+function setup_input_molecule(slider,ro,txt,x,set)
+{
+    $( slider ).slider( "value",x );
+    $( ro ).val( x );
+    $( txt ).val( "" );
+
+    $( txt ).keypress(function(event) {
+        if (event.which == 13) {
+            // Does this change the value or the parameter?
+            x = event.currentTarget.value;
+            set(x);
+            $( slider ).slider( "value",x );
+            $( ro ).val( x );
+            onComputeDelix();
+        }
+    });
+}
+
 
 $( document ).ready(function() {
-    console.log( "ready!" );
-
     runUnitTests();
-
     $("#construct_via_norms").prop('checked', true);
 
     $( "#angle_omega_slider" ).slider( "value",INIT_RHO );
@@ -1109,32 +1121,20 @@ $( document ).ready(function() {
     $( "#angle_rho" ).val( INIT_OMEGA );
     ANGLE_RHO_d = INIT_OMEGA;
 
-    $( "#tau_slider" ).slider( "value",TAU_d );
-    $( "#tau_d" ).val( TAU_d );
-    $( "#tau_txt" ).val( "" );
-    
-    $( "#normal_b_x_slider" ).slider( "value",NORMAL_B_X );
-    $( "#normal_b_x" ).val( NORMAL_B_X );
-    $( "#b_x" ).val( "" );
-    $( "#normal_b_y_slider" ).slider( "value",NORMAL_B_Y );
-    $( "#normal_b_y" ).val( NORMAL_B_Y );
-    $( "#b_y" ).val( "" );        
-    $( "#normal_b_z_slider" ).slider( "value",NORMAL_B_Z );
-    $( "#normal_b_z" ).val( NORMAL_B_Z );
-    $( "#b_z" ).val( "" );            
+    setup_input_molecule("#tau_slider","#tau_d","#tau_txt",TAU_d,(v => TAU_d = v));
 
-    $( "#normal_c_x_slider" ).slider( "value",NORMAL_C_X );
-    $( "#normal_c_x" ).val( NORMAL_C_X );
-    $( "#c_x" ).val( "" );
-    
-    $( "#normal_c_y_slider" ).slider( "value",NORMAL_C_Y );
-    $( "#normal_c_y" ).val( NORMAL_C_Y );
-    $( "#c_y" ).val( "" );
-    
-    $( "#normal_c_z_slider" ).slider( "value",NORMAL_C_Z );
-    $( "#normal_c_z" ).val( NORMAL_C_Z );
-    $( "#c_z" ).val( "" );                
-    
+    setup_input_molecule("#normal_b_x_slider","#normal_b_x",
+                         "#b_x",NORMAL_B_X,(v => NORMAL_B_X = v));
+    setup_input_molecule("#normal_b_y_slider","#normal_b_y",
+                         "#b_y",NORMAL_B_Y,(v => NORMAL_B_Y = v));
+    setup_input_molecule("#normal_b_z_slider","#normal_b_z",
+                         "#b_z",NORMAL_B_Z,(v => NORMAL_B_Z = v));
+    setup_input_molecule("#normal_c_x_slider","#normal_c_x",
+                         "#c_x",NORMAL_C_X,(v => NORMAL_C_X = v));
+    setup_input_molecule("#normal_c_y_slider","#normal_c_y",
+                         "#c_y",NORMAL_C_Y,(v => NORMAL_C_Y = v));
+    setup_input_molecule("#normal_c_z_slider","#normal_c_z",
+                         "#c_z",NORMAL_C_Z,(v => NORMAL_C_Z = v));
     
     $(function () { main(); });
     

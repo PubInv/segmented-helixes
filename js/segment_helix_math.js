@@ -657,8 +657,8 @@ function testRegularTetsUnified() {
     var A = AfromLtauNbNc(L0,tau,NB1,NC1)[0];
     let B = new THREE.Vector3(0,0,-L0/2);
     let D = new THREE.Vector3(-A.x,A.y,-A.z);
-    let res = UnifiedComp(L0,B,D);
-   //    let res = KahnAxis(L0,D);
+//    let res = UnifiedComp(L0,B,D);
+    let res = KahnAxis(L0,D);
     let r = res[0];
     let theta = res[1];
     let da = res[2];
@@ -737,89 +737,6 @@ function testComputeBalancingRotation2() {
     }
 }
 
-// function test_some_calculations() {
-
-//     // var v = [new THREE.Vector3( Math.sqrt(8/9),-1/3,0),
-//     //          new THREE.Vector3(-Math.sqrt(2/9),-1/3,Math.sqrt(2/3)),
-//     //          new THREE.Vector3(-Math.sqrt(2/9),-1/3,-Math.sqrt(2/3)),
-//     //          new THREE.Vector3(0,1,0)];
-//     // v[0].y += 1/3;
-//     // v[1].y += 1/3;
-//     // v[2].y += 1/3;
-//     // v[3].y += 1/3;
-
-//     // var d = 1/v[0].distanceTo(v[1]);
-//     // v.forEach(x => { x.x *= d; x.y *= d; x.z *= d; });
-//     var x = 1/Math.sqrt(2);
-//     var v = [new THREE.Vector3(0,0,1/2),
-//              new THREE.Vector3(0,0,-1/2),
-//              new THREE.Vector3(1/2,-x,0),
-//              new THREE.Vector3(-1/2,-x,0)];
-
-
-    
-//     // now I will attempt to compute the distanace between
-//     // the centroids
-//     function centroid(v0,v1,v2) {
-//         return new THREE.Vector3((v0.x + v1.x + v2.x)/3,
-//                                  (v0.y + v1.y + v2.y)/3,
-//                                  (v0.z + v1.z + v2.z)/3);
-//     }
-
-//     const c = centroid(v[0],v[2],v[3]);
-
-//     v[0].y -= c.y;
-//     v[1].y -= c.y;
-//     v[2].y -= c.y;
-//     v[3].y -= c.y;
-    
-//     const c0 = centroid(v[0],v[1],v[2]);
-//     const c1 = centroid(v[0],v[1],v[3]);
-//     const c2 = centroid(v[0],v[2],v[3]);
-//     const c3 = centroid(v[1],v[2],v[3]);
-
-//     console.log("CALCULATE");
-//     console.log(v);
-    
-//     console.log(c0.distanceTo(c1));
-//     console.log("centroids",c0,c1,c2,c3);
-//     var valid = { v: true };
-    
-//     // We'll build out form v[0],v[2],v[3]
-//     var pd = find_fourth_point_given_three_points_and_three_distances(
-//         CHIRALITY_CCW,
-//         v[0], v[2], v[3],
-//         1, 1, 1,
-//         valid);
-    
-//     console.log("Fifth point",pd);
-//     v.push(pd);
-//     // now we need to compute the appropriate centroid fo the
-//     // new point, then compute the angles of the centroid-to-centroid
-//     // vector with the z axis
-//     // now which centroid to we compute?
-//     // 0 - +x, z = 0
-//     // 1 - -x, z = 0.5
-//     // 2 - -x, z = -0.5
-//     // 3 - x = 0, y = 0.8164, z = 0
-//     // 4 - x = 0.48, y = 0.54, : -0.83333
-//     c4 = centroid(v[0],v[2],v[4]);
-//     console.log("c4",c4);
-//     var dir = c4.clone().sub(c2);
-//     var check = c2.clone().sub(c3)
-//     console.log("check",check);
-//     // How can these be at the same Y level?
-//     console.log(dir);
-//     var rho = Math.atan2(dir.y,dir.z);
-//     var ome = Math.atan2(dir.x,dir.z);    
-//     console.log("rho,ome", rho * 180/Math.PI, ome * 180/
-//                 Math.PI);
-    
-//     const res = UnifiedComp(1/3,rho,ome);
-//     console.log("res",res);
-//     console.log("bc =",res[1] * 180/Math.PI);
-// }
-
 function test_UnifiedComp() {
     const res = UnifiedComp(1,Math.PI/10,Math.PI/30);
     console.log(res);
@@ -881,5 +798,4 @@ function runUnitTests() {
     testKahnAxisYTorus();
     testAfromLfailureCase1();
     testAfromLtauMultiple();
-//    test_some_calculations();
 }
