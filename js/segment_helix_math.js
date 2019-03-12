@@ -93,6 +93,7 @@ function KahnAxis(L,D) {
     // which will also have x and z = 0.
     var Ba;
     if (near(phi,Math.PI/2,1e-4)) {
+        console.log("XXXX",phi);
         let psi = Math.atan2(Bb.y,Bb.z);
         Ba = new THREE.Vector3(0,
                                Math.tan(psi)* L/2,
@@ -197,7 +198,6 @@ function adjoinPrism(old,tau,joinToC) {
                                    nu.p.Nb);
     }
 
-    // I'm assuming order doesn't matter here.
     if (joinToC) {
         applyQuaternionToPrism(nu,Q_to_Nb);
         applyQuaternionToPrism(nu,Q_to_Nc);
@@ -338,8 +338,10 @@ function CreatePrism(absp,PRISM_FACE_RATIO_LENGTH) {
 
 function condition_angle(angle) {
     if (angle < (-2 * Math.PI)) {
+        console.log("CONDITIONED ANGLE");
         return condition_angle(angle + (2 * Math.PI));
     } else if (angle > (2 * Math.PI)) {
+        console.log("CONDITIONED ANGLE");        
         return condition_angle(angle - (2 * Math.PI));
     } else {
         return angle;
@@ -404,6 +406,7 @@ function ComputeBalancingRotation(Nb,Nc) {
     rt.makeRotationAxis(new THREE.Vector3(0,0,1),theta);
     b.applyMatrix4(rt);
     c.applyMatrix4(rt);
+    console.log("BALANCE",theta);
     return [theta,b,c];
 }
 
@@ -519,10 +522,29 @@ function AfromLtauNbNc(L,tau,NBu,NCu) {
     // The x values of these two should be the oppoosite
 
 //    console.assert(near(p_b.b.x,-p_c.c.x,1e-4));
-//    console.assert(near(p_b.b.y,p_c.c.y,1e-4));
+    //    console.assert(near(p_b.b.y,p_c.c.y,1e-4));
+
+    
     let fb = new THREE.Vector2(p_b.b.x,p_b.b.y);
     let fc = new THREE.Vector2(p_c.c.x,p_c.c.y);
-    let psi = -((fb.angle()+fc.angle())/2 - ( 3 * Math.PI / 2));
+
+    function compute_angle_midpoint(fb,fc) {
+    // Note: Possibly this use of "angle" is unreliable....
+    // Note: When fc crosses from 360, this fails...
+    // FAIL!!!! This is where it fails!!!
+        let fbc = new THREE.Vector2().addVectors(fb,fc);
+        // This is likely the problem....
+        //        let psi = -((fb.angle()+fc.angle())/2 - ( 3 * Math.PI / 2));
+        // Why is this negated? Why am I subtracting 3 PI / 2?
+        // I assume this is "reverse on the clock" operation!
+        let psi = -(fbc.angle() - ( 3 * Math.PI / 2));
+        return psi;
+    }
+
+    // This is likely the problem....
+    let psi = compute_angle_midpoint(fb,fc);
+
+    console.log("PSI = ",psi * 180 / Math.PI);
 
     // The fact that psi is not Beta somehow means my balancing computation
     // above is not correct (by definition.)
@@ -627,6 +649,12 @@ function testAfromLtauNbNn(tau) {
     let NC1 = new THREE.Vector3(0,-Math.sin(tetAngle),Math.cos(tetAngle));
     let AA = AfromLtauNbNc(L,tau,NB1,NC1);
     return AA;
+}
+
+function testAfromLtauNbNnContinuityOfTau() {
+    var a = testAfromLtauNbNn(134 * Math.PI / 180);
+    var b = testAfromLtauNbNn(135 * Math.PI / 180);
+    console.log("=== A, B",a,b);
 }
 
 function testAfromLtauNbNnKeepsYPure() {
