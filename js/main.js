@@ -727,10 +727,10 @@ function RenderHelix(l,r,d,theta,v,phi,wh,MAX_POINTS) {
 
 
 function set_outputs(radius,theta,travel,phi) {
-    $( "#radius_output" ).val( radius );
-    $( "#theta_output" ).val( theta * 180 / Math.PI);
-    $( "#travel_output" ).val( travel );
-    $( "#phi_output" ).val( phi * 180 / Math.PI );            
+    $( "#radius_output" ).val( format_num(radius,2) );
+    $( "#theta_output" ).val( format_num(theta * 180 / Math.PI,2));
+    $( "#travel_output" ).val( format_num(travel,2) );
+    $( "#phi_output" ).val( format_num(phi * 180 / Math.PI,2) );            
 }
 
 
@@ -863,13 +863,16 @@ function onComputeDelix() {
         // First, let me just draw one at the origin
         // in the correct direction
     var points3D = new THREE.Geometry();
-    let H = res[5];
+    let H = res[5].clone();
 
     // we compute y via Pythagoras from the a line
     // from the y-axis to a joint--- yd is always slightly
     // less than radius because it is the distance to
     // the midpoint of a segment.
     let Qsq = r**2 + (d/2)**2 - (L0/2)**2;
+    if (near(Qsq,0,1e-4)) {
+        Qsq = 0;
+    }
     let yd = Math.sqrt(Qsq);
     // I unfortunately have some kind of sign error here...
     H.multiplyScalar(100);    
@@ -881,11 +884,10 @@ function onComputeDelix() {
     points3D.vertices.push(H);
     points3D.vertices.push(Hn);
     
-    var axis_line = new THREE.Line(points3D, new THREE.LineBasicMaterial({color: "green"}));
+    var axis_line = new THREE.Line(points3D, new THREE.LineBasicMaterial({color: "green",linewidth: 10}));
     axis_line.name = "AXIS";    
     am.scene.add(axis_line);
     
-
     if (PHI_SPRITE) {
         am.grid_scene.remove(PHI_SPRITE);
     }
@@ -960,8 +962,7 @@ var TAU = 0;
 $(function() {
     $( "#tau_slider" ).slider({
 	range: "max",
-        // We disallow -180 because it is the same as 180
-	min: -179,
+	min: -180,
 	max: 180,
 	value: TAU_d,
 	step: 0.01,	

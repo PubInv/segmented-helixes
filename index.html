@@ -31,6 +31,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
     <link rel="stylesheet" href="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
     <link rel="stylesheet" href="./css/main.css">
     <link rel="icon" href="./images/favicon.ico">
+    <script type="text/javascript" src="http://latex.codecogs.com/latexit.js"></script>
     
     <script src="https://code.jquery.com/jquery-1.12.4.js"></script>
 
@@ -131,17 +132,19 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 </table>
       </section>
 
+    <table>
+      <tr><td>
     <section>
       <p>
-    <label for="radius_output">Radius:</label>      
+    <label for="radius_output">Radius (r):</label>      
     <input type="text" id="radius_output" readonly style="border:0; color:#f6931f; font-weight:bold;">
     </p>
           <p>
-    <label for="theta_output">Theta:</label>          
+    <label for="theta_output">Theta (<span lang='latex'>\theta</span>):</label>          
     <input type="text" id="theta_output" readonly style="border:0; color:#f6931f; font-weight:bold;">
     </p>
           <p>
-    <label for="travel_output">Travel:</label>              
+    <label for="travel_output">Travel (d):</label>              
     <input type="text" id="travel_output" readonly style="border:0; color:#f6931f; font-weight:bold;">
     </p>
           <p>
@@ -149,7 +152,23 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
       <input type="text" id="phi_output" readonly style="border:0; color:#f6931f; font-weight:bold;">
     </p>
     </section>
-    
+        </td>
+        <td>
+    <section>
+ The nodes of the segmented helix are, for integers <i>n</i>:
+      <div lang="latex">
+y = r \cos{(n \theta)}
+</div>
+      <div lang="latex">
+x = r \cos{(n \theta)}
+</div>
+      <div lang="latex">
+z = n \cdot d
+</div>
+    </section>
+        </td>
+        </tr>
+</table>    
     
     <section id="textsection">
         <h1 id="message_banner">Basic Usage -- Test Discrete Helix Math</h1>
