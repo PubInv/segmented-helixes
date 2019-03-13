@@ -35,11 +35,6 @@ if (!Detector.webgl) {
 
 // Here I attempt to create an abstract prism object.
 
-function AbstractPrism(L,Nb,Nc) {
-    this.L = L;
-    this.Nb = Nb.clone().normalize();
-    this.Nc = Nc.clone().normalize();
-}
 
 const PRISM_FACE_RATIO_LENGTH = 1/2;
 
@@ -782,17 +777,21 @@ function onComputeDelix() {
         Nb.normalize();
         Nc.normalize();
         
-        let tau_v = TAU_d * Math.PI / 180;
+    let tau_v = TAU_d * Math.PI / 180;
+    console.log(tau_v);
         let Arot = AfromLtauNbNc(L0,tau_v,Nb,Nc);
-        let A = Arot[0];
+    let A = Arot[0];
+    console.log(A);    
         // I am not sure whey this is negated...
-        var rotation = -Arot[1];
+    var rotation = -Arot[1];
+    console.log("ROTATION",rotation);        
 
         var rt = new THREE.Matrix4();
         rt.makeRotationAxis(new THREE.Vector3(0,0,-1),rotation);
         
         let D = new THREE.Vector3(A.x,A.y,-A.z);        
-        res = KahnAxis(L0,D);
+    res = KahnAxis(L0,D);
+    console.log("RESULT",res);
 
         
         GLOBAL_P0 = new AbstractPrism(
@@ -961,7 +960,8 @@ var TAU = 0;
 $(function() {
     $( "#tau_slider" ).slider({
 	range: "max",
-	min: -180,
+        // We disallow -180 because it is the same as 180
+	min: -179,
 	max: 180,
 	value: TAU_d,
 	step: 0.01,	

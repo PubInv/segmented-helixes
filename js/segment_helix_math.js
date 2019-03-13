@@ -24,6 +24,12 @@ function ThetaFromRC(r,c) {
     return Math.abs(2 * Math.asin(c/(2*r)));
 }
 
+function AbstractPrism(L,Nb,Nc) {
+    this.L = L;
+    this.Nb = Nb.clone().normalize();
+    this.Nc = Nc.clone().normalize();
+}
+
 // return r,theta,d,c,phi    
 function UnifiedComp(L,rho,omega) {
     const B = new THREE.Vector3(0,0,-L/2);
@@ -58,9 +64,17 @@ function UnifiedComp(L,rho,omega) {
 function ChordFromLDaxis(L,Da) {
         return Math.sqrt((L**2) - (Da**2));
 }
+// Note this has a "special" case...
 function RotationFromRadiusChord(R,C) {
-    return 2 * Math.asin(C / (2 * R));
+    let v = C / (2 * R);
+    if (v == 1) {
+        return Math.PI;
+    } else {
+        return 2 * Math.asin(C / (2 * R));
+    }
 }
+
+// D is a the point, L is the 
 function KahnAxis(L,D) {
     let x = D.x;
     let y = D.y;
@@ -79,11 +93,31 @@ function KahnAxis(L,D) {
     Bb.multiplyScalar(1/2);
     Bb.sub(B);
 
+    // If Bb and Cb have zero length, the cross product
+    // is undefined, and the axis of the helix may be
+    // taken to be anywhere (is not uniquely defined.)
+    // Conjecture--the lengths are always the same?
+    console.assert(near(Bb.length(),Cb.length(),1e-3));
+    // Now if these are zero what do we do?
+    if (Bb.length() == 0) {
+        console.log("STRAIGHT LINE!");
+        // We will take H to be the vector point from B to C,
+        // use a zero radius.
+        let H = new THREE.Vector3(0,0,L);
+        let da = L;
+        let r = 0;
+        let c = 0;
+        // I need to define this more clearly....
+        let phi = Math.PI;
+        let theta = 0;
+        return [r,theta,da,c,phi,H];        
+    } else {
     let H = new THREE.Vector3(0,0,0);
     H.crossVectors(Bb,Cb);
     H.normalize();
     let CmB = C.clone();
     CmB.sub(B);
+    console.log("CmB,H :",CmB,H);
     let da = CmB.dot(H);
     let phi = Math.acos(da/L);
     let Bax = Math.sin(phi) * da /2;
@@ -109,7 +143,8 @@ function KahnAxis(L,D) {
     let r = Ba_m_B.length();
     let c = ChordFromLDaxis(L,da);
     let theta = RotationFromRadiusChord(r,c);
-    return [r,theta,da,c,phi,H];
+        return [r,theta,da,c,phi,H];
+    }
 }
 
 // Add the novel prism to the old prism by placing the B face
@@ -508,6 +543,9 @@ function AfromLtauNbNc(L,tau,NBu,NCu) {
     // Why do some values clearly get far out of whack?
 
     var abs0 = new AbstractPrism(L,NBu,NCu);
+    if (!abs0) {
+        debugger;
+    }
     var p_i = CreatePrism(abs0,PRISM_FACE_RATIO_LENGTH);
 
     var rt = new THREE.Matrix4();
@@ -519,23 +557,26 @@ function AfromLtauNbNc(L,tau,NBu,NCu) {
     
     var p_b = adjoinPrism(p_i,tau,false);
     var p_c = adjoinPrism(p_i,tau,true);
-    // The x values of these two should be the oppoosite
 
-//    console.assert(near(p_b.b.x,-p_c.c.x,1e-4));
-    //    console.assert(near(p_b.b.y,p_c.c.y,1e-4));
-
-    
     let fb = new THREE.Vector2(p_b.b.x,p_b.b.y);
     let fc = new THREE.Vector2(p_c.c.x,p_c.c.y);
 
     function compute_angle_midpoint(fb,fc) {
-    // Note: Possibly this use of "angle" is unreliable....
-    // Note: When fc crosses from 360, this fails...
-    // FAIL!!!! This is where it fails!!!
         let fbc = new THREE.Vector2().addVectors(fb,fc);
-        // This is likely the problem....
-        //        let psi = -((fb.angle()+fc.angle())/2 - ( 3 * Math.PI / 2));
-        // Why is this negated? Why am I subtracting 3 PI / 2?
+        // if fbc is zero, that means the vectors perfectly
+        // oppose each other. We should produce a psi to
+        // rotate so that b is in the X - Z plane
+
+        if (near(fbc.length(),0,1e-3)) { // The angles are in opposition
+            let fba = fb.angle();
+            let fca = fc.angle();
+            console.log(fba * 180 / Math.PI);
+            console.log(fca * 180 / Math.PI);                        
+            let psi = -( (fba > fca) ? fba - Math.PI : fca - Math.PI );
+            console.log(psi * 180 / Math.PI);
+            return psi;
+        }
+        // The ".angle()" function in THREE measures against the X-axis
         // I assume this is "reverse on the clock" operation!
         let psi = -(fbc.angle() - ( 3 * Math.PI / 2));
         return psi;
@@ -654,7 +695,8 @@ function testAfromLtauNbNn(tau) {
 function testAfromLtauNbNnContinuityOfTau() {
     var a = testAfromLtauNbNn(134 * Math.PI / 180);
     var b = testAfromLtauNbNn(135 * Math.PI / 180);
-    console.log("=== A, B",a,b);
+    console.assert(near(a[0].x,b[0].x,0.2));
+    console.assert(near(a[0].y,b[0].y,0.2));    
 }
 
 function testAfromLtauNbNnKeepsYPure() {
@@ -811,7 +853,31 @@ function testKahnAxisYTorus()
     let da = res[2];
     let c = res[3];
     let phi = res[4];
-    console.assert((theta * 180/ Math.PI) != 180);    
+    console.assert((theta * 180/ Math.PI) != 180);
+    console.assert(near(da,0,0.01));            
+}
+// That that tau = 180 is not degenerate..
+function testKahnAxisTau180()
+{
+    let L0 = 2;
+    //    let angle = Math.PI/7;
+    let angle = 0;
+    let NB1 = new THREE.Vector3(0,-Math.sin(angle),-Math.cos(angle));
+    // We add in a little here so we are not a torus
+    let NC1 = new THREE.Vector3(0,-Math.sin(angle),Math.cos(angle));
+    let tau = Math.PI;    
+    let A = AfromLtauNbNc(L0,tau,NB1,NC1)[0];
+    let B = new THREE.Vector3(0,0,-L0/2);
+    let D = new THREE.Vector3(-A.x,A.y,-A.z);
+    let res = KahnAxis(L0,D);
+    let r = res[0];
+    let theta = res[1];
+    let da = res[2];
+    let c = res[3];
+    let phi = res[4];
+    console.assert((theta * 180/ Math.PI) != 180);
+    console.assert(!near(da,0,0.1));
+    console.assert(!isNaN(theta));
 }
 
 
@@ -822,8 +888,10 @@ function runUnitTests() {
     testComputeBalancingRotation2();
     testComputeBalancingRotation3();    
     testAfromLtauNbNnKeepsYPure();
+    testAfromLtauNbNnContinuityOfTau();    
     testRegularTetsKahnAxis();
     testKahnAxisYTorus();
+    testKahnAxisTau180();
     testAfromLfailureCase1();
     testAfromLtauMultiple();
 }
