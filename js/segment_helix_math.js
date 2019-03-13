@@ -67,9 +67,13 @@ function ChordFromLDaxis(L,Da) {
 // Note this has a "special" case...
 function RotationFromRadiusChord(R,C) {
     let v = C / (2 * R);
-    if (v == 1) {
+    if (near(v,1,1e-4)) {
         return Math.PI;
     } else {
+        let theta = 2 * Math.asin(C / (2 * R));
+        if (isNaN(theta)) {
+            debugger;
+        }
         return 2 * Math.asin(C / (2 * R));
     }
 }
@@ -80,6 +84,7 @@ function KahnAxis(L,D) {
     let y = D.y;
     let z = D.z;
     let A = new THREE.Vector3(-x,y,-z);
+    
     let B = new THREE.Vector3(0,0,-L/2);
     let C = new THREE.Vector3(0,0,L/2);
     
@@ -93,12 +98,13 @@ function KahnAxis(L,D) {
     Bb.multiplyScalar(1/2);
     Bb.sub(B);
 
+  
     // If Bb and Cb have zero length, the cross product
     // is undefined, and the axis of the helix may be
     // taken to be anywhere (is not uniquely defined.)
     // Conjecture--the lengths are always the same?
-    console.assert(near(Bb.length(),Cb.length(),1e-3));
     // Now if these are zero what do we do?
+    console.log("Bb length!",Bb.length());
     if (Bb.length() == 0) {
         console.log("STRAIGHT LINE!");
         // We will take H to be the vector point from B to C,
@@ -112,38 +118,58 @@ function KahnAxis(L,D) {
         let theta = 0;
         return [r,theta,da,c,phi,H];        
     } else {
-    let H = new THREE.Vector3(0,0,0);
-    H.crossVectors(Bb,Cb);
-    H.normalize();
-    let CmB = C.clone();
-    CmB.sub(B);
-    console.log("CmB,H :",CmB,H);
-    let da = CmB.dot(H);
-    let phi = Math.acos(da/L);
-    let Bax = Math.sin(phi) * da /2;
-    // This be undefinied if phi = PI/2.
-    // if phi = PI/2, then B on the axis is
-    // the intersection of the Bb and Cb,
-    // which will also have x and z = 0.
-    var Ba;
-    if (near(phi,Math.PI/2,1e-4)) {
-        console.log("XXXX",phi);
-        let psi = Math.atan2(Bb.y,Bb.z);
-        Ba = new THREE.Vector3(0,
-                               Math.tan(psi)* L/2,
-                               0);
-        
-    } else {
-        Ba = new THREE.Vector3(Bax,
-                               Bb.y * ( Bax / Bb.x),
-                               -Math.cos(phi) * da /2);
-    }
-    var Ba_m_B = Ba.clone();
-    Ba_m_B.sub(B);
-    let r = Ba_m_B.length();
-    let c = ChordFromLDaxis(L,da);
-    let theta = RotationFromRadiusChord(r,c);
-        return [r,theta,da,c,phi,H];
+        let CmB = C.clone();
+        CmB.sub(B);
+
+        if (near(y,0,1e-4)) { // This is the Zig-Zag case
+            let CmA = C.clone();
+            CmA.sub(A);
+            
+            let H = new THREE.Vector3(CmA.x,0,CmA.z);
+            H.normalize();
+            H.multiplyScalar(-1);
+            H.setY(0);
+            // I think I need to understand why this is negative
+            let da = CmB.dot(H);
+            let r = Bb.length() / 2;
+            let c = 2*r;
+            let phi = Math.acos(da/L);
+            let theta = Math.PI;
+            console.log("H",H);
+            return [r,theta,da,c,phi,H];               
+        } else {
+            
+            let H = new THREE.Vector3(0,0,0);
+            H.crossVectors(Bb,Cb);
+            H.normalize();
+            let da = CmB.dot(H);
+            let phi = Math.acos(da/L);
+            let Bax = Math.sin(phi) * da /2;
+            
+            // This be undefinied if phi = PI/2.
+            // if phi = PI/2, then B on the axis is
+            // the intersection of the Bb and Cb,
+            // which will also have x and z = 0.
+            var Ba;
+            if (near(phi,Math.PI/2,1e-4)) {
+                let psi = Math.atan2(Bb.y,Bb.z);
+                Ba = new THREE.Vector3(0,
+                                       Math.tan(psi)* L/2,
+                                       0);
+            } else {
+                Ba = new THREE.Vector3(Bax,
+                                       Bb.y * ( Bax / Bb.x),
+                                       -Math.cos(phi) * da /2);
+            }
+            var Ba_m_B = Ba.clone();
+            Ba_m_B.sub(B);
+            let r = Ba_m_B.length();
+            let c = ChordFromLDaxis(L,da);
+            let theta = RotationFromRadiusChord(r,c);
+            console.assert(!isNaN(theta));
+            console.log("Hn",H);            
+            return [r,theta,da,c,phi,H];
+        }
     }
 }
 
@@ -373,10 +399,8 @@ function CreatePrism(absp,PRISM_FACE_RATIO_LENGTH) {
 
 function condition_angle(angle) {
     if (angle < (-2 * Math.PI)) {
-        console.log("CONDITIONED ANGLE");
         return condition_angle(angle + (2 * Math.PI));
     } else if (angle > (2 * Math.PI)) {
-        console.log("CONDITIONED ANGLE");        
         return condition_angle(angle - (2 * Math.PI));
     } else {
         return angle;
@@ -441,7 +465,6 @@ function ComputeBalancingRotation(Nb,Nc) {
     rt.makeRotationAxis(new THREE.Vector3(0,0,1),theta);
     b.applyMatrix4(rt);
     c.applyMatrix4(rt);
-    console.log("BALANCE",theta);
     return [theta,b,c];
 }
 
@@ -570,10 +593,13 @@ function AfromLtauNbNc(L,tau,NBu,NCu) {
         if (near(fbc.length(),0,1e-3)) { // The angles are in opposition
             let fba = fb.angle();
             let fca = fc.angle();
-            console.log(fba * 180 / Math.PI);
-            console.log(fca * 180 / Math.PI);                        
+//            console.log("FBA", fba * 180 / Math.PI);
+//            console.log("FCA",fca * 180 / Math.PI);                        
             let psi = -( (fba > fca) ? fba - Math.PI : fca - Math.PI );
             console.log(psi * 180 / Math.PI);
+            if (tau == -Math.PI) {
+                return psi+Math.PI;
+            }
             return psi;
         }
         // The ".angle()" function in THREE measures against the X-axis
@@ -585,7 +611,7 @@ function AfromLtauNbNc(L,tau,NBu,NCu) {
     // This is likely the problem....
     let psi = compute_angle_midpoint(fb,fc);
 
-    console.log("PSI = ",psi * 180 / Math.PI);
+//    console.log("PSI = ",psi * 180 / Math.PI);
 
     // The fact that psi is not Beta somehow means my balancing computation
     // above is not correct (by definition.)
@@ -875,7 +901,7 @@ function testKahnAxisTau180()
     let da = res[2];
     let c = res[3];
     let phi = res[4];
-    console.assert((theta * 180/ Math.PI) != 180);
+//    console.assert((theta * 180/ Math.PI) != 180);
     console.assert(!near(da,0,0.1));
     console.assert(!isNaN(theta));
 }
