@@ -254,8 +254,6 @@ function adjoinPrism(old,tau,joinToC) {
     }
 
     // So that the normal of the C face is the opposite of the B face.
-
-
     return nu;
 }
 

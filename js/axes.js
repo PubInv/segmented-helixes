@@ -1,7 +1,23 @@
+// Copyright (C) 2019 by
+//   Robert L. Read <read.robert@gmail.com>
+
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+
+// You should have received a copy of the GNU General Public License
+// along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
 //----------------------------------------------------------------------------
 // opts
 // {
-//  height: width, 
+//  height: width,
 //  width: depth,
 //  linesHeight: b,
 //  linesWidth: c,
@@ -34,14 +50,15 @@ function createAGrid(opts) {
       gridGeo.vertices.push(new THREE.Vector3(-config.height, i, 0));
       gridGeo.vertices.push(new THREE.Vector3(config.height, i, 0));
     }
-    
+
     //height
     for (var i = -config.height; i <= config.height; i += steph) {
       gridGeo.vertices.push(new THREE.Vector3(i, -config.width, 0));
       gridGeo.vertices.push(new THREE.Vector3(i, config.width, 0));
     }
-    
-  var line = new THREE.Line(gridGeo, material, THREE.LinePieces);
+
+  //  var line = new THREE.Line(gridGeo, material, THREE.LinePieces);
+  var line = new THREE.Line(gridGeo, material, THREE.LineSegments);
   gridObject.add(line);
 
   return gridObject;
@@ -71,44 +88,48 @@ function createZeroedGrid(opts) {
     var halfheight = config.cellheight*config.numCellsPosHeight;
     var halfwidth = config.cellwidth*config.numCellsPosWidth;
     for (var i = -config.numCellsPosWidth; i <= config.numCellsPosWidth; i += stepw) {
-      gridGeo.vertices.push(new THREE.Vector3(-halfheight, i*config.cellwidth, 0));
+        gridGeo = new THREE.Geometry(),
+        gridGeo.vertices.push(new THREE.Vector3(-halfheight, i*config.cellwidth, 0));
 	gridGeo.vertices.push(new THREE.Vector3(halfheight, i*config.cellwidth, 0));
+        var line = new THREE.Line(gridGeo, material, THREE.LineSegments);
+        gridObject.add(line);
     }
-    
+
     //height
     for (var i = -config.numCellsPosHeight; i <= config.numCellsPosHeight; i += steph) {
-      gridGeo.vertices.push(new THREE.Vector3(i*config.cellheight, -halfwidth, 0));
+        gridGeo = new THREE.Geometry(),
+        gridGeo.vertices.push(new THREE.Vector3(i*config.cellheight, -halfwidth, 0));
 	gridGeo.vertices.push(new THREE.Vector3(i*config.cellheight, halfwidth, 0));
+        var line = new THREE.Line(gridGeo, material, THREE.LineSegments);
+        gridObject.add(line);
     }
-    
-  var line = new THREE.Line(gridGeo, material, THREE.LinePieces);
-  gridObject.add(line);
+
 
   return gridObject;
 }
 
 function labelAxis(width, data, direction){
-    var w = width;
+  var w = width;
 
-  var separator = 2*width/data.length,
-			p = {
-				x:-w,
-				y:-w,
-				z:-w
-			},
-			dobj = new THREE.Object3D();
+  var separator = 2*width/data.length;
+  var p = {
+    x:-w,
+    y:-w,
+    z:-w
+  };
+  var dobj = new THREE.Object3D();
 
   for ( var i = 0; i < data.length; i ++ ) {
-      var label = makeTextSprite(data[i],{fontsize: 50 });
+    var label = makeTextSprite(data[i],{fontsize: 50 });
 
-		label.position.set(p.x+w,p.y+w,p.z+w);
+    label.position.set(-(p.x+w),p.y+w,-(p.z+w));
 
-		dobj.add( label );
-		if (direction=="y"){
-			p[direction]+=separator;
-		}else{
-			p[direction]-=separator;
-		}
+    dobj.add( label );
+    if (direction=="y"){
+      p[direction]+=separator;
+    }else{
+      p[direction]-=separator;
+    }
 
   }
   return dobj;
@@ -166,7 +187,7 @@ function getBalancedMeterScale(sep,meters,offset) {
 function getPositiveMeterScale(sep,meters) {
     return getMeterScale(sep,meters,0);
 }
-    
+
 
 function gridInit(glScene,gDimensions){
 
@@ -237,20 +258,20 @@ function gridInit(glScene,gDimensions){
         newGridXZ.position.y = height;
 			//newGridXZ.position.y = height;
     newGridXZ.rotation.y = Math.PI/2;
-    
+
 			boundingGrid.add(newGridXZ);
 
     glScene.add(boundingGrid);
 
     var margin = -0.5;
 	var labelsW = labelAxis(width, data.labels.x,"x");
-			labelsW.position.x = width;
+			labelsW.position.x = 1+-width;
 			labelsW.position.y = 0;
     			labelsW.position.z = -depth;
 			glScene.add(labelsW);
 
 	var labelsH = labelAxis(height, data.labels.y,"y");
-			labelsH.position.x = width;
+			labelsH.position.x = -width;
                         labelsH.position.y = -0.5/2;
 			labelsH.position.z = -depth;
 			glScene.add(labelsH);
@@ -258,7 +279,6 @@ function gridInit(glScene,gDimensions){
 	var labelsD = labelAxis(depth, data.labels.z, "z");
                         labelsD.position.x = width;
                         labelsD.position.y = 0;
-			labelsD.position.z = 0.0 + depth;
+                        labelsD.position.z = 1+-(0.0 + depth);
 			glScene.add(labelsD);
 };
-
