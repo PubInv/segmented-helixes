@@ -2,7 +2,7 @@
 Copyright (C) 2018 by
   Robert L. Read <read.robert@gmail.com>
   David Jeschke <djeschke@gmail.com>
-    
+
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
 the Free Software Foundation, either version 3 of the License, or
@@ -32,14 +32,14 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
     <link rel="stylesheet" href="./css/main.css">
     <link rel="icon" href="./images/favicon.ico">
     <script type="text/javascript" src="http://latex.codecogs.com/latexit.js"></script>
-    
+
     <script src="https://code.jquery.com/jquery-1.12.4.js"></script>
 
     <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
     <script src="./js/scijs-newton-raphson.js"></script>
     <script src="./js/tm_bundle.js"></script>
     <script src="./js/axes.js"></script>
-    <script src="./js/three.js"></script>
+    <script src="./js/three.min.js"></script>
     <script src="./js/THREE.MeshLine.js"></script>
     <script src="./js/OrbitControls.js"></script>
     <script src="./js/Detector.js"></script>
@@ -73,37 +73,37 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 <table style="width:100%">
   <tr>
     <th width='10%'>Coord</th>
-    <th width='10%'>Value</th> 
+    <th width='10%'>Value</th>
     <th width='60%'>Slider</th>
-    <th width='20%'>Text Input</th>    
+    <th width='20%'>Text Input</th>
   </tr>
 
   <tr>
     <td><label for="tau_d">Tau</label></td>
     <td> <input type="text" id="tau_d" readonly style="border:0; color:#f6931f; font-weight:bold;">
-</td> 
+</td>
     <td> <div id="tau_slider"></div> </td>
     <td>  &nbsp;  &nbsp; <label>Tau (Twist) <input id="tau_txt" />  </label> </td>
   </tr>
-  
+
   <tr>
     <td><label for="normal_b_x">B x</label></td>
     <td> <input type="text" id="normal_b_x" readonly style="border:0; color:#f6931f; font-weight:bold;">
-</td> 
+</td>
     <td> <div id="normal_b_x_slider"></div> </td>
     <td>  &nbsp;  &nbsp; <label>B.x <input id="b_x" />  </label> </td>
   </tr>
   <tr>
     <td><label for="normal_b_y">B y</label></td>
     <td> <input type="text" id="normal_b_y" readonly style="border:0; color:#f6931f; font-weight:bold;">
-</td> 
+</td>
     <td> <div id="normal_b_y_slider"></div> </td>
     <td>  &nbsp;  &nbsp; <label>B.y <input id="b_y" />  </label> </td>
   </tr>
   <tr>
     <td><label for="normal_b_z">B z</label></td>
     <td> <input type="text" id="normal_b_z" readonly style="border:0; color:#f6931f; font-weight:bold;">
-</td> 
+</td>
     <td> <div id="normal_b_z_slider"></div> </td>
     <td>  &nbsp;  &nbsp; <label>B.z <input id="b_z" />  </label> </td>
   </tr>
@@ -111,21 +111,21 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
   <tr>
     <td><label for="normal_c_x">C x</label></td>
     <td> <input type="text" id="normal_c_x" readonly style="border:0; color:#f6931f; font-weight:bold;">
-</td> 
+</td>
     <td> <div id="normal_c_x_slider"></div> </td>
     <td>  &nbsp;  &nbsp; <label>C.x <input id="c_x" />  </label> </td>
   </tr>
   <tr>
     <td><label for="normal_c_y">C y</label></td>
     <td> <input type="text" id="normal_c_y" readonly style="border:0; color:#f6931f; font-weight:bold;">
-</td> 
+</td>
     <td> <div id="normal_c_y_slider"></div> </td>
     <td>  &nbsp;  &nbsp; <label>C.y <input id="c_y" />  </label> </td>
   </tr>
   <tr>
     <td><label for="normal_c_z">C z</label></td>
     <td> <input type="text" id="normal_c_z" readonly style="border:0; color:#f6931f; font-weight:bold;">
-</td> 
+</td>
     <td> <div id="normal_c_z_slider"></div> </td>
     <td>  &nbsp;  &nbsp; <label>C.z <input id="c_z" />  </label> </td>
   </tr>
@@ -136,19 +136,19 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
       <tr><td>
     <section>
       <p>
-    <label for="radius_output">Radius (r):</label>      
+    <label for="radius_output">Radius (r):</label>
     <input type="text" id="radius_output" readonly style="border:0; color:#f6931f; font-weight:bold;">
     </p>
           <p>
-    <label for="theta_output">Theta (<span lang='latex'>\theta</span>):</label>          
+    <label for="theta_output">Theta (<span lang='latex'>\theta</span>):</label>
     <input type="text" id="theta_output" readonly style="border:0; color:#f6931f; font-weight:bold;">
     </p>
           <p>
-    <label for="travel_output">Travel (d):</label>              
+    <label for="travel_output">Travel (d):</label>
     <input type="text" id="travel_output" readonly style="border:0; color:#f6931f; font-weight:bold;">
     </p>
           <p>
-    <label for="phi_output">Phi:</label>                  
+    <label for="phi_output">Phi:</label>
       <input type="text" id="phi_output" readonly style="border:0; color:#f6931f; font-weight:bold;">
     </p>
     </section>
@@ -168,8 +168,8 @@ z = n \cdot d
     </section>
         </td>
         </tr>
-</table>    
-    
+</table>
+
     <section id="textsection">
         <h1 id="message_banner">Basic Usage -- Test Discrete Helix Math</h1>
         <h2> This is an interactive 3D simulation. To change the view, place your mouse in the view area, and
@@ -203,7 +203,7 @@ z = n \cdot d
         <p>
           Although a work-in-progress, at this repo you will find a <a href="https://github.com/PubInv/segmented-helixes/blob/master/doc/StackingHelix.pdf">technical paper</a> describing the math in greater detail, and giving the Mathematica code that implements it. (The same math is implemented in JavaScript on this page.)
           </p>
-        
+
         <p> I have developed an algorithm---it is actually a closed-form expression, but too complex to be treated as such---which computes the intrinsic properties of the discrete helix from the intrinsic properties of a stacked object. This is closely related to an algorithm <a href="https://www.researchgate.net/profile/Peter_Kahn/publication/220667044_Defining_the_axis_of_a_helix/links/5b86ab1e299bf1d5a730ff2e/Defining-the-axis-of-a-helix.pdf">published</a> by Peter Kahn in 1989.
         </p>
         <p> I have extended Kahn's work by developing the math to apply his algorithm from the face-normals. The insight to do this is that the object can always be positioned in space so that the joints on either side are symmetrically arranged about an axis. </p>
@@ -229,15 +229,15 @@ z = n \cdot d
           which is a tremendous advantage.
           </p>
 
-        
+
 
         <h2>Licensing</h2>
-        
+
         <p>All of the code on this site is released under the GNU General Public License, and I hope you will
           reuse it. </p>
         <p>This project is part of Public Invention. To assist on this project, contact Robert L. Read &lt; read.robert@gmail.com &gt;</p>
     </section>
-    <script src="./js/segment_helix_math.js"></script>    
+    <script src="./js/segment_helix_math.js"></script>
     <script src="./js/main.js"></script>
-    
+
 </body>

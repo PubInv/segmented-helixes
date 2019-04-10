@@ -815,9 +815,67 @@ var LABEL_SPRITES = [
     am.scene.add(mesh);
   }
 
-function createProtractor(obj,prefix,A,B,C) {
+// Create an arc centered on B, touch A and C.
+// At the moment, I will insist that BA = BC.
+function createArc(color,A,B,C) {
+  const radius = B.distanceTo(A);
+  const BA = A.clone().sub(B);
+  const BC = C.clone().sub(B);
+  const M = vMidPoint(A,C);
+  const BM = M.clone().sub(B);
 
-  console.log("A,B,C",A,B,C);
+  const angle = BA.angleTo(BC);
+
+  const normal = BA.cross(BC);
+  normal.normalize();
+
+  let q = new THREE.Quaternion();
+  const z = new THREE.Vector3(0,0,1);
+  z.normalize();
+
+  const Mc = BM.clone();
+  const Z = new THREE.Vector3(0,0,1);
+  const X = new THREE.Vector3(1,0,0);
+  let qz = new THREE.Quaternion();
+  qz.setFromUnitVectors(normal,Z);
+  Mc.applyQuaternion(qz);
+  const rotAboutNorm = Mc.angleTo(X);
+  console.log("rotAboutNorm",rotAboutNorm);
+
+  q.setFromUnitVectors(z,normal);
+
+  var curve = new THREE.EllipseCurve(
+    0,  0,            // ax, aY
+    radius, radius,           // xRadius, yRadius
+    rotAboutNorm-angle/2,  rotAboutNorm + angle/2,  // aStartAngle, aEndAngle
+    false,            // aClockwise
+    0                 // aRotation
+  );
+
+  var points = curve.getPoints( 50 );
+  var geometry = new THREE.BufferGeometry().setFromPoints( points );
+
+  var material = new THREE.LineBasicMaterial( { color : color } );
+
+  // Create the final object to add to the scene
+  var ellipse = new THREE.Line( geometry, material );
+
+  console.log("Q",q);
+  ellipse.quaternion = q.clone();
+
+  ellipse.quaternion.setFromUnitVectors(z,normal);
+
+  console.log("Q",ellipse.quaternion);
+  ellipse.type = "PROTRACTOR_LINE";
+  ellipse.position.copy(B);
+
+  am.scene.add(ellipse);
+}
+function vMidPoint(A,B) {
+    return new THREE.Vector3((A.x + B.x)/2,(A.y + B.y)/2,(A.z + B.z)/2);
+}
+function createProtractor(obj,prefix,color,A,B,C) {
+
   const size = am.JOINT_RADIUS/5;
 
   function cSphere(size,p,color) {
@@ -829,15 +887,12 @@ function createProtractor(obj,prefix,A,B,C) {
     am.scene.add(mesh);
   }
 
-  cSphere(size,A,"red");
-  cSphere(size,B,"blue");
-  cSphere(size,C,"green");
-  lineBetwixt(B,A,"blue");
-  lineBetwixt(B,C,"green");
+  cSphere(size,A,color);
+  cSphere(size,B,color);
+  cSphere(size,C,color);
+  lineBetwixt(B,A,color);
+  lineBetwixt(B,C,color);
 
-  function vMidPoint(A,B) {
-    return new THREE.Vector3((A.x + B.x)/2,(A.y + B.y)/2,(A.z + B.z)/2);
-  }
 
   // now compute intermediate points....
   // how should this work if one is very small?
@@ -852,19 +907,22 @@ function createProtractor(obj,prefix,A,B,C) {
   // to create new points...
   BtoA.clampLength(lengthToDraw,lengthToDraw);
   BtoC.clampLength(lengthToDraw,lengthToDraw);
-  const Bp = B.clone().add(BtoA);
+  const Ap = B.clone().add(BtoA);
   const Cp = B.clone().add(BtoC);
-  cSphere(size/2.0,Bp,"blue");
-  cSphere(size/2.0,Cp,"white");
-  lineBetwixt(Bp,Cp,"white");
-  const PpCp_mid = vMidPoint(Bp,Cp);
+  cSphere(size/2.0,Ap,color);
+  cSphere(size/2.0,Cp,color);
+  lineBetwixt(Ap,Cp,color);
 
-  cSphere(size/2.0,PpCp_mid,"red");
+  createArc(color,Ap,B,Cp);
+
+  const PpCp_mid = vMidPoint(Ap,Cp);
+
+//  cSphere(size/2.0,PpCp_mid,"red");
 
   obj.p = PpCp_mid.clone();
   const angle_rads = BtoA.angleTo(BtoC);
   obj.t = prefix + format_num((angle_rads * 180 / Math.PI),1) + " deg";
-  obj.c = "red";
+  obj.c = color;
 }
 
 
@@ -1054,7 +1112,7 @@ function onComputeDelix() {
   // here I attempt to create the visually important
   // theta protractor
   {
-    createProtractor(THETA_SPRITE,"theta = ",B,Ba,Cpara);
+    createProtractor(THETA_SPRITE,"theta = ","red",B,Ba,Cpara);
   }
 
 
@@ -1064,7 +1122,7 @@ function onComputeDelix() {
     let X = new THREE.Vector3(0,0,1);
     let Hyplane = new THREE.Vector3(H.x,0,H.z);
     Hyplane.clampLength(1,1);
-    createProtractor(PHI_SPRITE,"phi = ",X,O,Hyplane);
+    createProtractor(PHI_SPRITE,"phi = ","purple",X,O,Hyplane);
   }
 
   // here I attempt to create the visually important
@@ -1077,7 +1135,7 @@ function onComputeDelix() {
     let Aface = prisms[0][3].position;
     let Cface = prisms[1][0][0].position;
     console.log(prisms[0],prisms[1][0]);
-    createProtractor(TAU_SPRITE,"tau = ",Aface,B,Cface);
+    createProtractor(TAU_SPRITE,"tau = ","yellow",Aface,B,Cface);
   }
 
   renderSprites();
@@ -1325,4 +1383,8 @@ $( document ).ready(function() {
   $(function () { main(); });
 
   onComputeDelix();
+  const A = new THREE.Vector3(0,5,6);
+  const B = new THREE.Vector3(0,0,0);
+  const C = new THREE.Vector3(0,6,5);
+  createArc("red",A,B,C);
 });
