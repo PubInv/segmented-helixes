@@ -685,6 +685,10 @@ function clearAm() {
     if ((obj.name == "HELIX") || (obj.name == "AXIS")) {
       am.scene.remove(obj);
     }
+    if ((obj.type == "PROTRACTOR_LINE") || (obj.type == "PROTRACTOR_SPHERE")) {
+      am.scene.remove(obj);
+    }
+
   }
   am.helices = [];
   am.helix_params = [];
@@ -754,6 +758,7 @@ function format_num(num,digits) {
   return parseFloat(Math.round(num * 10**digits) / 10**digits).toFixed(digits);
 }
 
+
 var PHI_SPRITE;
 // I'm treating a label spreat as an object having postion p,
 // color c, and text t.
@@ -769,24 +774,83 @@ var C_SPRITE = { p: new THREE.Vector3(0,0,0),
 var D_SPRITE = { p: new THREE.Vector3(0,0,0),
                  c: "green",
                  t: "D"};
+var testSPRITE = { p: new THREE.Vector3(0,0,0),
+                 c: "green",
+                 t: "D"};
 var LABEL_SPRITES = [
-  // { p: new THREE.Vector3(0,0,0),
-  //                       c: "white",
-  //                       t: "Origin" },
-  //                     { p: new THREE.Vector3(1,0,0),
-  //                       c: "red",
-  //                       t: "X+" },
-  //                     { p: new THREE.Vector3(0,1,0),
-  //                       c: "green",
-  //                       t: "Y+" },
-  //                     { p: new THREE.Vector3(0,0,1),
-  //                       c: "blue",
-  //                       t: "Z+" },
   A_SPRITE,
   B_SPRITE,
   C_SPRITE,
-  D_SPRITE
+  D_SPRITE,
+  testSPRITE,
                     ];
+// Create a visual protractor betwen points A, B, C in 3space
+// This should really use an ellipse curver to make a fine
+// protractor. However, I will just use a straightline instead
+// for now.
+// obj is a sprite object to attach the label two
+function createProtractor(obj,prefix,A,B,C) {
+
+  console.log("A,B,C",A,B,C);
+  const size = am.JOINT_RADIUS/5;
+
+  function cSphere(size,p,color) {
+    var mesh = createSphere(size, p, color);
+    mesh.castShadow = false;
+    mesh.receiveShadow = false;
+    mesh.debugObject = true;
+    mesh.type = "PROTRACTOR_SPHERE";
+    am.scene.add(mesh);
+  }
+
+  cSphere(size,A,"red");
+  cSphere(size,B,"blue");
+  cSphere(size,C,"green");
+  function lineBetwixt(A,B,color) {
+    var BApoints = new THREE.Geometry();
+    BApoints.vertices.push(B.clone());
+    BApoints.vertices.push(A.clone());
+    var BAline = new THREE.Line(BApoints, new THREE.LineBasicMaterial({color: color,linewidth: 10}));
+    am.scene.add(BAline);
+    BAline.type = "PROTRACTOR_LINE";
+    return BAline;
+  }
+  lineBetwixt(B,A,"blue");
+  lineBetwixt(B,C,"green");
+
+  function vMidPoint(A,B) {
+    return new THREE.Vector3((A.x + B.x)/2,(A.y + B.y)/2,(A.z + B.z)/2);
+  }
+
+  // now compute intermediate points....
+  // how should this work if one is very small?
+  const BtoA = A.clone().sub(B);
+  const BtoC = C.clone().sub(B);
+  const b_to_a = BtoA.length();
+  const b_to_c = BtoC.length();
+  var minLength = Math.min(b_to_a,b_to_c);
+  var avgMidLength = (b_to_a + b_to_c)/4;
+  var lengthToDraw = Math.min(minLength,avgMidLength);
+  // Now that we have the length, we'll move along our vectors
+  // to create new points...
+  BtoA.clampLength(lengthToDraw,lengthToDraw);
+  BtoC.clampLength(lengthToDraw,lengthToDraw);
+  const Bp = B.clone().add(BtoA);
+  const Cp = B.clone().add(BtoC);
+  cSphere(size/2.0,Bp,"blue");
+  cSphere(size/2.0,Cp,"white");
+  lineBetwixt(Bp,Cp,"white");
+  const PpCp_mid = vMidPoint(Bp,Cp);
+  console.log("Middie",PpCp_mid);
+
+  cSphere(size/2.0,PpCp_mid,"red");
+
+  obj.p = PpCp_mid.clone();
+  const angle_rads = BtoA.angleTo(BtoC);
+  obj.t = prefix + format_num((angle_rads * 180 / Math.PI),1) + " deg";
+  obj.c = "red";
+  console.log("A,B,C",A,B,C);
+}
 
 
 const LABEL_SPRITE_FONT_SIZE = 20;
@@ -897,7 +961,7 @@ function onComputeDelix() {
   create_vertex_mesh(new THREE.Vector3(0,1,0),d3.color("green"));
   create_vertex_mesh(new THREE.Vector3(0,0,1),d3.color("blue"));
 
-  renderSprites();
+
 
   // now we would like to draw the axis of the helix...
   // we have the vector H from the KahnAxis algorithm.
@@ -933,15 +997,15 @@ function onComputeDelix() {
   axis_line.name = "AXIS";
   am.scene.add(axis_line);
 
-  if (PHI_SPRITE) {
-    am.grid_scene.remove(PHI_SPRITE);
+  {
+    let X = new THREE.Vector3(0,0,1);
+    let O = new THREE.Vector3(0,0,0);
+    let Hyplane = new THREE.Vector3(H.x,0,H.z);
+    Hyplane.clampLength(1,1);
+    createProtractor(testSPRITE,"phi = ",X,O,Hyplane);
   }
-  PHI_SPRITE = makeTextSprite("phi="+format_num(phi * 180/Math.PI,2),{fontsize: 20 },"red");
-  PHI_SPRITE.position.set(0,0.05,0);
-  am.grid_scene.add(PHI_SPRITE);
-
+  renderSprites();
 }
-
 
 function addDebugSphere(am,pos,color) {
   if (!color) {
