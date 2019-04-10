@@ -38,6 +38,8 @@ if (!Detector.webgl) {
 
 const PRISM_FACE_RATIO_LENGTH = 1/2;
 
+var PHI_SPRITE;
+
 function renderPrismInstance(p_i) {
   // now that we have the points, we can
   // construct the objects....
@@ -114,15 +116,23 @@ function testCreatePrism() {
   TP.forEach(o => { am.scene.add(o); });
 }
 
-function createAdjoinPrism(p_i,tau,num) {
+// In order to do some labeling, it is valuble to return
+// some of these prisms; I will return a triple:
+// [origin,positives,negatives], which respects the
+// symmetry of how they are created and makes it easy
+// to pick them out.
+function createAdjoinedPrisms(p_i,tau,num) {
   var TP = renderPrismInstance(p_i);
   TP.forEach(o => { am.scene.add(o); });
-
+  var orign = TP;
+  var positives = [];
+  var negatives = [];
   var cur = p_i;
   for(let i = 0; i < num; i++) {
     var p_c = adjoinPrism(cur,tau,true);
     var TP = renderPrismInstance(p_c);
     TP.forEach(o => { am.scene.add(o); });
+    positives.push(TP);
     cur = p_c;
   }
   var cur = p_i;
@@ -130,9 +140,10 @@ function createAdjoinPrism(p_i,tau,num) {
     var p_c = adjoinPrism(cur,tau,false);
     var TP = renderPrismInstance(p_c);
     TP.forEach(o => { am.scene.add(o); });
+    negatives.push(TP);
     cur = p_c;
   }
-
+  return [orign,positives,negatives];
 }
 
 function addShadowedLight(scene, x, y, z, color, intensity) {
@@ -266,6 +277,7 @@ function create_vertex_mesh(pos, c) {
   mesh.castShadow = false;
   mesh.receiveShadow = false;
   am.scene.add(mesh);
+  return mesh;
 }
 
 function cto3(c) {
@@ -583,7 +595,7 @@ var sprite_controls = new function () {
 
     // setting canvas width/height before ctx draw, else canvas is empty
     canvas.width = ctx.measureText(message).width;
-    canvas.height = fontsize * 2; // fontsize * 1.5
+    canvas.height = fontsize * 1; // fontsize * 1.5
 
     // after setting the canvas width/height we have to re-set font to apply!?! looks like ctx reset
     ctx.font = fontsize + "px Arial";
@@ -619,8 +631,9 @@ var sprite_controls = new function () {
 function render() {
   var deltaTime = am.clock.getDelta();
 
-  sprite_controls.clear();
+//  sprite_controls.clear();
   am.controls.update(deltaTime);
+
 
   // note this....
   //    am.renderer.autoClear = true;
@@ -742,9 +755,60 @@ function format_num(num,digits) {
 }
 
 var PHI_SPRITE;
-var X_AXIS_SPRITE;
-var Y_AXIS_SPRITE;
-var Z_AXIS_SPRITE;
+// I'm treating a label spreat as an object having postion p,
+// color c, and text t.
+var A_SPRITE = { p: new THREE.Vector3(0,0,0),
+                 c: "green",
+                 t: "A"};
+var B_SPRITE = { p: new THREE.Vector3(0,0,0),
+                 c: "green",
+                 t: "B"};
+var C_SPRITE = { p: new THREE.Vector3(0,0,0),
+                 c: "green",
+                 t: "C"};
+var D_SPRITE = { p: new THREE.Vector3(0,0,0),
+                 c: "green",
+                 t: "D"};
+var LABEL_SPRITES = [
+  // { p: new THREE.Vector3(0,0,0),
+  //                       c: "white",
+  //                       t: "Origin" },
+  //                     { p: new THREE.Vector3(1,0,0),
+  //                       c: "red",
+  //                       t: "X+" },
+  //                     { p: new THREE.Vector3(0,1,0),
+  //                       c: "green",
+  //                       t: "Y+" },
+  //                     { p: new THREE.Vector3(0,0,1),
+  //                       c: "blue",
+  //                       t: "Z+" },
+  A_SPRITE,
+  B_SPRITE,
+  C_SPRITE,
+  D_SPRITE
+                    ];
+
+
+const LABEL_SPRITE_FONT_SIZE = 20;
+function renderSprite(obj) {
+  const FifteenSpaces = "               ";
+
+  if (obj.s) {
+    am.grid_scene.remove(obj.s);
+  }
+
+  obj.s = makeTextSprite(FifteenSpaces + obj.t,
+                              {fontsize: LABEL_SPRITE_FONT_SIZE},
+                              obj.c );
+
+  obj.s.position.set(obj.p.x,obj.p.y,obj.p.z);
+  am.grid_scene.add(obj.s);
+}
+
+function renderSprites() {
+  LABEL_SPRITES.forEach(s => renderSprite(s));
+}
+
 function onComputeDelix() {
   clearAm();
 
@@ -785,6 +849,8 @@ function onComputeDelix() {
   rt.makeRotationAxis(new THREE.Vector3(0,0,-1),rotation);
 
   let D = new THREE.Vector3(A.x,A.y,-A.z);
+
+
   res = KahnAxis(L0,D);
   console.log("RESULT",res);
 
@@ -798,6 +864,7 @@ function onComputeDelix() {
   // We shall place this upward, for the purpose of
   // making it easier to see...
 
+  console.log("P_I_BEFORE",p_i);
   // Take this out, and input an instance!
   applyMatrix4ToPrism(p_i,rt);
 
@@ -806,14 +873,20 @@ function onComputeDelix() {
   p_i.p.Nb.applyMatrix4(rt);
   p_i.p.Nc.applyMatrix4(rt);
 
-  createAdjoinPrism(p_i,tau_v,NUM_PRISMS);
+  var prisms = createAdjoinedPrisms(p_i,tau_v,NUM_PRISMS);
+
+  B_SPRITE.p = prisms[0][7].position.clone();
+  C_SPRITE.p = prisms[0][6].position.clone();
+
+  A_SPRITE.p = prisms[1][0][7].position.clone();
+  D_SPRITE.p = prisms[2][0][6].position.clone();
+
 
   r = res[0];
   theta = res[1];
   d = res[2];
   phi = res[4];
   set_outputs(r,theta,d,phi);
-
 
   RenderHelix(L0,r,d,theta,new THREE.Vector3(0,0,1),-phi,
               WORLD_HEIGHT,NUM_SEGMENTS);
@@ -823,27 +896,8 @@ function onComputeDelix() {
   create_vertex_mesh(new THREE.Vector3(1,0,0),d3.color("red"));
   create_vertex_mesh(new THREE.Vector3(0,1,0),d3.color("green"));
   create_vertex_mesh(new THREE.Vector3(0,0,1),d3.color("blue"));
-  if (X_AXIS_SPRITE) {
-    am.grid_scene.remove(X_AXIS_SPRITE);
-  }
-  X_AXIS_SPRITE = makeTextSprite("X+",{fontsize: 20 },"red");
-  X_AXIS_SPRITE.position.set(1.0,0,0);
-  am.grid_scene.add(X_AXIS_SPRITE);
 
-  if (Y_AXIS_SPRITE) {
-    am.grid_scene.remove(Y_AXIS_SPRITE);
-  }
-  Y_AXIS_SPRITE = makeTextSprite("Y+",{fontsize: 20 },"green");
-  Y_AXIS_SPRITE.position.set(0,1.0,0);
-  am.grid_scene.add(Y_AXIS_SPRITE);
-
-  if (Z_AXIS_SPRITE) {
-    am.grid_scene.remove(Z_AXIS_SPRITE);
-  }
-  Z_AXIS_SPRITE = makeTextSprite("Z+",{fontsize: 20 },"blue");
-  Z_AXIS_SPRITE.position.set(0,0,1.0);
-  am.grid_scene.add(Z_AXIS_SPRITE);
-
+  renderSprites();
 
   // now we would like to draw the axis of the helix...
   // we have the vector H from the KahnAxis algorithm.
