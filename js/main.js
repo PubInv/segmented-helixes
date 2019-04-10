@@ -780,13 +780,17 @@ var PHI_SPRITE = { p: new THREE.Vector3(0,0,0),
 var TAU_SPRITE = { p: new THREE.Vector3(0,0,0),
                  c: "green",
                  t: "D"};
+var THETA_SPRITE = { p: new THREE.Vector3(0,0,0),
+                 c: "green",
+                 t: "D"};
 var LABEL_SPRITES = [
   A_SPRITE,
   B_SPRITE,
   C_SPRITE,
   D_SPRITE,
   PHI_SPRITE,
-  TAU_SPRITE
+  TAU_SPRITE,
+  THETA_SPRITE
                     ];
 // Create a visual protractor betwen points A, B, C in 3space
 // This should really use an ellipse curver to make a fine
@@ -961,10 +965,9 @@ function onComputeDelix() {
   console.log("B,Ba",B,Ba);
   // We'll put a Ball at Ba ...
   cSphere(am.JOINT_RADIUS/5,Ba,"black");
-  // Since we've set the first prism up symmetrically, Ca
-  // mirrors Ba...
-  var Ca = new THREE.Vector3(-Ba.x,Ba.y,-Ba.z);
-  cSphere(am.JOINT_RADIUS/5,Ca,"black");
+
+
+
 
 
   C = prisms[0][6].position;
@@ -973,6 +976,12 @@ function onComputeDelix() {
 
   A_SPRITE.p = prisms[1][0][7].position.clone();
   D_SPRITE.p = prisms[2][0][6].position.clone();
+
+
+  // Since we've set the first prism up symmetrically, Ca
+  // mirrors Ba...
+  var Ca = new THREE.Vector3(-Ba.x,Ba.y,-Ba.z);
+  cSphere(am.JOINT_RADIUS/5,Ca,"black");
 
 
   r = res[0];
@@ -1001,8 +1010,8 @@ function onComputeDelix() {
   // First, let me just draw one at the origin
   // in the correct direction
   var points3D = new THREE.Geometry();
-  let H = res[5].clone();
 
+  H = res[5];
   // we compute y via Pythagoras from the a line
   // from the y-axis to a joint--- yd is always slightly
   // less than radius because it is the distance to
@@ -1029,6 +1038,26 @@ function onComputeDelix() {
   // Now we will attempt to render the B-BA line...
   lineBetwixt(B,Ba,"yellow");
   lineBetwixt(C,Ca,"yellow");
+
+  // Now, in order to be able todraw the theta
+  // protractor, we will translate Ca to Cpara in the -H
+  // direction to place it in a circle at Ba, then
+  // add a protractor between them.p
+  var Cpara = C.clone();
+  var Hdir = Hn.clone().clampLength(d,d);
+  Cpara.sub(Hdir);
+
+  cSphere(am.JOINT_RADIUS/5,Cpara,"black");
+  // a nice greenline parallel to the helix axis should help..
+
+  lineBetwixt(C,Cpara,"green");
+  // here I attempt to create the visually important
+  // theta protractor
+  {
+    createProtractor(THETA_SPRITE,"theta = ",B,Ba,Cpara);
+  }
+
+
 
   let O = new THREE.Vector3(0,0,0);
   {
