@@ -759,7 +759,7 @@ function format_num(num,digits) {
 }
 
 
-var PHI_SPRITE;
+
 // I'm treating a label spreat as an object having postion p,
 // color c, and text t.
 var A_SPRITE = { p: new THREE.Vector3(0,0,0),
@@ -774,7 +774,10 @@ var C_SPRITE = { p: new THREE.Vector3(0,0,0),
 var D_SPRITE = { p: new THREE.Vector3(0,0,0),
                  c: "green",
                  t: "D"};
-var testSPRITE = { p: new THREE.Vector3(0,0,0),
+var PHI_SPRITE = { p: new THREE.Vector3(0,0,0),
+                 c: "green",
+                 t: "D"};
+var TAU_SPRITE = { p: new THREE.Vector3(0,0,0),
                  c: "green",
                  t: "D"};
 var LABEL_SPRITES = [
@@ -782,7 +785,8 @@ var LABEL_SPRITES = [
   B_SPRITE,
   C_SPRITE,
   D_SPRITE,
-  testSPRITE,
+  PHI_SPRITE,
+  TAU_SPRITE
                     ];
 // Create a visual protractor betwen points A, B, C in 3space
 // This should really use an ellipse curver to make a fine
@@ -841,7 +845,6 @@ function createProtractor(obj,prefix,A,B,C) {
   cSphere(size/2.0,Cp,"white");
   lineBetwixt(Bp,Cp,"white");
   const PpCp_mid = vMidPoint(Bp,Cp);
-  console.log("Middie",PpCp_mid);
 
   cSphere(size/2.0,PpCp_mid,"red");
 
@@ -849,7 +852,6 @@ function createProtractor(obj,prefix,A,B,C) {
   const angle_rads = BtoA.angleTo(BtoC);
   obj.t = prefix + format_num((angle_rads * 180 / Math.PI),1) + " deg";
   obj.c = "red";
-  console.log("A,B,C",A,B,C);
 }
 
 
@@ -939,8 +941,10 @@ function onComputeDelix() {
 
   var prisms = createAdjoinedPrisms(p_i,tau_v,NUM_PRISMS);
 
-  B_SPRITE.p = prisms[0][7].position.clone();
-  C_SPRITE.p = prisms[0][6].position.clone();
+  B = prisms[0][7].position;
+  C = prisms[0][6].position;
+  B_SPRITE.p = B.clone();
+  C_SPRITE.p = C.clone();
 
   A_SPRITE.p = prisms[1][0][7].position.clone();
   D_SPRITE.p = prisms[2][0][6].position.clone();
@@ -997,13 +1001,27 @@ function onComputeDelix() {
   axis_line.name = "AXIS";
   am.scene.add(axis_line);
 
+  let O = new THREE.Vector3(0,0,0);
   {
     let X = new THREE.Vector3(0,0,1);
-    let O = new THREE.Vector3(0,0,0);
     let Hyplane = new THREE.Vector3(H.x,0,H.z);
     Hyplane.clampLength(1,1);
-    createProtractor(testSPRITE,"phi = ",X,O,Hyplane);
+    createProtractor(PHI_SPRITE,"phi = ",X,O,Hyplane);
   }
+
+  // here I attempt to create the visually important
+  // tau protractor
+  {
+    // tau comes from the prisms, the center of the
+    // joint is just B
+    // The other two points are corresponding points
+    // on at the joint face. We'll use the TOP elements.
+    let Aface = prisms[0][3].position;
+    let Cface = prisms[1][0][0].position;
+    console.log(prisms[0],prisms[1][0]);
+    createProtractor(TAU_SPRITE,"tau = ",Aface,B,Cface);
+  }
+
   renderSprites();
 }
 
