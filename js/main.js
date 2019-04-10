@@ -793,6 +793,24 @@ var LABEL_SPRITES = [
 // protractor. However, I will just use a straightline instead
 // for now.
 // obj is a sprite object to attach the label two
+  function lineBetwixt(A,B,color) {
+    var BApoints = new THREE.Geometry();
+    BApoints.vertices.push(B.clone());
+    BApoints.vertices.push(A.clone());
+    var BAline = new THREE.Line(BApoints, new THREE.LineBasicMaterial({color: color,linewidth: 10}));
+    am.scene.add(BAline);
+    BAline.type = "PROTRACTOR_LINE";
+    return BAline;
+  }
+  function cSphere(size,p,color) {
+    var mesh = createSphere(size, p, color);
+    mesh.castShadow = false;
+    mesh.receiveShadow = false;
+    mesh.debugObject = true;
+    mesh.type = "PROTRACTOR_SPHERE";
+    am.scene.add(mesh);
+  }
+
 function createProtractor(obj,prefix,A,B,C) {
 
   console.log("A,B,C",A,B,C);
@@ -810,15 +828,6 @@ function createProtractor(obj,prefix,A,B,C) {
   cSphere(size,A,"red");
   cSphere(size,B,"blue");
   cSphere(size,C,"green");
-  function lineBetwixt(A,B,color) {
-    var BApoints = new THREE.Geometry();
-    BApoints.vertices.push(B.clone());
-    BApoints.vertices.push(A.clone());
-    var BAline = new THREE.Line(BApoints, new THREE.LineBasicMaterial({color: color,linewidth: 10}));
-    am.scene.add(BAline);
-    BAline.type = "PROTRACTOR_LINE";
-    return BAline;
-  }
   lineBetwixt(B,A,"blue");
   lineBetwixt(B,C,"green");
 
@@ -916,10 +925,8 @@ function onComputeDelix() {
 
   let D = new THREE.Vector3(A.x,A.y,-A.z);
 
-
   res = KahnAxis(L0,D);
   console.log("RESULT",res);
-
 
   GLOBAL_P0 = new AbstractPrism(
     L0,
@@ -939,9 +946,27 @@ function onComputeDelix() {
   p_i.p.Nb.applyMatrix4(rt);
   p_i.p.Nc.applyMatrix4(rt);
 
+//  Ba.applyMatrix4(rt);
+
   var prisms = createAdjoinedPrisms(p_i,tau_v,NUM_PRISMS);
 
   B = prisms[0][7].position;
+
+  // vector pointing from B to Ba
+  var Ba_m_B = res[6];
+  // we can use this to find Ba...
+  // Ba is the perpendicular line from B to the axis
+  var Ba = B.clone();
+  Ba.sub(Ba_m_B);
+  console.log("B,Ba",B,Ba);
+  // We'll put a Ball at Ba ...
+  cSphere(am.JOINT_RADIUS/5,Ba,"black");
+  // Since we've set the first prism up symmetrically, Ca
+  // mirrors Ba...
+  var Ca = new THREE.Vector3(-Ba.x,Ba.y,-Ba.z);
+  cSphere(am.JOINT_RADIUS/5,Ca,"black");
+
+
   C = prisms[0][6].position;
   B_SPRITE.p = B.clone();
   C_SPRITE.p = C.clone();
@@ -1000,6 +1025,10 @@ function onComputeDelix() {
   var axis_line = new THREE.Line(points3D, new THREE.LineBasicMaterial({color: "green",linewidth: 10}));
   axis_line.name = "AXIS";
   am.scene.add(axis_line);
+
+  // Now we will attempt to render the B-BA line...
+  lineBetwixt(B,Ba,"yellow");
+  lineBetwixt(C,Ca,"yellow");
 
   let O = new THREE.Vector3(0,0,0);
   {

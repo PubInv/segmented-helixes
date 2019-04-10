@@ -131,13 +131,15 @@ function KahnAxis(L,D) {
                                        Bb.y * ( Bax / Bb.x),
                                        -Math.cos(phi) * da /2);
             }
-            var Ba_m_B = Ba.clone();
+          var Ba_m_B = Ba.clone();
+          // Ba_minus_B
             Ba_m_B.sub(B);
             let r = Ba_m_B.length();
             let c = ChordFromLDaxis(L,da);
             let theta = RotationFromRadiusChord(r,c);
-            console.assert(!isNaN(theta));
-            return [r,theta,da,c,phi,H];
+          console.assert(!isNaN(theta));
+          console.log("Kahn B,Ba",B,Ba_m_B)
+          return [r,theta,da,c,phi,H,Ba_m_B];
         }
     }
 }
