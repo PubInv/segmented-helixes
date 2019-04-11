@@ -909,9 +909,9 @@ function createProtractor(obj,prefix,color,A,B,C) {
   BtoC.clampLength(lengthToDraw,lengthToDraw);
   const Ap = B.clone().add(BtoA);
   const Cp = B.clone().add(BtoC);
-  cSphere(size/2.0,Ap,color);
-  cSphere(size/2.0,Cp,color);
-  lineBetwixt(Ap,Cp,color);
+  cSphere(size/4.0,Ap,color);
+  cSphere(size/4.0,Cp,color);
+//  lineBetwixt(Ap,Cp,color);
 
   createArc(color,Ap,B,Cp);
 
@@ -1112,7 +1112,7 @@ function onComputeDelix() {
   // here I attempt to create the visually important
   // theta protractor
   {
-    createProtractor(THETA_SPRITE,"theta = ","red",B,Ba,Cpara);
+    createProtractor(THETA_SPRITE,"theta = ","black",B,Ba,Cpara);
   }
 
 
