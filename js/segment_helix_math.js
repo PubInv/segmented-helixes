@@ -403,7 +403,8 @@ function ADirFromParam(L,v0,tau,Nb) {
 }
 
 
-
+// Compute the A point of an ideally centered prism
+// with normal faces NBu, Ncu.
 function AfromLtauNbNc(L,tau,NBu,NCu) {
     var abs0 = new AbstractPrism(L,NBu,NCu);
     if (!abs0) {
@@ -440,8 +441,12 @@ function AfromLtauNbNc(L,tau,NBu,NCu) {
         return psi;
     }
 
+  // what is the meaning of psi? It is the angle midpoint
+  // between the projects of fb and fc
     let psi = compute_angle_midpoint(fb,fc);
 
+  // That is why we rotate around the z axis to get down
+  // to find the A point.
     rt.makeRotationAxis(new THREE.Vector3(0,0,1),psi);
 
     applyMatrix4ToPrism(p_i,rt);

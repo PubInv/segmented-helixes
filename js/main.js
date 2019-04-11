@@ -721,7 +721,8 @@ function RenderHelix(l,r,d,theta,v,phi,wh,MAX_POINTS) {
   for (var i=0; i < POINTS; i++) {
     var n = i - (POINTS/2) + 0.5;
     var y = r * Math.cos(n*theta);
-    var x = r * Math.sin(n*theta);
+    // Not entirely sure why this is negated...
+    var x = -r * Math.sin(n*theta);
     var z = n * d;
     // We will apply the global translation here...
     var p = new THREE.Vector3(x,y,z);
@@ -911,13 +912,10 @@ function createProtractor(obj,prefix,color,A,B,C) {
   const Cp = B.clone().add(BtoC);
   cSphere(size/4.0,Ap,color);
   cSphere(size/4.0,Cp,color);
-//  lineBetwixt(Ap,Cp,color);
 
   createArc(color,Ap,B,Cp);
 
   const PpCp_mid = vMidPoint(Ap,Cp);
-
-//  cSphere(size/2.0,PpCp_mid,"red");
 
   obj.p = PpCp_mid.clone();
   const angle_rads = BtoA.angleTo(BtoC);
@@ -979,13 +977,22 @@ function onComputeDelix() {
   let A = Arot[0];
   console.log(A);
   // I am not sure whey this is negated...
-  var rotation = -Arot[1];
+  //  var rotation = -Arot[1];
+
+  // The rotation here is the amount we rotated
+  // the initial prism to get it into a "balanced" position.
+  // Balanced means the midpoint of the project of the normals
+  // is pointing straight down. So we roation by this distance
+  // to form rt, that must be applied to the prism  below.
+  var rotation = Arot[1];
   console.log("ROTATION",rotation);
 
   var rt = new THREE.Matrix4();
-  rt.makeRotationAxis(new THREE.Vector3(0,0,-1),rotation);
 
-  let D = new THREE.Vector3(A.x,A.y,-A.z);
+  rt.makeRotationAxis(new THREE.Vector3(0,0,1),rotation);
+
+  // Why wouldn't this be -A.x?
+  let D = new THREE.Vector3(-A.x,A.y,-A.z);
 
   res = KahnAxis(L0,D);
   console.log("RESULT",res);
@@ -1024,10 +1031,6 @@ function onComputeDelix() {
   // We'll put a Ball at Ba ...
   cSphere(am.JOINT_RADIUS/5,Ba,"black");
 
-
-
-
-
   C = prisms[0][6].position;
   B_SPRITE.p = B.clone();
   C_SPRITE.p = C.clone();
@@ -1048,7 +1051,7 @@ function onComputeDelix() {
   phi = res[4];
   set_outputs(r,theta,d,phi);
 
-  RenderHelix(L0,r,d,theta,new THREE.Vector3(0,0,1),-phi,
+  RenderHelix(L0,r,d,theta,new THREE.Vector3(0,0,1),phi,
               WORLD_HEIGHT,NUM_SEGMENTS);
 
   // These are the "axes" markers...
@@ -1082,7 +1085,7 @@ function onComputeDelix() {
   // I unfortunately have some kind of sign error here...
   H.multiplyScalar(100);
   H.setY(WORLD_HEIGHT - yd);
-  H.setX(-H.x);
+  H.setX(H.x);
   var Hn = H.clone();
   Hn.multiplyScalar(-1);
   Hn.setY(H.y);
@@ -1135,7 +1138,7 @@ function onComputeDelix() {
     let Aface = prisms[0][3].position;
     let Cface = prisms[1][0][0].position;
     console.log(prisms[0],prisms[1][0]);
-    createProtractor(TAU_SPRITE,"tau = ","yellow",Aface,B,Cface);
+    createProtractor(TAU_SPRITE,"tau = ","green",Aface,B,Cface);
   }
 
   renderSprites();
