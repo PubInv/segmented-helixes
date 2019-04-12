@@ -99,7 +99,7 @@ function renderPrismInstance(p_i) {
 var INITIAL_NORM_POINT_Y = -0.7;
 var INITIAL_NORM_POINT_X = -0.62;
 
-var WORLD_HEIGHT = 1.5;
+var WORLD_HEIGHT = 2.0;
 var GTRANS = new THREE.Matrix4().makeTranslation(0,WORLD_HEIGHT,0);
 var GLOBAL_P0 = new AbstractPrism(
   1,
@@ -660,12 +660,6 @@ init();
 animate();
 
 
-// for testing, we need to know when somethigns is "closeto a target"
-// to deal with roundoff error
-
-function near(x, y, e) {
-  return Math.abs(x - y) <= e;
-}
 
 // Find the normal to a triangle in 3space: https://stackoverflow.com/questions/19350792/calculate-normal-of-a-single-triangle-in-3d-space
 // arguments THREE.js Vector3's
@@ -722,7 +716,7 @@ function RenderHelix(l,r,d,theta,v,phi,wh,MAX_POINTS) {
     var n = i - (POINTS/2) + 0.5;
     var y = r * Math.cos(n*theta);
     // Not entirely sure why this is negated...
-    var x = -r * Math.sin(n*theta);
+    var x = r * Math.sin(n*theta);
     var z = n * d;
     // We will apply the global translation here...
     var p = new THREE.Vector3(x,y,z);
@@ -731,7 +725,7 @@ function RenderHelix(l,r,d,theta,v,phi,wh,MAX_POINTS) {
   }
 
   var line2 = new THREE.Line(points3D, gmat);
-  line2.rotation.y = phi;
+  line2.rotation.y = -phi;
   line2.name = "HELIX";
   am.scene.add(line2);
 }
@@ -841,8 +835,6 @@ function createArc(color,A,B,C) {
   qz.setFromUnitVectors(normal,Z);
   Mc.applyQuaternion(qz);
   const rotAboutNorm = Mc.angleTo(X);
-  console.log("rotAboutNorm",rotAboutNorm);
-
   q.setFromUnitVectors(z,normal);
 
   var curve = new THREE.EllipseCurve(
@@ -861,12 +853,10 @@ function createArc(color,A,B,C) {
   // Create the final object to add to the scene
   var ellipse = new THREE.Line( geometry, material );
 
-  console.log("Q",q);
   ellipse.quaternion = q.clone();
 
   ellipse.quaternion.setFromUnitVectors(z,normal);
 
-  console.log("Q",ellipse.quaternion);
   ellipse.type = "PROTRACTOR_LINE";
   ellipse.position.copy(B);
 
@@ -972,10 +962,8 @@ function onComputeDelix() {
   Nc.normalize();
 
   let tau_v = TAU_d * Math.PI / 180;
-  console.log(tau_v);
   let Arot = AfromLtauNbNc(L0,tau_v,Nb,Nc);
   let A = Arot[0];
-  console.log(A);
   // I am not sure whey this is negated...
   //  var rotation = -Arot[1];
 
@@ -1019,32 +1007,36 @@ function onComputeDelix() {
 
   var prisms = createAdjoinedPrisms(p_i,tau_v,NUM_PRISMS);
 
-  B = prisms[0][7].position;
+  B = prisms[0][6].position;
 
   // vector pointing from B to Ba
-  var Ba_m_B = res[6];
-  // we can use this to find Ba...
-  // Ba is the perpendicular line from B to the axis
-  var Ba = B.clone();
-  Ba.sub(Ba_m_B);
+  var Ba = res[6];
+  // Ba may not be defined!
+  if (Ba) {
+  Ba.applyMatrix4(GTRANS);
+
   console.log("B,Ba",B,Ba);
   // We'll put a Ball at Ba ...
-  cSphere(am.JOINT_RADIUS/5,Ba,"black");
+    cSphere(am.JOINT_RADIUS/5,Ba,"red");
+  }
 
-  C = prisms[0][6].position;
+  // Ba and Ca need to be on the axis, that is an assertion.
+
+  C = prisms[0][7].position;
   B_SPRITE.p = B.clone();
   C_SPRITE.p = C.clone();
 
-  A_SPRITE.p = prisms[1][0][7].position.clone();
-  D_SPRITE.p = prisms[2][0][6].position.clone();
+  D_SPRITE.p = prisms[1][0][7].position.clone();
+  A_SPRITE.p = prisms[2][0][6].position.clone();
 
 
+  if (Ba) {
   // Since we've set the first prism up symmetrically, Ca
   // mirrors Ba...
   var Ca = new THREE.Vector3(-Ba.x,Ba.y,-Ba.z);
-  cSphere(am.JOINT_RADIUS/5,Ca,"black");
+  cSphere(am.JOINT_RADIUS/5,Ca,"blue");
 
-
+  }
   r = res[0];
   theta = res[1];
   d = res[2];
@@ -1086,7 +1078,7 @@ function onComputeDelix() {
   H.multiplyScalar(100);
   H.setY(WORLD_HEIGHT - yd);
   H.setX(H.x);
-  var Hn = H.clone();
+  var Hn = H.clone(); // H "negative", not H normal!
   Hn.multiplyScalar(-1);
   Hn.setY(H.y);
   points3D.vertices.push(H);
@@ -1096,19 +1088,27 @@ function onComputeDelix() {
   axis_line.name = "AXIS";
   am.scene.add(axis_line);
 
+  // Technically, we could draw the Theta protractor but we would
+  // have to extend the lines
+  // TODO: My Theta protract is wrong when tau = 180 degrees.
+  if (Ba) {
   // Now we will attempt to render the B-BA line...
-  lineBetwixt(B,Ba,"yellow");
-  lineBetwixt(C,Ca,"yellow");
+  lineBetwixt(B,Ba,"red");
+    lineBetwixt(C,Ca,"green");
+
+
+
 
   // Now, in order to be able todraw the theta
   // protractor, we will translate Ca to Cpara in the -H
   // direction to place it in a circle at Ba, then
   // add a protractor between them.p
   var Cpara = C.clone();
-  var Hdir = Hn.clone().clampLength(d,d);
+  var Hdir = H.clone().clampLength(d,d);
+  console.log("Hdir:",Hdir);
   Cpara.sub(Hdir);
 
-  cSphere(am.JOINT_RADIUS/5,Cpara,"black");
+  cSphere(am.JOINT_RADIUS/5,Cpara,"green");
   // a nice greenline parallel to the helix axis should help..
 
   lineBetwixt(C,Cpara,"green");
@@ -1117,7 +1117,7 @@ function onComputeDelix() {
   {
     createProtractor(THETA_SPRITE,"theta = ","black",B,Ba,Cpara);
   }
-
+  }
 
 
   let O = new THREE.Vector3(0,0,0);
@@ -1135,10 +1135,9 @@ function onComputeDelix() {
     // joint is just B
     // The other two points are corresponding points
     // on at the joint face. We'll use the TOP elements.
-    let Aface = prisms[0][3].position;
+    let Bface = prisms[0][3].position;
     let Cface = prisms[1][0][0].position;
-    console.log(prisms[0],prisms[1][0]);
-    createProtractor(TAU_SPRITE,"tau = ","green",Aface,B,Cface);
+    createProtractor(TAU_SPRITE,"tau = ","green",Bface,C,Cface);
   }
 
   renderSprites();
@@ -1386,8 +1385,5 @@ $( document ).ready(function() {
   $(function () { main(); });
 
   onComputeDelix();
-  const A = new THREE.Vector3(0,5,6);
-  const B = new THREE.Vector3(0,0,0);
-  const C = new THREE.Vector3(0,6,5);
-  createArc("red",A,B,C);
+
 });

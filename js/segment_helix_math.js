@@ -14,6 +14,14 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+// for testing, we need to know when somethigns is "closeto a target"
+// to deal with roundoff error
+
+function near(x, y, e = 1e-5) {
+  return Math.abs(x - y) <= e;
+}
+
+
 function QFromRhoOmega(L,rho,omega) {
     return L/(Math.sqrt(1 + Math.tan(rho) ** 2 + Math.tan(omega) ** 2));
 }
@@ -64,6 +72,7 @@ function KahnAxis(L,D) {
     let B = new THREE.Vector3(0,0,-L/2);
     let C = new THREE.Vector3(0,0,L/2);
 
+  // I may not actually be using Cb...
     let Cb = B.clone();
     Cb.add(D);
     Cb.multiplyScalar(1/2);
@@ -88,8 +97,8 @@ function KahnAxis(L,D) {
         let c = 0;
         // I need to define this more clearly....
         let phi = Math.PI;
-        let theta = 0;
-        return [r,theta,da,c,phi,H];
+      let theta = 0;
+      return [r,theta,da,c,phi,H,null];
     } else {
         let CmB = C.clone();
         CmB.sub(B);
@@ -98,23 +107,32 @@ function KahnAxis(L,D) {
             CmA.sub(A);
             let H = CmA.clone();
             H.normalize();
-//            H.multiplyScalar(-1);
+            H.multiplyScalar(-1);
             // I think I need to understand why this is negative
             let da = (CmA.x >= 0) ? CmB.dot(H) : -CmB.dot(H);
             let r = Bb.length() / 2;
             let c = 2*r;
             let phi = Math.acos(da/L);
-            let theta = Math.PI;
-            return [r,theta,da,c,phi,H];
+          let theta = Math.PI;
+          // TODO: What is Ba!!!
+          let Ba = new THREE.Vector3();
+          return [r,theta,da,c,phi,H,Ba];
         } else {
-            let H = new THREE.Vector3(0,0,0);
-            H.crossVectors(Bb,Cb);
-            H.normalize();
-            // This is "rejection of CmB along H".
-            // Negative indicates a negative z travel
-            let da = CmB.dot(H);
-            let phi = Math.acos(da/L);
-            let Bax = Math.sin(phi) * da /2;
+          let H = new THREE.Vector3(0,0,0);
+          // It is C x B and not B x C because we want
+          // the right-handed system to produce the axis
+          // in the positive Z (in the usual case that A.z < B.z).
+            H.crossVectors(Cb,Bb);
+          H.normalize();
+
+          // da is the length of the projection of BC onto H
+          let da = CmB.dot(H);
+
+          // phi is now the angle of H with the z axis
+          let phi = Math.acos(da/L);
+          let Bax = Math.sin(phi) * da /2;
+          console.log("A,D",A,D);
+          console.log("da,phi,Bax",da,phi * 180/Math.PI,Bax);
 
             // This be undefinied if phi = PI/2.
             // if phi = PI/2, then B on the axis is
@@ -131,15 +149,19 @@ function KahnAxis(L,D) {
                                        Bb.y * ( Bax / Bb.x),
                                        -Math.cos(phi) * da /2);
             }
+          // here we assert that Ba is on the axis...
+          // To make sure we have the sign right, in our model
+          // the y value of Ba must be below the y = 0 plane...
+          console.assert(Ba.y <= 0);
           var Ba_m_B = Ba.clone();
           // Ba_minus_B
             Ba_m_B.sub(B);
             let r = Ba_m_B.length();
             let c = ChordFromLDaxis(L,da);
             let theta = RotationFromRadiusChord(r,c);
-          console.assert(!isNaN(theta));
-          console.log("Kahn B,Ba",B,Ba_m_B)
-          return [r,theta,da,c,phi,H,Ba_m_B];
+          // now we want to assert that Ba_m_B is perpendicular to H...
+          console.assert(near(0,H.dot(Ba_m_B)),"dot product");
+          return [r,theta,da,c,phi,H,Ba];
         }
     }
 }
@@ -658,8 +680,18 @@ function testKahnAxisTau180()
     console.assert(!isNaN(theta));
 }
 
+function testThreeIsRightHanded() {
+  let A = new THREE.Vector3(1,0,0);
+  let B = new THREE.Vector3(0,1,0);
+  let Z = A.cross(B);
+  // in a right-handed system, A cross B provides positve Z.
+  console.assert(near(Z.x,0));
+  console.assert(near(Z.y,0));
+  console.assert(near(Z.z,1));
+}
 
 function runUnitTests() {
+  testThreeIsRightHanded();
     testAfromLtauNbNnKeepsYPure();
     testAfromLtauNbNnContinuityOfTau();
     testRegularTetsKahnAxis();
