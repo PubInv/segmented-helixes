@@ -72,11 +72,7 @@ function KahnAxis(L,D) {
     let B = new THREE.Vector3(0,0,-L/2);
     let C = new THREE.Vector3(0,0,L/2);
 
-  // I may not actually be using Cb...
-    let Cb = B.clone();
-    Cb.add(D);
-    Cb.multiplyScalar(1/2);
-    Cb.sub(C);
+
 
     let Bb = A.clone();
     Bb.add(C);
@@ -102,7 +98,7 @@ function KahnAxis(L,D) {
     } else {
         let CmB = C.clone();
         CmB.sub(B);
-        if (near(y,0,1e-4)) { // This is the Zig-Zag case
+        if (near(y,0,1e-4)) { // flat case
             let CmA = C.clone();
             CmA.sub(A);
             let H = CmA.clone();
@@ -114,15 +110,21 @@ function KahnAxis(L,D) {
             let c = 2*r;
             let phi = Math.acos(da/L);
           let theta = Math.PI;
-          // TODO: What is Ba!!!
-          let Ba = new THREE.Vector3();
+          // TODO: This computation of Ba is just a guess.
+          let Ba = new THREE.Vector3(0,0,da/2);
           return [r,theta,da,c,phi,H,Ba];
         } else {
+            // I may not actually be using Cb...
+          let Cb = B.clone();
+          Cb.add(D);
+          Cb.multiplyScalar(1/2);
+          Cb.sub(C);
+
           let H = new THREE.Vector3(0,0,0);
           // It is C x B and not B x C because we want
           // the right-handed system to produce the axis
           // in the positive Z (in the usual case that A.z < B.z).
-            H.crossVectors(Cb,Bb);
+          H.crossVectors(Cb,Bb);
           H.normalize();
 
           // da is the length of the projection of BC onto H
@@ -130,6 +132,7 @@ function KahnAxis(L,D) {
 
           // phi is now the angle of H with the z axis
           let phi = Math.acos(da/L);
+          // This sin could be computed with a perp dot....
           let Bax = Math.sin(phi) * da /2;
           console.log("A,D",A,D);
           console.log("da,phi,Bax",da,phi * 180/Math.PI,Bax);
@@ -138,17 +141,22 @@ function KahnAxis(L,D) {
             // if phi = PI/2, then B on the axis is
             // the intersection of the Bb and Cb,
             // which will also have x and z = 0.
-            var Ba;
+          var Ba;
             if (near(phi,Math.PI/2,1e-4)) {
-                let psi = Math.atan2(Bb.y,Bb.z);
+// let psi = Math.atan2(Bb.y,Bb.z);
                 Ba = new THREE.Vector3(0,
-                                       Math.tan(psi)* L/2,
+                                       // Math.tan(psi)* L/2,
+                                       (Bb.y * L) / (Bb.z * 2),
                                        0);
+              console.log("phi is 180");
+              console.assert(near(Math.tan(Math.atan2(Bb.y,Bb.z)),Bb.y/Bb.z));
             } else {
                 Ba = new THREE.Vector3(Bax,
                                        Bb.y * ( Bax / Bb.x),
-                                       -Math.cos(phi) * da /2);
+                                       // -Math.cos(phi) * da /2
+                                       -(da**2)/(2*L));
             }
+          console.assert(near(Ba.z,-(da/L) * da /2));
           // here we assert that Ba is on the axis...
           // To make sure we have the sign right, in our model
           // the y value of Ba must be below the y = 0 plane...
