@@ -97,7 +97,8 @@ function KahnAxis(L,D) {
       return [r,theta,da,c,phi,H,null];
     } else {
         let CmB = C.clone();
-        CmB.sub(B);
+      CmB.sub(B);
+      CmB = new THREE.Vector3(0,0,L);
         if (near(y,0,1e-4)) { // flat case
             let CmA = C.clone();
             CmA.sub(A);
@@ -114,21 +115,39 @@ function KahnAxis(L,D) {
           let Ba = new THREE.Vector3(0,0,da/2);
           return [r,theta,da,c,phi,H,Ba];
         } else {
-            // I may not actually be using Cb...
-          let Cb = B.clone();
-          Cb.add(D);
-          Cb.multiplyScalar(1/2);
-          Cb.sub(C);
+          // let Cb = B.clone();
+          // Cb.add(D);
+          // Cb.multiplyScalar(1/2);
+          // Cb.sub(C);
+
+          let Cb = new THREE.Vector3(-Bb.x,Bb.y,-Bb.z);
 
           let H = new THREE.Vector3(0,0,0);
           // It is C x B and not B x C because we want
           // the right-handed system to produce the axis
           // in the positive Z (in the usual case that A.z < B.z).
           H.crossVectors(Cb,Bb);
+          Hd = new THREE.Vector3(2 * Bb.y * Bb.z,0, -2 * Bb.y * Bb.x);
+          console.assert(Hd.x == H.x && Hd.y == H.y && Hd.z == H.z);
+          console.log("H,Hd",H,Hd);
+
+          H = Hd;
           H.normalize();
 
           // da is the length of the projection of BC onto H
-          let da = CmB.dot(H);
+          let dax = CmB.dot(H);
+          // cnorm is the scalar that scales H so that
+          // the norm of H is 1. But this is a +/-,
+          // which is a problem for us!
+          let cnorm = 1/ (2 * Bb.y * Math.sqrt(Bb.x**2 + Bb.z**2));
+          // Let me guess that the sign should be negated..
+          cnorm = cnorm * -1;
+          let da = -2 * cnorm * L * Bb.y * Bb.x;
+          console.assert(near(da,dax));
+          // This seems to really be + or  - ... not
+          // sure how to resolve!
+          let sda = L * Bb.x / (Math.sqrt(Bb.x**2 + Bb.z**2));
+          console.assert(near(sda,da));
 
           // phi is now the angle of H with the z axis
           let phi = Math.acos(da/L);
