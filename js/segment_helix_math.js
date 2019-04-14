@@ -64,133 +64,151 @@ function RotationFromRadiusChord(R,C) {
 // phi -- the angle of the Helix axis against a segment
 // H -- the vector of the axis of the helix
 function KahnAxis(L,D) {
-    let x = D.x;
-    let y = D.y;
-    let z = D.z;
-    let A = new THREE.Vector3(-x,y,-z);
+  let x = D.x;
+  let y = D.y;
+  let z = D.z;
+  let A = new THREE.Vector3(-x,y,-z);
 
-    let B = new THREE.Vector3(0,0,-L/2);
-    let C = new THREE.Vector3(0,0,L/2);
-
-
-
-    let Bb = A.clone();
-    Bb.add(C);
-    Bb.multiplyScalar(1/2);
-    Bb.sub(B);
+  let B = new THREE.Vector3(0,0,-L/2);
+  let C = new THREE.Vector3(0,0,L/2);
 
 
-    // If Bb and Cb have zero length, the cross product
-    // is undefined, and the axis of the helix may be
+
+  let Bb = A.clone();
+  Bb.add(C);
+  Bb.multiplyScalar(1/2);
+  Bb.sub(B);
+
+
+  // If Bb and Cb have zero length, the cross product
+  // is undefined, and the axis of the helix may be
   // taken to be anywhere (is not uniquely defined.)
   // This is the case of a "straight line".
-    if (Bb.length() == 0) {
-        // We will take H to be the vector point from B to C,
-        // use a zero radius.
-        let H = new THREE.Vector3(0,0,L);
-        let da = L;
-        let r = 0;
-        let c = 0;
-        // I need to define this more clearly....
-        let phi = Math.PI;
-      let theta = 0;
-      return [r,theta,da,c,phi,H,null];
+  if (Bb.length() == 0) {
+    // We will take H to be the vector point from B to C,
+    // use a zero radius.
+    let H = new THREE.Vector3(0,0,L);
+    let da = L;
+    let r = 0;
+    let c = 0;
+    // I need to define this more clearly....
+    let phi = Math.PI;
+    let theta = 0;
+    return [r,theta,da,c,phi,H,null];
+  } else {
+    let CmB = C.clone();
+    CmB.sub(B);
+    CmB = new THREE.Vector3(0,0,L);
+    if (near(y,0,1e-4)) { // flat case
+      console.log("FLAT CASE");
+
+      // Note: I think at a minimum the compuation of Ba below is wrong.
+      // This case needs to be tested more extensively.
+      // This also should be integrated with the code below if possible.
+      let CmA = C.clone();
+      CmA.sub(A);
+      let H = CmA.clone();
+      H.normalize();
+      H.multiplyScalar(-1);
+      // I think I need to understand why this is negative
+      let da = (CmA.x >= 0) ? CmB.dot(H) : -CmB.dot(H);
+      let r = Bb.length() / 2;
+      let c = 2*r;
+      let phi = Math.acos(da/L);
+      let theta = Math.PI;
+      let Bax = Math.sqrt(1 - da**2/L**2) * da /2;
+
+      // TODO: This computation of Ba is just a guess.
+      let Ba = new THREE.Vector3(Bax,0, -(da**2)/(2*L));
+      console.log("FLAT:",r,theta,da,c,phi,H,Ba);
+      return [r,theta,da,c,phi,H,Ba];
     } else {
-        let CmB = C.clone();
-      CmB.sub(B);
-      CmB = new THREE.Vector3(0,0,L);
-        if (near(y,0,1e-4)) { // flat case
-            let CmA = C.clone();
-            CmA.sub(A);
-            let H = CmA.clone();
-            H.normalize();
-            H.multiplyScalar(-1);
-            // I think I need to understand why this is negative
-            let da = (CmA.x >= 0) ? CmB.dot(H) : -CmB.dot(H);
-            let r = Bb.length() / 2;
-            let c = 2*r;
-            let phi = Math.acos(da/L);
-          let theta = Math.PI;
-          // TODO: This computation of Ba is just a guess.
-          let Ba = new THREE.Vector3(0,0,da/2);
-          return [r,theta,da,c,phi,H,Ba];
-        } else {
-          // let Cb = B.clone();
-          // Cb.add(D);
-          // Cb.multiplyScalar(1/2);
-          // Cb.sub(C);
+      // let Cb = B.clone();
+      // Cb.add(D);
+      // Cb.multiplyScalar(1/2);
+      // Cb.sub(C);
 
-          let Cb = new THREE.Vector3(-Bb.x,Bb.y,-Bb.z);
+      let Cb = new THREE.Vector3(-Bb.x,Bb.y,-Bb.z);
 
-          let H = new THREE.Vector3(0,0,0);
-          // It is C x B and not B x C because we want
-          // the right-handed system to produce the axis
-          // in the positive Z (in the usual case that A.z < B.z).
-          H.crossVectors(Cb,Bb);
-          Hd = new THREE.Vector3(2 * Bb.y * Bb.z,0, -2 * Bb.y * Bb.x);
-          console.assert(Hd.x == H.x && Hd.y == H.y && Hd.z == H.z);
-          console.log("H,Hd",H,Hd);
+      let H = new THREE.Vector3(0,0,0);
+      // It is C x B and not B x C because we want
+      // the right-handed system to produce the axis
+      // in the positive Z (in the usual case that A.z < B.z).
+      H.crossVectors(Cb,Bb);
+      Hd = new THREE.Vector3(2 * Bb.y * Bb.z,0, -2 * Bb.y * Bb.x);
+      console.assert(Hd.x == H.x && Hd.y == H.y && Hd.z == H.z);
+      console.log("H,Hd",H,Hd);
 
-          H = Hd;
-          H.normalize();
+      H = Hd.clone();
+      H.normalize();
 
-          // da is the length of the projection of BC onto H
-          let dax = CmB.dot(H);
-          // cnorm is the scalar that scales H so that
-          // the norm of H is 1. But this is a +/-,
-          // which is a problem for us!
-          let cnorm = 1/ (2 * Bb.y * Math.sqrt(Bb.x**2 + Bb.z**2));
-          // Let me guess that the sign should be negated..
-          cnorm = cnorm * -1;
-          let da = -2 * cnorm * L * Bb.y * Bb.x;
-          console.assert(near(da,dax));
-          // This seems to really be + or  - ... not
-          // sure how to resolve!
-          let sda = L * Bb.x / (Math.sqrt(Bb.x**2 + Bb.z**2));
-          console.assert(near(sda,da));
+      // da is the length of the projection of BC onto H
+      let dax = CmB.dot(H);
+      // cnorm is the scalar that scales H so that
+      // the norm of H is 1. But this is a +/-,
+      // which is a problem for us!
+      let cnorm = 1/ (2 * Bb.y * Math.sqrt(Bb.x**2 + Bb.z**2));
+      // Let me guess that the sign should be negated..
+      cnorm = cnorm * -1;
+      let sda = -2 * cnorm * L * Bb.y * Bb.x;
+      console.assert(near(sda,dax));
+      // This seems to really be + or  - ... not
+      // sure how to resolve!
+      let da = L * Bb.x / (Math.sqrt(Bb.x**2 + Bb.z**2));
+      console.assert(near(sda,da));
 
-          // phi is now the angle of H with the z axis
-          let phi = Math.acos(da/L);
-          // This sin could be computed with a perp dot....
-          let Bax = Math.sin(phi) * da /2;
-          console.log("A,D",A,D);
-          console.log("da,phi,Bax",da,phi * 180/Math.PI,Bax);
+      // phi is now the angle of H with the z axis
+      let phi = Math.acos(da/L);
+      // This sin could be computed with a perp dot....
+      // Note: Sin(acos(x)) = sqrt(1 - x^2) https://socratic.org/questions/how-do-you-simplify-sin-arccos-x-1
+      //          let Baxold = Math.sin(phi) * da /2;
+      let Bax = Math.sqrt(1 - da**2/L**2) * da /2;
+      // NOTE: Try to compute the point Ba
+      // from the H vector and da!
+      console.log("A,D",A,D);
+      console.log("da,phi,Bax",da,phi * 180/Math.PI,Bax);
 
-            // This be undefinied if phi = PI/2.
-            // if phi = PI/2, then B on the axis is
-            // the intersection of the Bb and Cb,
-            // which will also have x and z = 0.
-          var Ba;
-            if (near(phi,Math.PI/2,1e-4)) {
-// let psi = Math.atan2(Bb.y,Bb.z);
-                Ba = new THREE.Vector3(0,
-                                       // Math.tan(psi)* L/2,
-                                       (Bb.y * L) / (Bb.z * 2),
-                                       0);
-              console.log("phi is 180");
-              console.assert(near(Math.tan(Math.atan2(Bb.y,Bb.z)),Bb.y/Bb.z));
-            } else {
-                Ba = new THREE.Vector3(Bax,
-                                       Bb.y * ( Bax / Bb.x),
-                                       // -Math.cos(phi) * da /2
-                                       -(da**2)/(2*L));
-            }
-          console.assert(near(Ba.z,-(da/L) * da /2));
-          // here we assert that Ba is on the axis...
-          // To make sure we have the sign right, in our model
-          // the y value of Ba must be below the y = 0 plane...
-          console.assert(Ba.y <= 0);
-          var Ba_m_B = Ba.clone();
-          // Ba_minus_B
-            Ba_m_B.sub(B);
-            let r = Ba_m_B.length();
-            let c = ChordFromLDaxis(L,da);
-            let theta = RotationFromRadiusChord(r,c);
-          // now we want to assert that Ba_m_B is perpendicular to H...
-          console.assert(near(0,H.dot(Ba_m_B)),"dot product");
-          return [r,theta,da,c,phi,H,Ba];
-        }
+      // This be undefinied if phi = PI/2.
+      // if phi = PI/2, then B on the axis is
+      // the intersection of the Bb and Cb,
+      // which will also have x and z = 0.
+      var Ba;
+      if (near(phi,Math.PI/2,1e-4)) {
+        // let psi = Math.atan2(Bb.y,Bb.z);
+        Ba = new THREE.Vector3(0,
+                               // Math.tan(psi)* L/2,
+                               (Bb.y * L) / (Bb.z * 2),
+                               0);
+        console.log("phi is 180");
+        console.assert(near(Math.tan(Math.atan2(Bb.y,Bb.z)),Bb.y/Bb.z));
+      } else {
+        Ba = new THREE.Vector3(Bax,
+                               Bb.y * ( Bax / Bb.x),
+                               // -Math.cos(phi) * da /2
+                               // Note: substitution here
+                               // of da will allows us to express better.
+
+
+                               -(da**2)/(2*L));
+      }
+
+      console.assert(near(Ba.z,-(da/L) * da /2));
+      // here we assert that Ba is on the axis...
+      // To make sure we have the sign right, in our model
+      // the y value of Ba must be below the y = 0 plane...
+      console.assert(Ba.y <= 0);
+      var Ba_m_B = Ba.clone();
+      // Ba_minus_B
+      Ba_m_B.sub(B);
+      let r = Ba_m_B.length();
+      let c = ChordFromLDaxis(L,da);
+      let theta = RotationFromRadiusChord(r,c);
+      // now we want to assert that Ba_m_B is perpendicular to H...
+      console.assert(near(0,H.dot(Ba_m_B)),"dot product");
+      console.log("normal case",r,theta);
+      return [r,theta,da,c,phi,H,Ba];
     }
+  }
 }
 
 // Add the novel prism to the old prism by placing the B face
