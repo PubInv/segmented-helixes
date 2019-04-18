@@ -21,6 +21,10 @@ function near(x, y, e = 1e-5) {
   return Math.abs(x - y) <= e;
 }
 
+function vnear(a, b, e = 1e-5) {
+  return near(a.x,b.x,e) && near(a.y,b.y,e) && near(a.z,b.z,e);
+}
+
 
 function QFromRhoOmega(L,rho,omega) {
   return L/(Math.sqrt(1 + Math.tan(rho) ** 2 + Math.tan(omega) ** 2));
@@ -734,6 +738,14 @@ function testRegularTetsKahnAxis()
   // it should be perpendicular to H.
   console.assert(near(0,H.dot(Ba_m_B)),"dot product");
   console.assert(near(theta,theta_exp,0.00001));
+
+    // Now test that H*da + Ba = Ca;
+  let Ca = new THREE.Vector3(-Ba.x,Ba.y,-Ba.z);
+  let X = Ba.clone();
+  let Hc = H.clone();
+  Hc.multiplyScalar(da);
+  X.add(Hc);
+  console.assert(vnear(X,Ca));
 }
 
 // This tests a common special case: when the helix
@@ -741,8 +753,15 @@ function testRegularTetsKahnAxis()
 // consider the object to have physical dimensions.)
 function testKahnAxisYTorus()
 {
+  let N = 17;
+  let angle = Math.PI/17;
+  for(let a = angle; a < Math.PI*2; a += angle) {
+    testKahnAxisYTorusAux(angle);
+  }
+}
+function testKahnAxisYTorusAux(angle)
+{
   let L0 = 2;
-  let angle = Math.PI/7;
   let NB1 = new THREE.Vector3(0,-Math.sin(angle),-Math.cos(angle));
   let NC1 = new THREE.Vector3(0,-Math.sin(angle),Math.cos(angle));
   let tau = 0;
@@ -761,7 +780,16 @@ function testKahnAxisYTorus()
     // Now we want to check that H and Da are correct...
   // H should have only only an x component...
   console.assert(near(0,H.y) && near(0,H.z));
+  console.assert(near(1,H.x));
   console.assert(near(da,0));
+
+  // Now test that H*da + Ba = Ca;
+  let Ca = new THREE.Vector3(-Ba.x,Ba.y,-Ba.z);
+  let X = Ba.clone();
+  let Hc = H.clone();
+  Hc.multiplyScalar(da);
+  X.add(Hc);
+  console.assert(vnear(X,Ca));
 
 }
 // That that tau = 180 is not degenerate..
