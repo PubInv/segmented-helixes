@@ -67,7 +67,7 @@ function testAxis(B,Ba,H,da) {
   let Hc = Hn.clone();
   // I don't understand this!!!
   // The only way this makes sense is if I have da reversed EVERYWHERE.
-  Hc.multiplyScalar(-da);
+  Hc.multiplyScalar(da);
   X.add(Hc);
   if (!vnear(X,Ca)) {
     debugger;
@@ -193,9 +193,6 @@ function KahnAxis(L,D) {
       // should always point in the right hand direction...
       // that is, along the thumb as the fingers of the right
       // hand are pointed from B to C (or point n to n+1).
-      const CCW = 1;
-      const CW = -1;
-      const SENSE = Math.sign(A.x);
 
       // CHANGE
       // if (A.x > 0) H.negate();
@@ -214,7 +211,7 @@ function KahnAxis(L,D) {
       // sure how to resolve!
       let da = L * Math.abs(Bb.x) / (Math.sqrt(Bb.x**2 + Bb.z**2));
       // If the sense is CW, the travel is negative...
-      if (SENSE == CW) {
+      if (A.x > 0) {
         da = -da;
       }
 
@@ -234,11 +231,11 @@ function KahnAxis(L,D) {
 
       // How do we determine the sign here?
       // If phi is > 180 (and less than 360), then Bax is negative.
-      let Bax = Math.sqrt(1 - da**2/L**2) * da /2;
+      let Bax = Math.sqrt(1 - da**2/L**2) * Math.abs(da) /2;
 
-//      if (SENSE == CW) {
-//        Bax = -Bax;
-//      }
+      if (A.x < 0) { // this is becasue of da
+        Bax = -Bax;
+      }
       if (!(Math.sign(Bax) == Math.sign(A.x))) {
         debugger;
       }
@@ -274,7 +271,7 @@ function KahnAxis(L,D) {
                                // create a test case later.
                                -(da**2)/(2*L));
       }
-      console.log("SENSE,da,BA",SENSE, da, Ba);
+      console.log("A.x,da,BA",A.x, da, Ba);
 
 
       // here we assert that Ba is on the axis...
@@ -289,9 +286,9 @@ function KahnAxis(L,D) {
       let theta = RotationFromRadiusChord(r,c);
       // theta is an absolute value. If A.x is negative,
       // we are rotating cw, else ccw.
-      if (SENSE == CW) {
-        theta = -theta;
-      }
+//      if (SENSE == CW) {
+//        theta = -theta;
+//      }
       // now we want to assert that Ba_m_B is perpendicular to H...
       testAxis(B,Ba,H,da);
       return [r,theta,da,c,phi,H,Ba];
@@ -747,7 +744,7 @@ function testRegularTetsKahnAxis()
   let Ba = res[6];
   // I am not sure the negative sign here is justified,
   // I need to check on this.
-  let theta_exp = -Math.acos(-2/3);
+  let theta_exp = Math.acos(-2/3);
   // We know (thanks to Coxeter) the expected theta!
   console.assert(near(theta,theta_exp,0.00001));
 

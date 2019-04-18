@@ -717,6 +717,7 @@ function RenderHelix(l,r,d,theta,v,phi,wh,MAX_POINTS) {
     var y = r * Math.cos(n*theta);
     // Not entirely sure why this is negated...
     var x = r * Math.sin(n*theta);
+    x = -x;
     var z = n * d;
     // We will apply the global translation here...
     var p = new THREE.Vector3(x,y,z);
@@ -1119,8 +1120,8 @@ function onComputeDelix() {
   // add a protractor between them.p
   var Cpara = C.clone();
   var Hdir = H.clone().clampLength(d,d);
-  console.log("Hdir:",Hdir);
-  Cpara.add(Hdir);
+    console.log("Hdir:",H,Hdir,d);
+  Cpara.sub(Hdir);
 
   cSphere(am.JOINT_RADIUS/5,Cpara,"green");
   // a nice greenline parallel to the helix axis should help..
