@@ -704,7 +704,7 @@ function RenderHelix(l,r,d,theta,v,phi,wh,MAX_POINTS) {
   // z axis so that the certain points on the on the z-axis.
   // In fact the rotation is purely about the y-axis.
 
-  console.log("RenderHelix:",l,r,d,theta,v,phi);
+  console.log("RenderHelix:",l,r,d,theta*180/Math.PI,v,phi*180/Math.PI);
   console.log("v",v);
 
   var init_y  = r * Math.cos(0.5*theta);
@@ -1064,7 +1064,7 @@ function onComputeDelix() {
   // in the correct direction
   var points3D = new THREE.Geometry();
 
-  H = res[5];
+  H = res[5].clone();
   // we compute y via Pythagoras from the a line
   // from the y-axis to a joint--- yd is always slightly
   // less than radius because it is the distance to
@@ -1075,18 +1075,32 @@ function onComputeDelix() {
   }
   let yd = Math.sqrt(Qsq);
   // I unfortunately have some kind of sign error here...
-  H.multiplyScalar(100);
+  const FACTOR = 10;
+  H.multiplyScalar(FACTOR);
   H.setY(WORLD_HEIGHT - yd);
+  // WTF?
   H.setX(H.x);
   var Hn = H.clone(); // H "negative", not H normal!
+
   Hn.multiplyScalar(-1);
   Hn.setY(H.y);
+
+
   points3D.vertices.push(H);
   points3D.vertices.push(Hn);
 
   var axis_line = new THREE.Line(points3D, new THREE.LineBasicMaterial({color: "green",linewidth: 10}));
   axis_line.name = "AXIS";
   am.scene.add(axis_line);
+
+  var hex = 0x008000;
+
+  let Hnmlzd = H.clone().sub(Hn).normalize();
+
+  var arrowHelper = new THREE.ArrowHelper( Hnmlzd, Hn, 2*FACTOR, hex,0.5,0.15 );
+  arrowHelper.name = "AXIS";
+  am.scene.add(arrowHelper);
+
 
   // Technically, we could draw the Theta protractor but we would
   // have to extend the lines

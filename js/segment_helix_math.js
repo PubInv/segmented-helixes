@@ -117,7 +117,7 @@ function KahnAxis(L,D) {
       CmA.sub(A);
       let H = CmA.clone();
       H.normalize();
-      console.log("Bb",Bb);
+//      console.log("Bb",Bb);
 
       //      H.multiplyScalar(-1);
       // I think I need to understand why this is negative
@@ -125,24 +125,31 @@ function KahnAxis(L,D) {
       // da should be positive as long as the A.z < B.z
       //      let da = (A.z < B.z) ? CmB.dot(H) : -CmB.dot(H);
       let r = Bb.length() / 2;
-      // THIS IS WRONG --- I think I cam computing da
-      // with the wrong sign in other cases. produce unit test for that.
-      da = -da;
       let c = 2*r;
       // How do I know phi should be positive?
       let phix = Math.acos(da/L);
       // This seems a better alternative....
-      let phi = Math.atan2(H.z,H.x) + Math.PI/2;
-      console.log("PHI, PHIX",phi, phix);
+      let phi = Math.atan2(H.z,H.x) - Math.PI/2;
+//      console.log("PHI, PHIX",phi, phix);
       let theta = Math.PI;
+
+      if (A.x < 0) {
+        theta = -theta;
+      }
+
       let Bax = Math.sqrt(1 - da**2/L**2) * da /2;
+       // because phi is the ccw angle against the Z axis....
+      // if phi > 0 but less than 180, x is positive...
+      if (Bb.x < 0) {
+        Bax = -Bax;
+      }
 
       // TODO: This computation of Ba is just a guess.
       let Ba = new THREE.Vector3(Bax,0, -(da**2)/(2*L));
       console.log("FLAT:",r,theta,da,c,phi,H,Ba);
 
       // For now, I will return null until I figure out Ba
-      return [r,theta,da,c,phi,H,null];
+      return [r,theta,da,c,phi,H,Ba];
     } else {
       // let Cb = B.clone();
       // Cb.add(D);
@@ -152,17 +159,15 @@ function KahnAxis(L,D) {
       let Cb = new THREE.Vector3(-Bb.x,Bb.y,-Bb.z);
 
       let H = new THREE.Vector3(0,0,0);
-      // It is C x B and not B x C because we want
-      // the right-handed system to produce the axis
-      // in the positive Z (in the usual case that A.z < B.z).
       H.crossVectors(Bb,Cb);
       // Hd is H computed direction....
       Hd = new THREE.Vector3(-2 * Bb.y * Bb.z,0, 2 * Bb.y * Bb.x);
       console.assert(Hd.x == H.x && Hd.y == H.y && Hd.z == H.z);
-      console.log("H,Hd",H,Hd);
 
       H = Hd.clone();
       H.normalize();
+      // WARNING!  Unexplained
+      if (A.x > 0) H.negate();
 
       // da is the length of the projection of BC onto H
       let dax = CmB.dot(H);
@@ -185,7 +190,6 @@ function KahnAxis(L,D) {
 
       // phi is actually correct as measured against the z axis....
       let phi = Math.atan2(H.z,H.x) - Math.PI/2;
-      console.log("PHI, PHIX",phi, phix);
 
       // This sin could be computed with a perp dot....
       // Note: Sin(acos(x)) = sqrt(1 - x^2) https://socratic.org/questions/how-do-you-simplify-sin-arccos-x-1
@@ -195,16 +199,11 @@ function KahnAxis(L,D) {
       // If phi is > 180 (and less than 360), then Bax is negative.
       let Bax = Math.sqrt(1 - da**2/L**2) * da /2;
 
-      // because phi is the ccw angle against the Z axis....
-      // if phi > 0 but less than 180, x is positive...
       if (Bb.x < 0) {
         Bax = -Bax;
       }
       // NOTE: Try to compute the point Ba
       // from the H vector and da!
-      console.log("A,D",A,D);
-      console.log("da,phi,Bax",da,phi * 180/Math.PI,Bax);
-
       // This be undefinied if phi = PI/2.
       // if phi = PI/2, then B on the axis is
       // the intersection of the Bb and Cb,
@@ -216,9 +215,12 @@ function KahnAxis(L,D) {
                                // Math.tan(psi)* L/2,
                                (Bb.y * L) / (Bb.z * 2),
                                0);
-        console.log("phi is 180");
+        console.log("phi is 90");
         console.assert(near(Math.tan(Math.atan2(Bb.y,Bb.z)),Bb.y/Bb.z));
       } else {
+        let s = Math.sign(Math.cos(phi));
+//        console.log("COMPARE",s,-Math.cos(phi) * da /2, -(da**2)/(2*L));
+
         Ba = new THREE.Vector3(Bax,
                                Bb.y * ( Bax / Bb.x),
                                // -Math.cos(phi) * da /2
@@ -232,7 +234,7 @@ function KahnAxis(L,D) {
                                -(da**2)/(2*L));
       }
 
-      console.assert(near(Ba.z,-(da/L) * da /2));
+
       // here we assert that Ba is on the axis...
       // To make sure we have the sign right, in our model
       // the y value of Ba must be below the y = 0 plane...
@@ -243,9 +245,13 @@ function KahnAxis(L,D) {
       let r = Ba_m_B.length();
       let c = ChordFromLDaxis(L,da);
       let theta = RotationFromRadiusChord(r,c);
+      // theta is an absolute value. If A.x is negative,
+      // we are rotating cw, else ccw.
+      if (A.x < 0) {
+        theta = -theta;
+      }
       // now we want to assert that Ba_m_B is perpendicular to H...
-      console.assert(near(0,H.dot(Ba_m_B)),"dot product");
-      console.log("normal case",r,theta);
+      testAxis(B,Ba,H,da);
       return [r,theta,da,c,phi,H,Ba];
     }
   }
@@ -512,6 +518,7 @@ function ADirFromParam(L,v0,tau,Nb) {
 
 // Compute the A point of an ideally centered prism
 // with normal faces NBu, Ncu.
+// Maybe this should normalize the input for robustness?
 function AfromLtauNbNc(L,tau,NBu,NCu) {
   var abs0 = new AbstractPrism(L,NBu,NCu);
   if (!abs0) {
@@ -672,35 +679,23 @@ function testAfromLtauNbNnKeepsYPure() {
   console.assert(near(A.x,0,1e-6));
 }
 
+function testAxis(B,Ba,H,da) {
+    // Now test that H*da + Ba = Ca;
+  let Ca = new THREE.Vector3(-Ba.x,Ba.y,-Ba.z);
+  let X = Ba.clone();
+  let Hc = H.clone();
+  Hc.multiplyScalar(da);
+  X.add(Hc);
+  console.assert(vnear(X,Ca));
 
-// This deosn't work---Unified need to be separated
-function testRegularTetsUnified() {
-  let L0 = 1;
-  let tetAngle = Math.atan(Math.sqrt(2)/2);
-  /* Rotation by an aribitrary amount should give us the same number. */
-  testRot = Math.PI / 5;
-  var rt = new THREE.Matrix4();
-  rt.makeRotationAxis(new THREE.Vector3(0,0,1),testRot);
-  let plainB = new THREE.Vector3(0,-Math.sin(tetAngle),-Math.cos(tetAngle));
-  let plainC = new THREE.Vector3(0,-Math.sin(tetAngle),Math.cos(tetAngle));
-  let tau = 2 * Math.PI /3;
-  var NB1 = plainB.clone();
-  NB1.applyMatrix4(rt);
-  var NC1 = plainC.clone();
-  NC1.applyMatrix4(rt);
-  var A = AfromLtauNbNc(L0,tau,NB1,NC1)[0];
-  let B = new THREE.Vector3(0,0,-L0/2);
-  let D = new THREE.Vector3(-A.x,A.y,-A.z);
-  //    let res = UnifiedComp(L0,B,D);
-  let res = KahnAxis(L0,D);
-  let r = res[0];
-  let theta = res[1];
-  let da = res[2];
-  let c = res[3];
-  let phi = res[4];
-  let theta_exp = Math.acos(-2/3);
-  console.assert(near(theta,theta_exp,0.00001));
+  var Ba_m_B = Ba.clone();
+  // Ba_minus_B
+  Ba_m_B.sub(B);
+  console.assert(near(0,H.dot(Ba_m_B)),"dot product");
 }
+
+
+
 
 // This tests the well known situation
 // of the Boerdijk-Coxeter tetrahelix.
@@ -723,7 +718,9 @@ function testRegularTetsKahnAxis()
   let phi = res[4];
   let H = res[5];
   let Ba = res[6];
-  let theta_exp = Math.acos(-2/3);
+  // I am not sure the negative sign here is justified,
+  // I need to check on this.
+  let theta_exp = -Math.acos(-2/3);
   // We know (thanks to Coxeter) the expected theta!
   console.assert(near(theta,theta_exp,0.00001));
 
@@ -731,21 +728,7 @@ function testRegularTetsKahnAxis()
   // We assert in a situation like this that da should be positive...
   console.assert(da > 0);
 
-  var Ba_m_B = Ba.clone();
-  // Ba_minus_B
-  Ba_m_B.sub(B);
-  // Ba_m_B is a vector point from B-on-the-axis to B;
-  // it should be perpendicular to H.
-  console.assert(near(0,H.dot(Ba_m_B)),"dot product");
-  console.assert(near(theta,theta_exp,0.00001));
-
-    // Now test that H*da + Ba = Ca;
-  let Ca = new THREE.Vector3(-Ba.x,Ba.y,-Ba.z);
-  let X = Ba.clone();
-  let Hc = H.clone();
-  Hc.multiplyScalar(da);
-  X.add(Hc);
-  console.assert(vnear(X,Ca));
+  testAxis(B,Ba,H,da);
 }
 
 // This tests a common special case: when the helix
@@ -783,21 +766,14 @@ function testKahnAxisYTorusAux(angle)
   console.assert(near(1,H.x));
   console.assert(near(da,0));
 
-  // Now test that H*da + Ba = Ca;
-  let Ca = new THREE.Vector3(-Ba.x,Ba.y,-Ba.z);
-  let X = Ba.clone();
-  let Hc = H.clone();
-  Hc.multiplyScalar(da);
-  X.add(Hc);
-  console.assert(vnear(X,Ca));
-
+  testAxis(B,Ba,H,da);
 }
 // That that tau = 180 is not degenerate..
 function testKahnAxisTau180()
 {
   let L0 = 2;
-  //    let angle = Math.PI/7;
-  let angle = 0;
+  let angle = Math.PI/7;
+//  let angle = 0;
   let NB1 = new THREE.Vector3(0,-Math.sin(angle),-Math.cos(angle));
   // We add in a little here so we are not a torus
   let NC1 = new THREE.Vector3(0,-Math.sin(angle),Math.cos(angle));
@@ -811,9 +787,66 @@ function testKahnAxisTau180()
   let da = res[2];
   let c = res[3];
   let phi = res[4];
-  //    console.assert((theta * 180/ Math.PI) != 180);
+  let H = res[5];
+  let Ba = res[6];
+  // What did I mean here?
   console.assert(!near(da,0,0.1));
   console.assert(!isNaN(theta));
+}
+
+// Test the flat "zig zag" case.
+function testKahnAxisFull()
+{
+  const N = 10;
+  const J = 3;
+  const K = 3;
+  let angle = Math.PI/7;
+  let NB1 = new THREE.Vector3(Math.sin(angle),0,-Math.cos(angle)).normalize();
+  for(let k = -(K-1); k < K; k++) {
+    for(let j = -(J-1); j < J; j++) {
+      for(let i = -(N-1); i < N; i++) {
+        // tau is limited to within +- 180.
+        let tau = -((Math.PI) * i) / (N-1)/10
+        let NC1 = new THREE.Vector3(j,k,1).normalize();
+        testKahnAxisFullAux(tau, NB1, NC1);
+      }
+    }
+  }
+}
+function testKahnAxisFullAux(tau,NB1,NC1)
+{
+  let L0 = 2;
+  let A = AfromLtauNbNc(L0,tau,NB1,NC1)[0];
+  let B = new THREE.Vector3(0,0,-L0/2);
+  let D = new THREE.Vector3(-A.x,A.y,-A.z);
+  let res = KahnAxis(L0,D);
+  let r = res[0];
+  let theta = res[1];
+  let da = res[2];
+  let c = res[3];
+  let phi = res[4];
+  let H = res[5];
+  let Ba = res[6];
+  console.assert(!isNaN(theta));
+
+  // Now test that H*da + Ba = Ca;
+  let Ca = new THREE.Vector3(-Ba.x,Ba.y,-Ba.z);
+  let X = Ba.clone();
+
+  //  WHY DOES THIS WORK?????
+  // This suggests Ba is correct but H points the wrong
+  // way.
+  //  let Hc = (tau < 0) ? H.clone().negate() : H.clone();
+  testAxis(B,Ba,H,da);
+  let Hc = H.clone();
+  Hc.multiplyScalar(da);
+  X.add(Hc);
+  if (!vnear(X,Ca)) {
+    debugger;
+  }
+  console.assert(vnear(X,Ca));
+
+
 }
 
 function testThreeIsRightHanded() {
@@ -834,6 +867,7 @@ function runUnitTests() {
   testAfromLtauNbNnContinuityOfTau();
   testRegularTetsKahnAxis();
   testKahnAxisYTorus();
+  testKahnAxisFull();
   testKahnAxisTau180();
   testAfromLfailureCase1();
   testAfromLtauMultiple();
