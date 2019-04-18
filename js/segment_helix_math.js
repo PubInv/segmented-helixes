@@ -166,7 +166,8 @@ function KahnAxis(L,D) {
 
       H = Hd.clone();
       H.normalize();
-      // WARNING!  Unexplained
+      // WARNING!  Unexplained. This is needed to make
+      // C.a greater than B.a on the axis.
       if (A.x > 0) H.negate();
 
       // da is the length of the projection of BC onto H
@@ -182,6 +183,7 @@ function KahnAxis(L,D) {
       // This seems to really be + or  - ... not
       // sure how to resolve!
       let da = L * Math.abs(Bb.x) / (Math.sqrt(Bb.x**2 + Bb.z**2));
+
       //      console.assert(near(sda,da));
 
       // phi is now the angle of H with the z axis
@@ -842,7 +844,7 @@ function testKahnAxisFullAux(tau,NB1,NC1)
   Hc.multiplyScalar(da);
   X.add(Hc);
   if (!vnear(X,Ca)) {
-    debugger;
+//    debugger;
   }
   console.assert(vnear(X,Ca));
 

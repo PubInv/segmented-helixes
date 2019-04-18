@@ -1075,7 +1075,7 @@ function onComputeDelix() {
   }
   let yd = Math.sqrt(Qsq);
   // I unfortunately have some kind of sign error here...
-  const FACTOR = 10;
+  const FACTOR = 6;
   H.multiplyScalar(FACTOR);
   H.setY(WORLD_HEIGHT - yd);
   // WTF?
