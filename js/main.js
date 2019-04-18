@@ -17,12 +17,8 @@
 // var tm = UGLY_GLOBAL_SINCE_I_CANT_GET_MY_MODULE_INTO_THE_BROWSER;
 // var OPERATION = "normal"; // "normal" or "helices"
 
-// const CHIRALITY_CCW = 1;
-// const CHIRALITY_CW = 0;
 var TET_DISTANCE = 0.5;
 
-// const MAX_PARAMETRIC_STEPS = 1000;
-// const PARAMETRIC_BISECTION_LIMIT = 50;
 
 const NUM_PRISMS = 15;
 const NUM_SEGMENTS = (2 * NUM_PRISMS) + 1;
@@ -707,6 +703,10 @@ function RenderHelix(l,r,d,theta,v,phi,wh,MAX_POINTS) {
   // Then rotate it parallel to v, then translate it on the
   // z axis so that the certain points on the on the z-axis.
   // In fact the rotation is purely about the y-axis.
+
+  console.log("RenderHelix:",l,r,d,theta,v,phi);
+  console.log("v",v);
+
   var init_y  = r * Math.cos(0.5*theta);
   var trans = new THREE.Matrix4().makeTranslation(0,wh - init_y,0);
   var points3D = new THREE.Geometry();
@@ -723,7 +723,7 @@ function RenderHelix(l,r,d,theta,v,phi,wh,MAX_POINTS) {
     p.applyMatrix4(trans);
     points3D.vertices.push(p);
   }
-
+  console.log("points3D",points3D);
   var line2 = new THREE.Line(points3D, gmat);
   line2.rotation.y = -phi;
   line2.name = "HELIX";
