@@ -59,6 +59,29 @@ function RotationFromRadiusChord(R,C) {
   }
 }
 
+function testAxis(B,Ba,H,da) {
+    // Now test that H*da + Ba = Ca;
+  let Ca = new THREE.Vector3(-Ba.x,Ba.y,-Ba.z);
+  let X = Ba.clone();
+  let Hn = H.clone().normalize();
+  let Hc = Hn.clone();
+  // I don't understand this!!!
+  // The only way this makes sense is if I have da reversed EVERYWHERE.
+  Hc.multiplyScalar(-da);
+  X.add(Hc);
+  if (!vnear(X,Ca)) {
+    debugger;
+  }
+  console.assert(vnear(X,Ca));
+
+  var Ba_m_B = Ba.clone();
+  // Ba_minus_B
+  Ba_m_B.sub(B);
+  console.assert(near(0,H.dot(Ba_m_B)),"dot product");
+}
+
+
+
 // D is the third physical point on Z-axis centered segmented helix, L is the length.
 // The return values are:
 // [r,theta,da,c,phi,H,Ba];
@@ -166,9 +189,16 @@ function KahnAxis(L,D) {
 
       H = Hd.clone();
       H.normalize();
-      // WARNING!  Unexplained. This is needed to make
-      // C.a greater than B.a on the axis.
-      if (A.x > 0) H.negate();
+      // If (A.x > 0), we have a clockwise helix. However,
+      // should always point in the right hand direction...
+      // that is, along the thumb as the fingers of the right
+      // hand are pointed from B to C (or point n to n+1).
+      const CCW = 1;
+      const CW = -1;
+      const SENSE = Math.sign(A.x);
+
+      // CHANGE
+      // if (A.x > 0) H.negate();
 
       // da is the length of the projection of BC onto H
       let dax = CmB.dot(H);
@@ -183,6 +213,11 @@ function KahnAxis(L,D) {
       // This seems to really be + or  - ... not
       // sure how to resolve!
       let da = L * Math.abs(Bb.x) / (Math.sqrt(Bb.x**2 + Bb.z**2));
+      // If the sense is CW, the travel is negative...
+      if (SENSE == CW) {
+        da = -da;
+      }
+
 
       //      console.assert(near(sda,da));
 
@@ -201,9 +236,16 @@ function KahnAxis(L,D) {
       // If phi is > 180 (and less than 360), then Bax is negative.
       let Bax = Math.sqrt(1 - da**2/L**2) * da /2;
 
-      if (Bb.x < 0) {
-        Bax = -Bax;
+//      if (SENSE == CW) {
+//        Bax = -Bax;
+//      }
+      if (!(Math.sign(Bax) == Math.sign(A.x))) {
+        debugger;
       }
+      console.assert(Math.sign(Bax) == Math.sign(A.x));
+//      if (Bb.x < 0) {
+//        Bax = -Bax;
+//      }
       // NOTE: Try to compute the point Ba
       // from the H vector and da!
       // This be undefinied if phi = PI/2.
@@ -220,9 +262,6 @@ function KahnAxis(L,D) {
         console.log("phi is 90");
         console.assert(near(Math.tan(Math.atan2(Bb.y,Bb.z)),Bb.y/Bb.z));
       } else {
-        let s = Math.sign(Math.cos(phi));
-//        console.log("COMPARE",s,-Math.cos(phi) * da /2, -(da**2)/(2*L));
-
         Ba = new THREE.Vector3(Bax,
                                Bb.y * ( Bax / Bb.x),
                                // -Math.cos(phi) * da /2
@@ -235,6 +274,7 @@ function KahnAxis(L,D) {
                                // create a test case later.
                                -(da**2)/(2*L));
       }
+      console.log("SENSE,da,BA",SENSE, da, Ba);
 
 
       // here we assert that Ba is on the axis...
@@ -249,7 +289,7 @@ function KahnAxis(L,D) {
       let theta = RotationFromRadiusChord(r,c);
       // theta is an absolute value. If A.x is negative,
       // we are rotating cw, else ccw.
-      if (A.x < 0) {
+      if (SENSE == CW) {
         theta = -theta;
       }
       // now we want to assert that Ba_m_B is perpendicular to H...
@@ -681,21 +721,6 @@ function testAfromLtauNbNnKeepsYPure() {
   console.assert(near(A.x,0,1e-6));
 }
 
-function testAxis(B,Ba,H,da) {
-    // Now test that H*da + Ba = Ca;
-  let Ca = new THREE.Vector3(-Ba.x,Ba.y,-Ba.z);
-  let X = Ba.clone();
-  let Hc = H.clone();
-  Hc.multiplyScalar(da);
-  X.add(Hc);
-  console.assert(vnear(X,Ca));
-
-  var Ba_m_B = Ba.clone();
-  // Ba_minus_B
-  Ba_m_B.sub(B);
-  console.assert(near(0,H.dot(Ba_m_B)),"dot product");
-}
-
 
 
 
@@ -840,15 +865,6 @@ function testKahnAxisFullAux(tau,NB1,NC1)
   // way.
   //  let Hc = (tau < 0) ? H.clone().negate() : H.clone();
   testAxis(B,Ba,H,da);
-  let Hc = H.clone();
-  Hc.multiplyScalar(da);
-  X.add(Hc);
-  if (!vnear(X,Ca)) {
-//    debugger;
-  }
-  console.assert(vnear(X,Ca));
-
-
 }
 
 function testThreeIsRightHanded() {

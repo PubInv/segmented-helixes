@@ -1120,7 +1120,7 @@ function onComputeDelix() {
   var Cpara = C.clone();
   var Hdir = H.clone().clampLength(d,d);
   console.log("Hdir:",Hdir);
-  Cpara.sub(Hdir);
+  Cpara.add(Hdir);
 
   cSphere(am.JOINT_RADIUS/5,Cpara,"green");
   // a nice greenline parallel to the helix axis should help..
