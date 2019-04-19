@@ -704,9 +704,6 @@ function RenderHelix(l,r,d,theta,v,phi,wh,MAX_POINTS) {
   // z axis so that the certain points on the on the z-axis.
   // In fact the rotation is purely about the y-axis.
 
-  console.log("RenderHelix:",l,r,d,theta*180/Math.PI,v,phi*180/Math.PI);
-  console.log("v",v);
-
   var init_y  = r * Math.cos(0.5*theta);
   var trans = new THREE.Matrix4().makeTranslation(0,wh - init_y,0);
   var points3D = new THREE.Geometry();
@@ -724,7 +721,6 @@ function RenderHelix(l,r,d,theta,v,phi,wh,MAX_POINTS) {
     p.applyMatrix4(trans);
     points3D.vertices.push(p);
   }
-  console.log("points3D",points3D);
   var line2 = new THREE.Line(points3D, gmat);
   line2.rotation.y = -phi;
   line2.name = "HELIX";
@@ -818,26 +814,35 @@ function createArc(color,A,B,C) {
   const BA = A.clone().sub(B);
   const BC = C.clone().sub(B);
   const M = vMidPoint(A,C);
-  const BM = M.clone().sub(B);
+  const BM = M.clone().sub(B); // Vector from B to Midpoint M.
 
   const angle = BA.angleTo(BC);
 
   const normal = BA.cross(BC);
   normal.normalize();
+  // we compute the normal so we have one vector to rotate
 
-  let q = new THREE.Quaternion();
-  const z = new THREE.Vector3(0,0,1);
-  z.normalize();
 
   const Mc = BM.clone();
   const Z = new THREE.Vector3(0,0,1);
   const X = new THREE.Vector3(1,0,0);
   let qz = new THREE.Quaternion();
   qz.setFromUnitVectors(normal,Z);
-  Mc.applyQuaternion(qz);
-  const rotAboutNorm = Mc.angleTo(X);
-  q.setFromUnitVectors(z,normal);
+  // q is the inverse quaternion to qz..
+  let q = new THREE.Quaternion();
+  q.setFromUnitVectors(Z,normal);
 
+  // qz will now rotate the "normal" into Z.
+  Mc.applyQuaternion(qz);
+  // Mc is now rotated such that the normal is at Z...
+  // that puts Mc somewhere in the Z = 0 XY plane.
+
+  // We we want to compute the angle around the X axis...
+  const rotAboutNorm = Math.atan2(Mc.y,Mc.x);
+
+  // now we create the actual ellipse...
+  // The idea is to split the difference between the angles
+  // by taking the midpoint.
   var curve = new THREE.EllipseCurve(
     0,  0,            // ax, aY
     radius, radius,           // xRadius, yRadius
@@ -856,7 +861,9 @@ function createArc(color,A,B,C) {
 
   ellipse.quaternion = q.clone();
 
-  ellipse.quaternion.setFromUnitVectors(z,normal);
+  // This is the inverse quaternion; it seems to be required to
+  // set it this qy.
+  ellipse.quaternion.setFromUnitVectors(Z,normal);
 
   ellipse.type = "PROTRACTOR_LINE";
   ellipse.position.copy(B);
@@ -904,11 +911,15 @@ function createProtractor(obj,prefix,color,A,B,C) {
   cSphere(size/4.0,Ap,color);
   cSphere(size/4.0,Cp,color);
 
+  // TODO: This sometimes fails based on order
   createArc(color,Ap,B,Cp);
+//  createArc(color,Cp,B,Ap);
 
   const PpCp_mid = vMidPoint(Ap,Cp);
 
   obj.p = PpCp_mid.clone();
+
+  // There is a problem here that this is unsigned...
   const angle_rads = BtoA.angleTo(BtoC);
   obj.t = prefix + format_num((angle_rads * 180 / Math.PI),1) + " deg";
   obj.c = color;
@@ -974,7 +985,6 @@ function onComputeDelix() {
   // is pointing straight down. So we roation by this distance
   // to form rt, that must be applied to the prism  below.
   var rotation = Arot[1];
-  console.log("ROTATION",rotation);
 
   var rt = new THREE.Matrix4();
 
@@ -984,7 +994,6 @@ function onComputeDelix() {
   let D = new THREE.Vector3(-A.x,A.y,-A.z);
 
   res = KahnAxis(L0,D);
-  console.log("RESULT",res);
 
   GLOBAL_P0 = new AbstractPrism(
     L0,
@@ -995,7 +1004,6 @@ function onComputeDelix() {
   // We shall place this upward, for the purpose of
   // making it easier to see...
 
-  console.log("P_I_BEFORE",p_i);
   // Take this out, and input an instance!
   applyMatrix4ToPrism(p_i,rt);
 
@@ -1004,7 +1012,7 @@ function onComputeDelix() {
   p_i.p.Nb.applyMatrix4(rt);
   p_i.p.Nc.applyMatrix4(rt);
 
-//  Ba.applyMatrix4(rt);
+  //  Ba.applyMatrix4(rt);
 
   var prisms = createAdjoinedPrisms(p_i,tau_v,NUM_PRISMS);
 
@@ -1014,10 +1022,9 @@ function onComputeDelix() {
   var Ba = res[6];
   // Ba may not be defined!
   if (Ba) {
-  Ba.applyMatrix4(GTRANS);
+    Ba.applyMatrix4(GTRANS);
 
-  console.log("B,Ba",B,Ba);
-  // We'll put a Ball at Ba ...
+    // We'll put a Ball at Ba ...
     cSphere(am.JOINT_RADIUS/5,Ba,"red");
   }
 
@@ -1032,11 +1039,10 @@ function onComputeDelix() {
 
 
   if (Ba) {
-  // Since we've set the first prism up symmetrically, Ca
-  // mirrors Ba...
-  var Ca = new THREE.Vector3(-Ba.x,Ba.y,-Ba.z);
-  cSphere(am.JOINT_RADIUS/5,Ca,"blue");
-
+    // Since we've set the first prism up symmetrically, Ca
+    // mirrors Ba...
+    var Ca = new THREE.Vector3(-Ba.x,Ba.y,-Ba.z);
+    cSphere(am.JOINT_RADIUS/5,Ca,"blue");
   }
   r = res[0];
   theta = res[1];
@@ -1052,8 +1058,6 @@ function onComputeDelix() {
   create_vertex_mesh(new THREE.Vector3(1,0,0),d3.color("red"));
   create_vertex_mesh(new THREE.Vector3(0,1,0),d3.color("green"));
   create_vertex_mesh(new THREE.Vector3(0,0,1),d3.color("blue"));
-
-
 
   // now we would like to draw the axis of the helix...
   // we have the vector H from the KahnAxis algorithm.
@@ -1107,40 +1111,35 @@ function onComputeDelix() {
   // have to extend the lines
   // TODO: My Theta protract is wrong when tau = 180 degrees.
   if (Ba) {
-  // Now we will attempt to render the B-BA line...
-  lineBetwixt(B,Ba,"red");
+    // Now we will attempt to render the B-BA line...
+    lineBetwixt(B,Ba,"red");
     lineBetwixt(C,Ca,"green");
 
+    // Now, in order to be able todraw the theta
+    // protractor, we will translate Ca to Cpara in the -H
+    // direction to place it in a circle at Ba, then
+    // add a protractor between them.p
+    var Cpara = C.clone();
+    var Hdir = H.clone().clampLength(d,d);
+    Cpara.sub(Hdir);
 
+    cSphere(am.JOINT_RADIUS/5,Cpara,"green");
+    // a nice greenline parallel to the helix axis should help..
 
-
-  // Now, in order to be able todraw the theta
-  // protractor, we will translate Ca to Cpara in the -H
-  // direction to place it in a circle at Ba, then
-  // add a protractor between them.p
-  var Cpara = C.clone();
-  var Hdir = H.clone().clampLength(d,d);
-    console.log("Hdir:",H,Hdir,d);
-  Cpara.sub(Hdir);
-
-  cSphere(am.JOINT_RADIUS/5,Cpara,"green");
-  // a nice greenline parallel to the helix axis should help..
-
-  lineBetwixt(C,Cpara,"green");
-  // here I attempt to create the visually important
-  // theta protractor
-  {
-    createProtractor(THETA_SPRITE,"theta = ","black",B,Ba,Cpara);
+    lineBetwixt(C,Cpara,"green");
+    // here I attempt to create the visually important
+    // theta protractor
+    {
+      createProtractor(THETA_SPRITE,"theta = ","black",B,Ba,Cpara);
+    }
   }
-  }
-
 
   let O = new THREE.Vector3(0,0,0);
   {
-    let X = new THREE.Vector3(0,0,1);
+    let Z = new THREE.Vector3(0,0,1);
     let Hyplane = new THREE.Vector3(H.x,0,H.z);
     Hyplane.clampLength(1,1);
-    createProtractor(PHI_SPRITE,"phi = ","purple",X,O,Hyplane);
+    createProtractor(PHI_SPRITE,"phi = ","purple",Z,O,Hyplane);
   }
 
   // here I attempt to create the visually important
@@ -1400,5 +1399,13 @@ $( document ).ready(function() {
   $(function () { main(); });
 
   onComputeDelix();
+
+
+  var T0_SPRITE = { p: new THREE.Vector3(0,0,0),
+                 c: "green",
+                 t: "D"};
+  var T1_SPRITE = { p: new THREE.Vector3(0,0,0),
+                 c: "green",
+                 t: "D"};
 
 });

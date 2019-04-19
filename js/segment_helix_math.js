@@ -128,7 +128,6 @@ function KahnAxis(L,D) {
     CmB.sub(B);
     CmB = new THREE.Vector3(0,0,L);
     if (near(y,0,1e-4)) { // flat case
-      console.log("FLAT CASE");
 
       // Note: I think at a minimum the compuation of Ba below is wrong.
       // This case needs to be tested more extensively.
@@ -160,47 +159,26 @@ function KahnAxis(L,D) {
       return [r,theta,da,c,phi,H,Ba];
     } else {
       let Cb = new THREE.Vector3(-Bb.x,Bb.y,-Bb.z);
-
 //      let H = new THREE.Vector3(0,0,0);
       // H.crossVectors(Bb,Cb);
       // Hd is H computed direction....
+      // This is optimization of that...
       let H = new THREE.Vector3(-2 * Bb.y * Bb.z,0, 2 * Bb.y * Bb.x);
-      console.assert(Hd.x == H.x && Hd.y == H.y && Hd.z == H.z);
+//      console.assert(Hd.x == H.x && Hd.y == H.y && Hd.z == H.z);
 
 //      H = Hd.clone();
       H.normalize();
-      // If (A.x > 0), we have a clockwise helix. However,
-      // should always point in the right hand direction...
-      // that is, along the thumb as the fingers of the right
-      // hand are pointed from B to C (or point n to n+1).
-
-      // CHANGE
-      // if (A.x > 0) H.negate();
 
       // da is the length of the projection of BC onto H
       let dax = CmB.dot(H);
-      // cnorm is the scalar that scales H so that
-      // the norm of H is 1. But this is a +/-,
-      // which is a problem for us!
-      //      let cnorm = 1/ (2 * Bb.y * Math.sqrt(Bb.x**2 + Bb.z**2));
-      // Let me guess that the sign should be negated..
-      //      cnorm = cnorm * -1;
-      //      let sda = -2 * cnorm * L * Bb.y * Bb.x;
-      //      console.assert(near(sda,dax));
-      // This seems to really be + or  - ... not
-      // sure how to resolve!
       let da = L * Math.abs(Bb.x) / (Math.sqrt(Bb.x**2 + Bb.z**2));
       // If the sense is CW, the travel is negative...
       if (A.x > 0) {
         da = -da;
       }
-
-
-      //      console.assert(near(sda,da));
-
       // phi is now the angle of H with the z axis
       // phi loses information, is sometimes off by PI
-      let phix = Math.acos(da/L);
+      // let phix = Math.acos(da/L);
 
       // phi is actually correct as measured against the z axis....
       let phi = Math.atan2(H.z,H.x) - Math.PI/2;
@@ -233,7 +211,6 @@ function KahnAxis(L,D) {
                                // Math.tan(psi)* L/2,
                                (Bb.y * L) / (Bb.z * 2),
                                0);
-        console.log("phi is 90");
         console.assert(near(Math.tan(Math.atan2(Bb.y,Bb.z)),Bb.y/Bb.z));
       } else {
         Ba = new THREE.Vector3(Bax,
@@ -551,7 +528,6 @@ function AfromLtauNbNc(L,tau,NBu,NCu) {
       let fba = fb.angle();
       let fca = fc.angle();
       let psi = -( (fba > fca) ? fba - Math.PI : fca - Math.PI );
-      console.log(psi * 180 / Math.PI);
       if (tau == -Math.PI) {
         return psi+Math.PI;
       }
@@ -577,17 +553,6 @@ function AfromLtauNbNc(L,tau,NBu,NCu) {
 
   var p_b = adjoinPrism(p_i,tau,false);
   var p_c = adjoinPrism(p_i,tau,true);
-  // The x values of these two should be the oppoosite
-
-  //    console.assert(near(p_b.b.x,-p_c.c.x,1e-4));
-  //    console.assert(near(p_b.b.y,p_c.c.y,1e-4));
-
-  //    if (!near(p_b.b.x,-p_c.c.x,1e-4)) {
-  //        debugger;
-  //    }
-  //    if (!near(p_b.b.y,p_c.c.y,1e-4)) {
-  //        debugger;
-  //    }
 
   return [p_b.b,psi];
 }
@@ -870,8 +835,6 @@ function testKahnAxisFlatAux(angle)
     // in the flat case H will be in the y = 0 plane
     console.assert(near(H.y,0));
 
-    console.log("Angle",(theta * 180)/ Math.PI);
-    console.log("Ba",Ba);
     let ntheta = theta/Math.PI;
     console.assert(near(ntheta,1) || near(ntheta,-1));
 
