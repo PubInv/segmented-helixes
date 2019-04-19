@@ -112,7 +112,7 @@ function KahnAxis(L,D) {
   // is undefined, and the axis of the helix may be
   // taken to be anywhere (is not uniquely defined.)
   // This is the case of a "straight line".
-  if (Bb.length() == 0) {
+  if (near(Bb.length(),0)) {
     // We will take H to be the vector point from B to C,
     // use a zero radius.
     let H = new THREE.Vector3(0,0,L);
@@ -140,54 +140,34 @@ function KahnAxis(L,D) {
       CmA.sub(A);
       let H = CmA.clone();
       H.normalize();
-//      console.log("Bb",Bb);
-
-      //      H.multiplyScalar(-1);
-      // I think I need to understand why this is negative
-      let da = (CmA.x >= 0) ? CmB.dot(H) : -CmB.dot(H);
-      // da should be positive as long as the A.z < B.z
-      //      let da = (A.z < B.z) ? CmB.dot(H) : -CmB.dot(H);
+      da = CmB.dot(H);
       let r = Bb.length() / 2;
       let c = 2*r;
       // How do I know phi should be positive?
       let phix = Math.acos(da/L);
       // This seems a better alternative....
       let phi = Math.atan2(H.z,H.x) - Math.PI/2;
-//      console.log("PHI, PHIX",phi, phix);
       let theta = Math.PI;
-
       if (A.x < 0) {
         theta = -theta;
       }
-
-      let Bax = Math.sqrt(1 - da**2/L**2) * da /2;
-       // because phi is the ccw angle against the Z axis....
-      // if phi > 0 but less than 180, x is positive...
-      if (Bb.x < 0) {
+      let Bax = Math.sqrt(1 - da**2/L**2) * Math.abs(da) /2;
+      if (A.x < 0) { // this is becasue of da
         Bax = -Bax;
       }
-
-      // TODO: This computation of Ba is just a guess.
       let Ba = new THREE.Vector3(Bax,0, -(da**2)/(2*L));
-      console.log("FLAT:",r,theta,da,c,phi,H,Ba);
-
-      // For now, I will return null until I figure out Ba
+      testAxis(B,Ba,H,da);
       return [r,theta,da,c,phi,H,Ba];
     } else {
-      // let Cb = B.clone();
-      // Cb.add(D);
-      // Cb.multiplyScalar(1/2);
-      // Cb.sub(C);
-
       let Cb = new THREE.Vector3(-Bb.x,Bb.y,-Bb.z);
 
-      let H = new THREE.Vector3(0,0,0);
-      H.crossVectors(Bb,Cb);
+//      let H = new THREE.Vector3(0,0,0);
+      // H.crossVectors(Bb,Cb);
       // Hd is H computed direction....
-      Hd = new THREE.Vector3(-2 * Bb.y * Bb.z,0, 2 * Bb.y * Bb.x);
+      let H = new THREE.Vector3(-2 * Bb.y * Bb.z,0, 2 * Bb.y * Bb.x);
       console.assert(Hd.x == H.x && Hd.y == H.y && Hd.z == H.z);
 
-      H = Hd.clone();
+//      H = Hd.clone();
       H.normalize();
       // If (A.x > 0), we have a clockwise helix. However,
       // should always point in the right hand direction...
@@ -240,9 +220,6 @@ function KahnAxis(L,D) {
         debugger;
       }
       console.assert(Math.sign(Bax) == Math.sign(A.x));
-//      if (Bb.x < 0) {
-//        Bax = -Bax;
-//      }
       // NOTE: Try to compute the point Ba
       // from the H vector and da!
       // This be undefinied if phi = PI/2.
@@ -271,8 +248,6 @@ function KahnAxis(L,D) {
                                // create a test case later.
                                -(da**2)/(2*L));
       }
-      console.log("A.x,da,BA",A.x, da, Ba);
-
 
       // here we assert that Ba is on the axis...
       // To make sure we have the sign right, in our model
@@ -284,12 +259,6 @@ function KahnAxis(L,D) {
       let r = Ba_m_B.length();
       let c = ChordFromLDaxis(L,da);
       let theta = RotationFromRadiusChord(r,c);
-      // theta is an absolute value. If A.x is negative,
-      // we are rotating cw, else ccw.
-//      if (SENSE == CW) {
-//        theta = -theta;
-//      }
-      // now we want to assert that Ba_m_B is perpendicular to H...
       testAxis(B,Ba,H,da);
       return [r,theta,da,c,phi,H,Ba];
     }
@@ -818,7 +787,6 @@ function testKahnAxisTau180()
   console.assert(!isNaN(theta));
 }
 
-// Test the flat "zig zag" case.
 function testKahnAxisFull()
 {
   const N = 10;
@@ -864,6 +832,55 @@ function testKahnAxisFullAux(tau,NB1,NC1)
   testAxis(B,Ba,H,da);
 }
 
+// This is to test the Flat, Zig-Zag Case
+function testKahnAxisFlat()
+{
+  let base = Math.PI/7;
+  const N = 10;
+  for(let i = -(N-1); i < N; i++) {
+    let angle = -((base) * i) / ((N-1)/N);
+    testKahnAxisFlatAux(angle);
+  }
+}
+function testKahnAxisFlatAux(angle)
+{
+  let L0 = 2;
+
+  let NB1 = new THREE.Vector3(-Math.sin(angle),0,-1);
+  // We add in a little here so we are not a torus
+  let NC1 = new THREE.Vector3(Math.sin(angle),0,1);
+  let tau = Math.PI;
+  let A = AfromLtauNbNc(L0,tau,NB1,NC1)[0];
+  let B = new THREE.Vector3(0,0,-L0/2);
+  let D = new THREE.Vector3(-A.x,A.y,-A.z);
+  let res = KahnAxis(L0,D);
+  let r = res[0];
+  let theta = res[1];
+  let da = res[2];
+  let c = res[3];
+  let phi = res[4];
+  let H = res[5];
+  let Ba = res[6];
+  console.assert(!isNaN(theta));
+
+  // Now test that H*da + Ba = Ca;
+  if (Ba) {
+    let Ca = new THREE.Vector3(-Ba.x,Ba.y,-Ba.z);
+
+    // in the flat case H will be in the y = 0 plane
+    console.assert(near(H.y,0));
+
+    console.log("Angle",(theta * 180)/ Math.PI);
+    console.log("Ba",Ba);
+    let ntheta = theta/Math.PI;
+    console.assert(near(ntheta,1) || near(ntheta,-1));
+
+    testAxis(B,Ba,H,da);
+  } else {
+      console.assert(!Ba);
+  }
+}
+
 function testThreeIsRightHanded() {
   let A = new THREE.Vector3(1,0,0);
   let B = new THREE.Vector3(0,1,0);
@@ -883,6 +900,7 @@ function runUnitTests() {
   testRegularTetsKahnAxis();
   testKahnAxisYTorus();
   testKahnAxisFull();
+  testKahnAxisFlat()
   testKahnAxisTau180();
   testAfromLfailureCase1();
   testAfromLtauMultiple();
