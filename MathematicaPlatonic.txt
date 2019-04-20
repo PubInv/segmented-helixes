@@ -1,0 +1,59 @@
+
+BottomFace = PolyhedronData["Icosahedron", "Faces"][[1]]
+TopFace = PolyhedronData["Icosahedron", "Faces"][[12]]
+CrownFace = PolyhedronData["Icosahedron", "Faces"][[11]]
+
+BottomFaceCoords = PolyhedronData["Icosahedron", "Vertices"][[{BottomFace[[1]],BottomFace[[2]],BottomFace[[3]]}]]
+TopFaceCoords = PolyhedronData["Icosahedron", "Vertices"][[TopFace]]
+
+Mean[BottomFaceCoords]
+Mean[TopFaceCoords]
+
+PolyCentroid[polyhedron_,face_] :=
+Mean[PolyhedronData[polyhedron,"Vertices"][[PolyhedronData[polyhedron, "Faces"][[face]]]]]
+
+PolyCentroid["Icosahedron",1]
+PolyCentroid["Icosahedron",2]
+PolyCentroid["Icosahedron",3]
+PolyCentroid["Icosahedron",4]
+PolyCentroid["Icosahedron",5]
+PolyCentroid["Icosahedron",6]
+
+// It appears that 1,6 are opposites.
+
+o = {0, 0, 0};
+b = {0, 0, 1};
+Graphics3D[{Red, Arrow[{o, b}]}, Axes -> True, Boxed -> True,
+AxesLabel -> {x, y, z}]
+
+
+// Note: Faces 1, 6, 11, on an icosahedron have the advantage that 1 and 6 are opposite and all three a coplanar...
+DrawFaces[polyhedron_,a_,b_,v_] :=
+Graphics3D[{
+Red,
+            Arrow[{o, PolyCentroid[polyhedron,a]}],
+            Blue,
+            Arrow[{o, PolyCentroid[polyhedron,b]}],
+            Green,
+            Arrow[{o, PolyCentroid[polyhedron,v]}]},
+            Axes -> True, Boxed -> True,
+            AxesLabel -> {x, y, z}]
+
+// Now we want to know the length between the centroids of the faces we have chosen (6,11),
+// That and the vectors themselves should be all we need to construct the helix with our JavaScript Code
+VL = Norm[PolyCentroid["Icosahedron",6] - PolyCentroid["Icosahedron",11],2]
+
+// Beccause we need it numerically for Javascript....
+VLn = N[VL]
+
+// Now we need to perform the rotation of the vectors that balances them on the z axis...
+
+V0 = PolyCentroid["Icosahedron",6]
+V1 = PolyCentroid["Icosahedron",11]
+
+dV0V1 = V1 - V0
+
+RT = RotationTransform[{N[dV0V1],{0,0,1}}]
+
+nF0 = RT[V0]
+nF1 = RT[V1]
