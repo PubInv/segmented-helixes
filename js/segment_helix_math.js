@@ -170,7 +170,7 @@ function KahnAxis(L,D) {
       H.normalize();
 
       // da is the length of the projection of BC onto H
-      let dax = CmB.dot(H);
+      //      let dax = CmB.dot(H);
       let da = L * Math.abs(Bb.x) / (Math.sqrt(Bb.x**2 + Bb.z**2));
       // If the sense is CW, the travel is negative...
       if (A.x > 0) {
@@ -248,6 +248,9 @@ function KahnAxis(L,D) {
 // and it has a link to the abstract prism inside it.
 // NOTE: with faces reversed, this still produces
 // positive z.
+// NOTE: A posssible goal here is to return the
+// transforms needed for this transformation, to apply to other
+// Geometry objects in the same frame.
 function adjoinPrism(old,tau,joinToC) {
   // First, we copy the old prism in exactly the same position
 

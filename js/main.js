@@ -251,17 +251,17 @@ function memo_color_mat(tcolor) {
   return am.color_material_palette[string]
 }
 
-function alphabetic_name(n) {
-  if (n < 26) {
-    return String.fromCharCode(65 + n);
-  } else {
-    if (n < 26 * 26) {
-      return alphabetic_name(Math.floor(n / 26)) + alphabetic_name(n % 26);
-    } else {
-      return "" + n;
-    }
-  }
-}
+// function alphabetic_name(n) {
+//   if (n < 26) {
+//     return String.fromCharCode(65 + n);
+//   } else {
+//     if (n < 26 * 26) {
+//       return alphabetic_name(Math.floor(n / 26)) + alphabetic_name(n % 26);
+//     } else {
+//       return "" + n;
+//     }
+//   }
+// }
 
 var scolors = [d3.color("DarkRed"), d3.color("DarkOrange"), d3.color("Indigo")];
 var smats = [new THREE.Color(0x8B0000),
@@ -1369,6 +1369,80 @@ function setup_input_molecule(slider,ro,txt,x,set)
   });
 }
 
+function createZAlignedIcosa() {
+//  let icosa = new THREE.IcosahedronGeometry(1,0); // Doesn't work!
+  //  let icosa = new THREE.CubeGeometry(1,0); // WORKS!
+  //  let icosa = new THREE.DodecahedronGeometry(1,0); // WORKS!
+  let icosa = new THREE.OctahedronGeometry(1,0);
+//  let icosa = new THREE.TetrahedronGeometry(1,0); // WORKS!
+
+  var obj = new THREE.Mesh( icosa, new THREE.MeshNormalMaterial(
+    { transparent: true,
+      opacity: 0.5 }
+  ));
+  // Our basic operation is to choose two faces, compute
+  // the centroids, and create the vector between them---we will
+  // call this alignment.
+  if (1) {
+    console.log(icosa);
+  //  debugger;
+  }
+  // I will just guess faces 0, 10 for now...
+  const Bf = 0;
+  const Cf = 4;
+  let Bc = new THREE.Vector3();
+  Bc.add(icosa.vertices[icosa.faces[Bf].a]);
+  Bc.add(icosa.vertices[icosa.faces[Bf].b]);
+  Bc.add(icosa.vertices[icosa.faces[Bf].c]);
+  Bc.multiplyScalar(1/3);
+
+  let Cc = new THREE.Vector3();
+  Cc.add(icosa.vertices[icosa.faces[Cf].a]);
+  Cc.add(icosa.vertices[icosa.faces[Cf].b]);
+  Cc.add(icosa.vertices[icosa.faces[Cf].c]);
+  Cc.multiplyScalar(1/3);
+  console.log(Bc,Cc);
+
+
+  let Dir = Bc.clone();
+  Dir.sub(Cc);
+  let len = Dir.length();
+  var hex = 0x008000;
+  Dir.normalize();
+  var arrowHelper = new THREE.ArrowHelper( Dir, Cc, len,
+                                           hex,0.2,0.03 );
+  console.log(obj);
+
+//  arrowHelper.quaternion.setFromUnitVectors(Dir,Z);
+
+  // var bsphere = createSphere(1/10, Bc, "red");
+  // var csphere = createSphere(1/10, Cc, "blue");
+
+  // bsphere.position.applyMatrix4(GTRANS);
+  // csphere.position.applyMatrix4(GTRANS);
+
+
+//  arrowHelper.position.applyMatrix4(GTRANS);
+
+// arrowHelper.quaternion.setFromUnitVectors(Dir,Z);
+
+  //  am.scene.add(arrowHelper);
+  let F = icosa.vertices[icosa.faces[Cf].c].clone();
+  let T = icosa.vertices[icosa.faces[Bf].c].clone();
+  const Z = new THREE.Vector3(0,0,1);
+  Z.normalize();
+  let d = Cc.clone();
+  d.sub(Bc);
+  d.normalize();
+  console.log("F,T,d =",F,T,d);
+  obj.quaternion.setFromUnitVectors(d,Z);
+  obj.position.applyMatrix4(GTRANS);
+  am.scene.add(obj);
+
+//  am.scene.add(bsphere);
+//  am.scene.add(csphere);
+}
+
 
 $( document ).ready(function() {
   runUnitTests();
@@ -1400,12 +1474,6 @@ $( document ).ready(function() {
 
   onComputeDelix();
 
-
-  var T0_SPRITE = { p: new THREE.Vector3(0,0,0),
-                 c: "green",
-                 t: "D"};
-  var T1_SPRITE = { p: new THREE.Vector3(0,0,0),
-                 c: "green",
-                 t: "D"};
+  createZAlignedIcosa();
 
 });
