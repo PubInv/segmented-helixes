@@ -1155,6 +1155,19 @@ function onComputeDelix() {
   }
 
   renderSprites();
+
+
+  // Here we attempt to render platonic solids if appropriate
+  //  let SOLID = "OCTAHEDRON";
+  //  let SOLID = "TETRAHEDRON";
+  //  let SOLID = "CUBE";
+  //  let SOLID = "ICOSAHEDRON";
+  let SOLID = "DODECAHEDRON";
+
+  if (SOLID) {
+    createZAlignedIcosa(SOLID,B,C);
+  }
+
 }
 
 function addDebugSphere(am,pos,color) {
@@ -1369,14 +1382,51 @@ function setup_input_molecule(slider,ro,txt,x,set)
   });
 }
 
-function createZAlignedIcosa() {
-//  let icosa = new THREE.IcosahedronGeometry(1,0); // Doesn't work!
-  //  let icosa = new THREE.CubeGeometry(1,0); // WORKS!
-  //  let icosa = new THREE.DodecahedronGeometry(1,0); // WORKS!
-  let icosa = new THREE.OctahedronGeometry(1,0);
-//  let icosa = new THREE.TetrahedronGeometry(1,0); // WORKS!
+function createZAlignedIcosa(solid,B,C) {
+  let Bf = 0;
+  switch(solid) {
+  case "TETRAHEDRON":
+    return createZAlignedIcosaAux(solid,B,C,Bf,2);
+  case "CUBE":
+    return createZAlignedIcosaAux(solid,B,C,Bf,1);
+  case "OCTAHEDRON":
+    return createZAlignedIcosaAux(solid,B,C,Bf,6);
+  case "DODECAHEDRON":
+    return createZAlignedIcosaAux(solid,B,C,Bf,7);
+  case "ICOSAHEDRON":
+    return createZAlignedIcosaAux(solid,B,C,Bf,10);
+  }
+}
 
-  var obj = new THREE.Mesh( icosa, new THREE.MeshNormalMaterial(
+function findCentroid(geo) {
+  var sum = new THREE.Vector3(0,0,0);
+  var n = 0;
+  geo.vertices.forEach(v => { sum.add(v); n++; });
+  return sum.multiplyScalar(1/n);
+}
+
+function createZAlignedIcosaAux(solid, B, C, Bf, Cf) {
+  // Each of the platonic solids actually requires you to also
+  // make a choice as to the face...
+  var geo;
+  switch(solid) {
+  case "TETRAHEDRON":
+    geo = new THREE.TetrahedronGeometry(1,0);
+    break;
+  case "CUBE":
+    geo = new THREE.CubeGeometry(1,0);
+    break;
+  case "OCTAHEDRON":
+    geo = new THREE.OctahedronGeometry(1,0);
+    break;
+  case "DODECAHEDRON":
+    geo = new THREE.DodecahedronGeometry(1,0);
+    break;
+  case "ICOSAHEDRON":
+    geo = new THREE.IcosahedronGeometry(1,0);
+    break;
+  }
+  var obj = new THREE.Mesh( geo, new THREE.MeshNormalMaterial(
     { transparent: true,
       opacity: 0.5 }
   ));
@@ -1384,63 +1434,181 @@ function createZAlignedIcosa() {
   // the centroids, and create the vector between them---we will
   // call this alignment.
   if (1) {
-    console.log(icosa);
+    console.log(geo);
   //  debugger;
   }
-  // I will just guess faces 0, 10 for now...
-  const Bf = 0;
-  const Cf = 4;
+  // This probably doesn't work when the faces aren't triangles...
+  // we need to choose the vertices more generally.
+  // In particualr for a cube and dodecahedron this is likely to be wrong.
+
   let Bc = new THREE.Vector3();
-  Bc.add(icosa.vertices[icosa.faces[Bf].a]);
-  Bc.add(icosa.vertices[icosa.faces[Bf].b]);
-  Bc.add(icosa.vertices[icosa.faces[Bf].c]);
+  let Cc = new THREE.Vector3();
+
+  if ((solid != "CUBE") && (solid != "DODECAHEDRON")) {
+  Bc.add(geo.vertices[geo.faces[Bf].a]);
+  Bc.add(geo.vertices[geo.faces[Bf].b]);
+  Bc.add(geo.vertices[geo.faces[Bf].c]);
   Bc.multiplyScalar(1/3);
 
-  let Cc = new THREE.Vector3();
-  Cc.add(icosa.vertices[icosa.faces[Cf].a]);
-  Cc.add(icosa.vertices[icosa.faces[Cf].b]);
-  Cc.add(icosa.vertices[icosa.faces[Cf].c]);
-  Cc.multiplyScalar(1/3);
-  console.log(Bc,Cc);
+  Cc.add(geo.vertices[geo.faces[Cf].a]);
+  Cc.add(geo.vertices[geo.faces[Cf].b]);
+  Cc.add(geo.vertices[geo.faces[Cf].c]);
+    Cc.multiplyScalar(1/3);
+  } else if (solid == "CUBE") {
+    // here we know we are the midpoint of opposite vertices...
+    // the concept of "faces" for a cube and a dodecahedron
+    // does not match the geometry, which uses multiple triangles.
+    // So it is easier to the mapping our selves...
+    // Although technically for a cube you could choose
+    // four faces, the are all symmetric, so we will just
+    // wire one in and not worry about it.
+    // This is technically an error, and does not support the
+    // fifth face (which is a very boring helix, having parallel
+    // normals, but so be it. I will capture this by aborting if
+    // you don't choose 0,1 for the faces.
+    console.assert((Bf == 0) && (Cf == 1));
+    Bc.add(geo.vertices[0]);
+    Bc.add(geo.vertices[3]);
+    Bc.multiplyScalar(1/2);
+
+    Cc.add(geo.vertices[0]);
+    Cc.add(geo.vertices[4]);
+    Cc.multiplyScalar(1/2);
+  } else if (solid == "DODECAHEDRON") {
+    // Now, sadly, we really have to just know the vertices of
+    // the first face...this numbering comes from THREE and is
+    // effectively arbitrary as far as we are concerned.
+    Bc.add(geo.vertices[0]);
+    Bc.add(geo.vertices[1]);
+    Bc.add(geo.vertices[2]);
+    Bc.add(geo.vertices[3]);
+    Bc.add(geo.vertices[4]);
+    Bc.multiplyScalar(1/5);
+
+    Cc.add(geo.vertices[11]);
+    Cc.add(geo.vertices[12]);
+    Cc.add(geo.vertices[14]);
+    Cc.add(geo.vertices[15]);
+    Cc.add(geo.vertices[16]);
+    Cc.multiplyScalar(1/5);
+  }
+  console.log("Bb,Cc",Bc,Cc);
+
+  let O = new THREE.Vector3();
+
+  var d = Cc.clone();
+  d.sub(Bc);
+  var olen = d.length();
+  let bclen = C.clone().sub(B).length();
+  let scale_m = new THREE.Matrix4().identity();
+  let s = bclen/olen;
+  scale_m.makeScale(s,s,s);
+  obj.applyMatrix(scale_m);
+  Bc.applyMatrix4(scale_m);
+  Cc.applyMatrix4(scale_m);
+  console.log("new len",C.clone().sub(B).length());
 
 
-  let Dir = Bc.clone();
-  Dir.sub(Cc);
-  let len = Dir.length();
-  var hex = 0x008000;
-  Dir.normalize();
-  var arrowHelper = new THREE.ArrowHelper( Dir, Cc, len,
-                                           hex,0.2,0.03 );
-  console.log(obj);
+  d = Cc.clone();
+  d.sub(Bc);
 
-//  arrowHelper.quaternion.setFromUnitVectors(Dir,Z);
-
-  // var bsphere = createSphere(1/10, Bc, "red");
-  // var csphere = createSphere(1/10, Cc, "blue");
-
-  // bsphere.position.applyMatrix4(GTRANS);
-  // csphere.position.applyMatrix4(GTRANS);
-
-
-//  arrowHelper.position.applyMatrix4(GTRANS);
-
-// arrowHelper.quaternion.setFromUnitVectors(Dir,Z);
-
-  //  am.scene.add(arrowHelper);
-  let F = icosa.vertices[icosa.faces[Cf].c].clone();
-  let T = icosa.vertices[icosa.faces[Bf].c].clone();
+  let F = Cc.clone();
+  let T = Bc.clone();
   const Z = new THREE.Vector3(0,0,1);
   Z.normalize();
-  let d = Cc.clone();
-  d.sub(Bc);
   d.normalize();
   console.log("F,T,d =",F,T,d);
-  obj.quaternion.setFromUnitVectors(d,Z);
-  obj.position.applyMatrix4(GTRANS);
+  const hex = 0x00ff00;
+  var arrowHelper = new THREE.ArrowHelper( d, T, bclen,
+                                           hex,0.2,0.03 );
+
+  let rotation = new THREE.Matrix4().identity();
+  let q = new THREE.Quaternion();
+  q.setFromUnitVectors(d,Z);
+  console.log(Z,d);
+  rotation.makeRotationFromQuaternion(q);
+
+  var phi = 0;
+//  rotation.makeRotationY(phi);
+
+//  obj.quaternion.setFromUnitVectors(d,Z);
+  //  arrowHelper.quaternion.setFromUnitVectors(d,Z);
+
+  // Now I rember....I need to create a "rotate about point" routine.
+  // First, let us point the point Bc on the point B.
+
+  obj.applyMatrix(rotation);
+  arrowHelper.applyMatrix(rotation);
+  Bc.applyMatrix4(rotation);
+  Cc.applyMatrix4(rotation);
+  O.applyMatrix4(rotation);
+
+
+
+  let trans = B.clone().sub(Bc);
+  let trans_m = new THREE.Matrix4().makeTranslation(trans.x,trans.y,trans.z);
+  obj.applyMatrix(trans_m);
+  arrowHelper.applyMatrix(trans_m);
+  Bc.applyMatrix4(trans_m);
+  Cc.applyMatrix4(trans_m);
+  O.applyMatrix4(trans_m);
+  console.log("Bc,Cc",Bc,Cc);
+
+    // now we may have Bc and Cc in the right location.
+  // We may have to rotate about the Z (Bc-Cc) axis to
+  // make sure the up vector is correct. But how to even define?
+  // ideally would use the centroid of the object, but Bc-Cc might
+  // pass through them!!
+  // However, we can at least try to compute the centroid and make the
+  // vector from the Bc-Cc line point upwards (+Y).
+  var cent = findCentroid(geo);
+
+  console.log("centroid ",cent,O);
+
+  var oxy = new THREE.Vector2(O.x-B.x,O.y-B.y);
+
+  // angle is measured against
+  var z_angle = oxy.angle() -Math.PI/2;
+
+  let rot_z = new THREE.Matrix4().makeRotationZ(-z_angle);
+
+  // WARNING :: I am traslating back to the center.
+  // I really need to translate the BC vector back to the
+  // the Z axis. This is really worth a subroutine here!
+
+  console.log("rot_z",z_angle * 180 / Math.PI);
+
+  // Now, sadly, we have to pute the object back at the axis to
+  // rotate...
+    let trans_down = new THREE.Matrix4().makeTranslation(0,B.y,0);
+  let trans_down_i = new THREE.Matrix4().getInverse(trans_down);
+  obj.applyMatrix(trans_down_i);
+  arrowHelper.applyMatrix(trans_down_i);
+  Bc.applyMatrix4(trans_down_i);
+  Cc.applyMatrix4(trans_down_i);
+  O.applyMatrix4(trans_down_i);
+
+  // now we apply the rotation, and then translate back
+  obj.applyMatrix(rot_z);
+  arrowHelper.applyMatrix(rot_z);
+  Bc.applyMatrix4(rot_z);
+  Cc.applyMatrix4(rot_z);
+  O.applyMatrix4(rot_z);
+
+  obj.applyMatrix(trans_down);
+  arrowHelper.applyMatrix(trans_down);
+  Bc.applyMatrix4(trans_down);
+  Cc.applyMatrix4(trans_down);
+  O.applyMatrix4(trans_down);
+
   am.scene.add(obj);
 
-//  am.scene.add(bsphere);
-//  am.scene.add(csphere);
+  // now taht we have Bc, Cc, we want to scale the solid appropriately....
+  var bsphere = createSphere(1/10, Bc, "yellow");
+  var csphere = createSphere(1/10, Cc, "black");
+  am.scene.add(arrowHelper);
+  am.scene.add(bsphere);
+  am.scene.add(csphere);
 }
 
 
@@ -1474,6 +1642,5 @@ $( document ).ready(function() {
 
   onComputeDelix();
 
-  createZAlignedIcosa();
 
 });
