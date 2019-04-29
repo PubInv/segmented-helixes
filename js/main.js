@@ -29,6 +29,10 @@ if (!Detector.webgl) {
   document.getElementById('threecontainer').innerHTML = "";
 }
 
+
+
+
+
 // Here I attempt to create an abstract prism object.
 
 
@@ -89,6 +93,9 @@ function renderPrismInstance(p_i) {
 
   // Need to return the points here, and the up vector, not just the meshes...
   // That is an "instance of an abstract prism".
+  if (p_i.sup) {
+    objects.push(p_i.sup);
+  }
   return objects;
 }
 
@@ -120,6 +127,8 @@ function testCreatePrism() {
 function createAdjoinedPrisms(p_i,tau,num) {
   var TP = renderPrismInstance(p_i);
   TP.forEach(o => { am.scene.add(o); });
+  // DANGER
+//  p_i.sup = null;
   var orign = TP;
   var positives = [];
   var negatives = [];
@@ -685,10 +694,16 @@ function clearAm() {
 }
 
 // This is the new experimental computation...
-var computeDelix;
+// var computeDelix;
 
 function main() {
-  computeDelix = document.getElementById('compute-delix');
+  $( "input[type='radio']" ).checkboxradio();
+  $('fieldset input').change(function () {
+    // The one that fires the event is always the
+    // checked one; you don't need to test for this
+    onComputeDelix();
+    });
+//  computeDelix = document.getElementById('compute-delix');
 }
 
 
@@ -954,6 +969,36 @@ function onComputeDelix() {
   var wf = wfgui ? wfgui.checked : true;
   var bc = bcgui ? bcgui.checked : false;
 
+  var mode = $(":radio:checked").attr('id');
+  console.log("MODE:",mode);
+  var SOLID;
+  switch (mode) {
+    case "radio-arb":
+    SOLID = null;
+    break;
+    case "radio-tet":
+    SOLID = "TETRAHEDRON";
+    break;
+    case "radio-cub":
+    SOLID = "CUBE";
+    break;
+    case "radio-oct":
+    SOLID = "OCTAHEDRON";
+    break;
+    case "radio-dod":
+    SOLID = "DODECAHEDRON";
+    break;
+    case "radio-ico":
+    SOLID = "ICOSAHEDRON";
+    break;
+  }
+  console.log("SOLID :",SOLID);
+    // Here we attempt to render platonic solids if appropriate
+  //  let SOLID = "OCTAHEDRON";
+  //  let SOLID = "TETRAHEDRON";
+  //  let SOLID = "CUBE";
+  //  let SOLID = "ICOSAHEDRON";
+  // let SOLID = "DODECAHEDRON";
 
   var res;
   var r;
@@ -995,12 +1040,25 @@ function onComputeDelix() {
 
   res = KahnAxis(L0,D);
 
+  let B = new THREE.Vector3(0,0,-L0/2);
+  let C = new THREE.Vector3(0,0,L0/2);
+
+  var obj;
+  var Bn_solid;
+  var Cn_solid;
+  if (SOLID) {
+    [obj,Bn_solid,Cn_solid] = createZAlignedIcosa(SOLID,B,C);
+  }
+
   GLOBAL_P0 = new AbstractPrism(
     L0,
     Nb,
     Nc);
 
   var p_i = CreatePrism( GLOBAL_P0,PRISM_FACE_RATIO_LENGTH);
+  // This should probably be added...
+  p_i.sup = obj;
+
   // We shall place this upward, for the purpose of
   // making it easier to see...
 
@@ -1029,8 +1087,8 @@ function onComputeDelix() {
   }
 
   // Ba and Ca need to be on the axis, that is an assertion.
-
   C = prisms[0][7].position;
+
   B_SPRITE.p = B.clone();
   C_SPRITE.p = C.clone();
 
@@ -1049,6 +1107,8 @@ function onComputeDelix() {
   d = res[2];
   phi = res[4];
   set_outputs(r,theta,d,phi);
+
+
 
   RenderHelix(L0,r,d,theta,new THREE.Vector3(0,0,1),phi,
               WORLD_HEIGHT,NUM_SEGMENTS);
@@ -1157,16 +1217,6 @@ function onComputeDelix() {
   renderSprites();
 
 
-  // Here we attempt to render platonic solids if appropriate
-  //  let SOLID = "OCTAHEDRON";
-  //  let SOLID = "TETRAHEDRON";
-  //  let SOLID = "CUBE";
-  //  let SOLID = "ICOSAHEDRON";
-  let SOLID = "DODECAHEDRON";
-
-  if (SOLID) {
-    createZAlignedIcosa(SOLID,B,C);
-  }
 
 }
 
@@ -1405,6 +1455,9 @@ function findCentroid(geo) {
   return sum.multiplyScalar(1/n);
 }
 
+// This routine needs to return not only the object
+// for rending, but also the normal vectors!
+// And legal tau values!
 function createZAlignedIcosaAux(solid, B, C, Bf, Cf) {
   // Each of the platonic solids actually requires you to also
   // make a choice as to the face...
@@ -1444,16 +1497,23 @@ function createZAlignedIcosaAux(solid, B, C, Bf, Cf) {
   let Bc = new THREE.Vector3();
   let Cc = new THREE.Vector3();
 
-  if ((solid != "CUBE") && (solid != "DODECAHEDRON")) {
-  Bc.add(geo.vertices[geo.faces[Bf].a]);
-  Bc.add(geo.vertices[geo.faces[Bf].b]);
-  Bc.add(geo.vertices[geo.faces[Bf].c]);
-  Bc.multiplyScalar(1/3);
+  // The are the face normals....
+  var Bn;
+  var Cn;
 
-  Cc.add(geo.vertices[geo.faces[Cf].a]);
-  Cc.add(geo.vertices[geo.faces[Cf].b]);
-  Cc.add(geo.vertices[geo.faces[Cf].c]);
+  if ((solid != "CUBE") && (solid != "DODECAHEDRON")) {
+    Bc.add(geo.vertices[geo.faces[Bf].a]);
+    Bc.add(geo.vertices[geo.faces[Bf].b]);
+    Bc.add(geo.vertices[geo.faces[Bf].c]);
+
+    Bc.multiplyScalar(1/3);
+    Bn = geo.faces[Bf].normal.clone();
+
+    Cc.add(geo.vertices[geo.faces[Cf].a]);
+    Cc.add(geo.vertices[geo.faces[Cf].b]);
+    Cc.add(geo.vertices[geo.faces[Cf].c]);
     Cc.multiplyScalar(1/3);
+    Cn = geo.faces[Cf].normal.clone();
   } else if (solid == "CUBE") {
     // here we know we are the midpoint of opposite vertices...
     // the concept of "faces" for a cube and a dodecahedron
@@ -1609,12 +1669,14 @@ function createZAlignedIcosaAux(solid, B, C, Bf, Cf) {
   am.scene.add(arrowHelper);
   am.scene.add(bsphere);
   am.scene.add(csphere);
+  console.log("returning obj", obj);
+  return [obj,Bn,Cn];
 }
 
 
 $( document ).ready(function() {
   runUnitTests();
-  $("#construct_via_norms").prop('checked', true);
+//  $("#construct_via_norms").prop('checked', true);
 
   $( "#angle_omega_slider" ).slider( "value",INIT_RHO );
   $( "#angle_omega" ).val( INIT_RHO );

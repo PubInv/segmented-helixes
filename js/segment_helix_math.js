@@ -36,10 +36,12 @@ function ThetaFromRC(r,c) {
   return Math.abs(2 * Math.asin(c/(2*r)));
 }
 
-function AbstractPrism(L,Nb,Nc) {
+// The "Sup" here is a "superstructure"
+function AbstractPrism(L,Nb,Nc,Sup = null) {
   this.L = L;
   this.Nb = Nb.clone().normalize();
   this.Nc = Nc.clone().normalize();
+  this.sup = Sup;
 }
 
 function ChordFromLDaxis(L,Da) {
@@ -268,6 +270,12 @@ function adjoinPrism(old,tau,joinToC) {
   nu.lc = new THREE.Vector3(old.lc.x,old.lc.y,old.lc.z);
   nu.rc = new THREE.Vector3(old.rc.x,old.rc.y,old.rc.z);
 
+  // I don't quite know how to copy the object here....
+
+  if (old.sup) {
+    nu.sup = old.sup.clone();
+  }
+
   // Then we translate along the axis of the old prism
   var av;
   if (joinToC)
@@ -374,6 +382,9 @@ function applyMatrix4ToPrism(nu,trans) {
 
   nu.b.applyMatrix4(trans);
   nu.c.applyMatrix4(trans);
+  if (nu.sup) {
+    nu.sup.applyMatrix(trans);
+  }
 }
 
 function applyQuaternionToPrism(nu,q) {
@@ -387,6 +398,9 @@ function applyQuaternionToPrism(nu,q) {
 
   nu.b.applyQuaternion(q);
   nu.c.applyQuaternion(q);
+  if (nu.sup) {
+    nu.sup.applyQuaternion(q);
+  }
 }
 
 // absp is an abstract prism.
@@ -463,7 +477,6 @@ function CreatePrism(absp,PRISM_FACE_RATIO_LENGTH) {
           nc: absp.Nc,
           tb: TB, lb : LB, rb : RB,
           tc : TC, lc : LC, rc : RC};
-
 }
 
 function condition_angle(angle) {

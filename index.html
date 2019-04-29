@@ -63,13 +63,26 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
   var GLOBAL_DHELIX_PAGE = true;
   </script>
 <body>
-    <div id="threecontainer"></div>
+  <div id="threecontainer"></div>
+
+ <h2>Control Mode</h2>
+  <fieldset>
+    <legend>Controls: </legend>
+    <label for="radio-arb">Arbitrary Faces</label>
+    <input type="radio" name="radio-1" id="radio-arb">
+    <label for="radio-tet">Tetrahelix</label>
+    <input type="radio" name="radio-1" id="radio-tet">
+    <label for="radio-cub">Cube</label>
+    <input type="radio" name="radio-1" id="radio-cub">
+    <label for="radio-oct">Octahedron</label>
+    <input type="radio" name="radio-1" id="radio-oct">
+    <label for="radio-dod">Dodecahedron</label>
+    <input type="radio" name="radio-1" id="radio-dod">
+    <label for="radio-ico">Icosahedron</label>
+    <input type="radio" name="radio-1" id="radio-ico">
+  </fieldset>
+
     <section>
-      <h1>Construction via Norms</h1>
-        <div id=stack>
-        <label>Construct via Norms:<input type="checkbox" id="construct_via_norms" value="true" /></label>
-        </br>
-        <br />
 <table style="width:100%">
   <tr>
     <th width='10%'>Coord</th>
@@ -130,6 +143,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
     <td>  &nbsp;  &nbsp; <label>C.z <input id="c_z" />  </label> </td>
   </tr>
 </table>
+
+
       </section>
 
     <table>
