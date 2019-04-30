@@ -20,7 +20,7 @@
 var TET_DISTANCE = 0.5;
 
 
-const NUM_PRISMS = 15;
+const NUM_PRISMS = 1;
 const NUM_SEGMENTS = (2 * NUM_PRISMS) + 1;
 
 // Detects webgl
@@ -40,11 +40,17 @@ const PRISM_FACE_RATIO_LENGTH = 1/2;
 
 var PHI_SPRITE;
 
+var BOGUS_OBJ_CNT = 0;
+var bncG;
+
+
 function renderPrismInstance(p_i) {
   // now that we have the points, we can
   // construct the objects....
   var objects = [];
   let colors = [d3.color("DarkRed"), d3.color("DarkOrange"), d3.color("Blue")];
+
+
 
   let L = p_i.p.L;
   let PRISM_FACE_LENGTH = L * PRISM_FACE_RATIO_LENGTH;
@@ -93,8 +99,82 @@ function renderPrismInstance(p_i) {
 
   // Need to return the points here, and the up vector, not just the meshes...
   // That is an "instance of an abstract prism".
-  if (p_i.sup) {
-    objects.push(p_i.sup);
+    // POSITION SUPERSTRUCTURE
+  // Not having computed the transform for this,
+  // But rather having computed all the points in the
+  // world space, we can postion SUP by moving it
+  // to the mid point of nu.b and nu.c, "looking at" C,
+  // and then making sure the local Y axis points at
+  // the up vectors by rotating around BC.
+
+  var transG;
+
+
+  function positionSuperStructure(nu) {
+    // First we point axis in bc direction....
+    var bc = nu.c.clone().sub(nu.b);
+    let bcn = bc.clone().normalize();
+    bncG = bcn.clone();
+
+    const m = new THREE.Vector3().addVectors(nu.b,nu.c);
+    m.multiplyScalar(1/2);
+    const tm = new THREE.Vector3().addVectors(nu.tb,nu.tc);
+    tm.multiplyScalar(1/2);
+    console.log("m,tm",m,tm);
+
+    const prism_up = tm.clone().sub(m);
+
+    const q0 = new THREE.Quaternion();
+
+    console.log("bcn",bcn);
+ //   bcn.multiplyScalar(-1);
+
+    q0.setFromUnitVectors(new THREE.Vector3(0,0,1),bcn);
+//    m.z += 1/2;
+//    m.y -= 1/2;
+//    nu.sup.position.copy(m);
+    console.log("PRE ROTATION",nu.sup.getWorldPosition().clone());
+//    nu.sup.applyQuaternion(q0);
+    console.log("POS ROTATION",nu.sup.getWorldPosition().clone());
+
+    // Then we make up direction correct...
+    //    const super_up = nu.sup.localToWorld(nu.sup.up);
+    const super_up = nu.sup.up.clone();
+    super_up.normalize();
+    prism_up.normalize();
+    console.log("SUPER_UP",super_up);
+    console.log("PRISM_UP",prism_up);
+
+    const q1 = new THREE.Quaternion();
+    q1.setFromUnitVectors(super_up,prism_up);
+
+//    nu.sup.applyQuaternion(q);
+    // finally we move the object to the midpoint...
+
+    var trans = new THREE.Matrix4();
+    trans.makeTranslation(m.x,m.y,m.z);
+    var rot0 = new THREE.Matrix4();
+    rot0.makeRotationFromQuaternion(q0);
+    var rot1 = new THREE.Matrix4();
+    rot1.makeRotationFromQuaternion(q1);
+    trans.multiply(rot1).multiply(rot0);
+    nu.sup.applyMatrix(trans);
+    console.log("NU.SUP ",nu.sup);
+  }
+
+  if (BOGUS_OBJ_CNT < 2) {
+    if (p_i.p.superstructure_prototype) {
+      p_i.sup =
+        p_i.p.superstructure_prototype.GdeepCloneMaterials();
+      // p_i.sup.scale.copy(p_i.p.superstructure_prototype.scale.clone());
+      // p_i.sup.position.copy(p_i.p.superstructure_prototype.position.clone());
+      // p_i.sup.quaternion.copy(p_i.p.superstructure_prototype.quaternion.clone());
+
+      console.log("prototype",p_i.p.superstructure_prototype);
+      positionSuperStructure(p_i);
+      objects.push(p_i.sup);
+      BOGUS_OBJ_CNT++;
+    }
   }
   return objects;
 }
@@ -259,18 +339,6 @@ function memo_color_mat(tcolor) {
   }
   return am.color_material_palette[string]
 }
-
-// function alphabetic_name(n) {
-//   if (n < 26) {
-//     return String.fromCharCode(65 + n);
-//   } else {
-//     if (n < 26 * 26) {
-//       return alphabetic_name(Math.floor(n / 26)) + alphabetic_name(n % 26);
-//     } else {
-//       return "" + n;
-//     }
-//   }
-// }
 
 var scolors = [d3.color("DarkRed"), d3.color("DarkOrange"), d3.color("Indigo")];
 var smats = [new THREE.Color(0x8B0000),
@@ -693,9 +761,6 @@ function clearAm() {
   am.helix_params = [];
 }
 
-// This is the new experimental computation...
-// var computeDelix;
-
 function main() {
   $( "input[type='radio']" ).checkboxradio();
   $('fieldset input').change(function () {
@@ -703,7 +768,6 @@ function main() {
     // checked one; you don't need to test for this
     onComputeDelix();
     });
-//  computeDelix = document.getElementById('compute-delix');
 }
 
 
@@ -1007,18 +1071,31 @@ function onComputeDelix() {
   var phi;
   let L0 = 1;
 
-  var Nb = new THREE.Vector3(NORMAL_B_X,
-                             NORMAL_B_Y,
-                             NORMAL_B_Z
-                            );
-  var Nc = new THREE.Vector3(NORMAL_C_X,
-                             NORMAL_C_Y,
-                             NORMAL_C_Z
-                            );
-  Nb.normalize();
-  Nc.normalize();
+  let B = new THREE.Vector3(0,0,-L0/2);
+  let C = new THREE.Vector3(0,0,L0/2);
 
-  let tau_v = TAU_d * Math.PI / 180;
+  var obj;
+  var Bn_solid;
+  var Cn_solid;
+  var Nb, Nc;
+  var tau_v;
+  if (SOLID) {
+    [obj,Nb,Nc] = createZAlignedIcosa(SOLID,B,C);
+    tau_v = 0;
+  } else {
+    var Nb = new THREE.Vector3(NORMAL_B_X,
+                               NORMAL_B_Y,
+                               NORMAL_B_Z
+                              );
+    var Nc = new THREE.Vector3(NORMAL_C_X,
+                               NORMAL_C_Y,
+                               NORMAL_C_Z
+                              );
+    Nb.normalize();
+    Nc.normalize();
+    tau_v = TAU_d * Math.PI / 180;
+  }
+
   let Arot = AfromLtauNbNc(L0,tau_v,Nb,Nc);
   let A = Arot[0];
   // I am not sure whey this is negated...
@@ -1040,24 +1117,16 @@ function onComputeDelix() {
 
   res = KahnAxis(L0,D);
 
-  let B = new THREE.Vector3(0,0,-L0/2);
-  let C = new THREE.Vector3(0,0,L0/2);
-
-  var obj;
-  var Bn_solid;
-  var Cn_solid;
-  if (SOLID) {
-    [obj,Bn_solid,Cn_solid] = createZAlignedIcosa(SOLID,B,C);
-  }
 
   GLOBAL_P0 = new AbstractPrism(
     L0,
     Nb,
-    Nc);
+    Nc,
+    obj);
 
   var p_i = CreatePrism( GLOBAL_P0,PRISM_FACE_RATIO_LENGTH);
   // This should probably be added...
-  p_i.sup = obj;
+  //  p_i.sup = obj;
 
   // We shall place this upward, for the purpose of
   // making it easier to see...
@@ -1067,10 +1136,16 @@ function onComputeDelix() {
 
   // GTRANS sets us into position in the world
   applyMatrix4ToPrism(p_i,GTRANS);
+
+// if (p_i.sup) {
+//    p_i.sup.applyMatrix(GTRANS);
+// }
   p_i.p.Nb.applyMatrix4(rt);
   p_i.p.Nc.applyMatrix4(rt);
 
-  //  Ba.applyMatrix4(rt);
+//  if (p_i.sup) {
+//    p_i.sup.applyMatrix(rt);
+//  }
 
   var prisms = createAdjoinedPrisms(p_i,tau_v,NUM_PRISMS);
 
@@ -1215,9 +1290,6 @@ function onComputeDelix() {
   }
 
   renderSprites();
-
-
-
 }
 
 function addDebugSphere(am,pos,color) {
@@ -1479,17 +1551,6 @@ function createZAlignedIcosaAux(solid, B, C, Bf, Cf) {
     geo = new THREE.IcosahedronGeometry(1,0);
     break;
   }
-  var obj = new THREE.Mesh( geo, new THREE.MeshNormalMaterial(
-    { transparent: true,
-      opacity: 0.5 }
-  ));
-  // Our basic operation is to choose two faces, compute
-  // the centroids, and create the vector between them---we will
-  // call this alignment.
-  if (1) {
-    console.log(geo);
-  //  debugger;
-  }
   // This probably doesn't work when the faces aren't triangles...
   // we need to choose the vertices more generally.
   // In particualr for a cube and dodecahedron this is likely to be wrong.
@@ -1497,9 +1558,9 @@ function createZAlignedIcosaAux(solid, B, C, Bf, Cf) {
   let Bc = new THREE.Vector3();
   let Cc = new THREE.Vector3();
 
-  // The are the face normals....
-  var Bn;
-  var Cn;
+  // The are LOCAL face normals....
+  var Bnl;
+  var Cnl;
 
   if ((solid != "CUBE") && (solid != "DODECAHEDRON")) {
     Bc.add(geo.vertices[geo.faces[Bf].a]);
@@ -1507,13 +1568,13 @@ function createZAlignedIcosaAux(solid, B, C, Bf, Cf) {
     Bc.add(geo.vertices[geo.faces[Bf].c]);
 
     Bc.multiplyScalar(1/3);
-    Bn = geo.faces[Bf].normal.clone();
+    Bnl = geo.faces[Bf].normal.clone();
 
     Cc.add(geo.vertices[geo.faces[Cf].a]);
     Cc.add(geo.vertices[geo.faces[Cf].b]);
     Cc.add(geo.vertices[geo.faces[Cf].c]);
     Cc.multiplyScalar(1/3);
-    Cn = geo.faces[Cf].normal.clone();
+    Cnl = geo.faces[Cf].normal.clone();
   } else if (solid == "CUBE") {
     // here we know we are the midpoint of opposite vertices...
     // the concept of "faces" for a cube and a dodecahedron
@@ -1534,6 +1595,9 @@ function createZAlignedIcosaAux(solid, B, C, Bf, Cf) {
     Cc.add(geo.vertices[0]);
     Cc.add(geo.vertices[4]);
     Cc.multiplyScalar(1/2);
+    Bnl = geo.faces[0].normal.clone();
+    Cnl = geo.faces[5].normal.clone();
+    console.log("Bnl, Cnl",Bnl,Cnl);
   } else if (solid == "DODECAHEDRON") {
     // Now, sadly, we really have to just know the vertices of
     // the first face...this numbering comes from THREE and is
@@ -1551,6 +1615,8 @@ function createZAlignedIcosaAux(solid, B, C, Bf, Cf) {
     Cc.add(geo.vertices[15]);
     Cc.add(geo.vertices[16]);
     Cc.multiplyScalar(1/5);
+    Bnl = geo.faces[Bf*3].normal.clone();
+    Cnl = geo.faces[13].normal.clone();
   }
   console.log("Bb,Cc",Bc,Cc);
 
@@ -1562,8 +1628,12 @@ function createZAlignedIcosaAux(solid, B, C, Bf, Cf) {
   let bclen = C.clone().sub(B).length();
   let scale_m = new THREE.Matrix4().identity();
   let s = bclen/olen;
+  // we could do this via world transformations, but
+  // we are attempting to build a locally aligned object...
   scale_m.makeScale(s,s,s);
-  obj.applyMatrix(scale_m);
+  //  obj.applyMatrix(scale_m);
+  geo.scale(s,s,s);
+
   Bc.applyMatrix4(scale_m);
   Cc.applyMatrix4(scale_m);
   console.log("new len",C.clone().sub(B).length());
@@ -1578,39 +1648,32 @@ function createZAlignedIcosaAux(solid, B, C, Bf, Cf) {
   Z.normalize();
   d.normalize();
   console.log("F,T,d =",F,T,d);
-  const hex = 0x00ff00;
-  var arrowHelper = new THREE.ArrowHelper( d, T, bclen,
-                                           hex,0.2,0.03 );
 
-  let rotation = new THREE.Matrix4().identity();
-  let q = new THREE.Quaternion();
-  q.setFromUnitVectors(d,Z);
-  console.log(Z,d);
+
+   let rotation = new THREE.Matrix4().identity();
+   let q = new THREE.Quaternion();
+   q.setFromUnitVectors(d,Z);
+   console.log(Z,d);
   rotation.makeRotationFromQuaternion(q);
-
-  var phi = 0;
-//  rotation.makeRotationY(phi);
-
-//  obj.quaternion.setFromUnitVectors(d,Z);
-  //  arrowHelper.quaternion.setFromUnitVectors(d,Z);
-
-  // Now I rember....I need to create a "rotate about point" routine.
-  // First, let us point the point Bc on the point B.
-
-  obj.applyMatrix(rotation);
-  arrowHelper.applyMatrix(rotation);
+  // Note: This is a local transformation!
+   geo.applyMatrix(rotation);
   Bc.applyMatrix4(rotation);
   Cc.applyMatrix4(rotation);
+  Bnl.applyMatrix4(rotation);
+  Cnl.applyMatrix4(rotation);
   O.applyMatrix4(rotation);
-
 
 
   let trans = B.clone().sub(Bc);
   let trans_m = new THREE.Matrix4().makeTranslation(trans.x,trans.y,trans.z);
-  obj.applyMatrix(trans_m);
-  arrowHelper.applyMatrix(trans_m);
+
+  // Note: This is a local tranformation
+  geo.applyMatrix(trans_m);
+//  arrowHelper.applyMatrix(trans_m);
   Bc.applyMatrix4(trans_m);
   Cc.applyMatrix4(trans_m);
+//  Bnl.applyMatrix4(trans_m);
+//  Cnl.applyMatrix4(trans_m);
   O.applyMatrix4(trans_m);
   console.log("Bc,Cc",Bc,Cc);
 
@@ -1624,6 +1687,7 @@ function createZAlignedIcosaAux(solid, B, C, Bf, Cf) {
   var cent = findCentroid(geo);
 
   console.log("centroid ",cent,O);
+
 
   var oxy = new THREE.Vector2(O.x-B.x,O.y-B.y);
 
@@ -1640,37 +1704,66 @@ function createZAlignedIcosaAux(solid, B, C, Bf, Cf) {
 
   // Now, sadly, we have to pute the object back at the axis to
   // rotate...
-    let trans_down = new THREE.Matrix4().makeTranslation(0,B.y,0);
+  let trans_down = new THREE.Matrix4().makeTranslation(0,B.y,0);
   let trans_down_i = new THREE.Matrix4().getInverse(trans_down);
-  obj.applyMatrix(trans_down_i);
-  arrowHelper.applyMatrix(trans_down_i);
+  geo.applyMatrix(trans_down_i);
   Bc.applyMatrix4(trans_down_i);
   Cc.applyMatrix4(trans_down_i);
   O.applyMatrix4(trans_down_i);
 
-  // now we apply the rotation, and then translate back
-  obj.applyMatrix(rot_z);
-  arrowHelper.applyMatrix(rot_z);
+  geo.applyMatrix(rot_z);
   Bc.applyMatrix4(rot_z);
   Cc.applyMatrix4(rot_z);
+  Bnl.applyMatrix4(rot_z);
+  Cnl.applyMatrix4(rot_z);
   O.applyMatrix4(rot_z);
 
-  obj.applyMatrix(trans_down);
-  arrowHelper.applyMatrix(trans_down);
+  geo.applyMatrix(trans_down);
   Bc.applyMatrix4(trans_down);
   Cc.applyMatrix4(trans_down);
   O.applyMatrix4(trans_down);
 
-  am.scene.add(obj);
 
-  // now taht we have Bc, Cc, we want to scale the solid appropriately....
-  var bsphere = createSphere(1/10, Bc, "yellow");
-  var csphere = createSphere(1/10, Cc, "black");
-  am.scene.add(arrowHelper);
+  var bsphere = createSphere(1/20, Bc, "yellow");
+  var csphere = createSphere(1/20, Cc, "black");
+  bsphere.position.copy(Bc);
+  csphere.position.copy(Cc);
+
   am.scene.add(bsphere);
   am.scene.add(csphere);
   console.log("returning obj", obj);
-  return [obj,Bn,Cn];
+
+  let Fx = Cc.clone();
+  let Tx = Bc.clone();
+  // I hate non-functional math....
+  let Bnx = Bnl.clone();
+  let Cnx = Cnl.clone();
+
+  // let qw = new THREE.Quaternion();
+  // obj.getWorldQuaternion(qw);
+  // Bnx.applyQuaternion(qw);
+  // Cnx.applyQuaternion(qw);
+//  obj.localToWorld(Bnx);
+//  obj.localToWorld(Cnx);
+  var Bn_arrowHelper = new THREE.ArrowHelper( Bnx, Tx, bclen,
+                                           0x00ff00,0.2,0.03 );
+
+  var Cn_arrowHelper = new THREE.ArrowHelper( Cnx, Fx, bclen,
+                                              0xff0000,0.2,0.03 );
+  var group = new THREE.Group();
+  var obj = new THREE.Mesh( geo, new THREE.MeshNormalMaterial(
+    { transparent: true,
+      opacity: 0.5 }
+  ));
+  group.add(obj);
+  console.log("XXXX",obj.getWorldPosition().clone());
+  group.add(bsphere);
+  group.add(csphere);
+//  group.add(Bn_arrowHelper);
+//  group.add(Cn_arrowHelper);
+//  am.scene.add(Bn_arrowHelper);
+//  am.scene.add(Cn_arrowHelper);
+  return [group,Bnx,Cnx];
 }
 
 

@@ -41,7 +41,7 @@ function AbstractPrism(L,Nb,Nc,Sup = null) {
   this.L = L;
   this.Nb = Nb.clone().normalize();
   this.Nc = Nc.clone().normalize();
-  this.sup = Sup;
+  this.superstructure_prototype = Sup;
 }
 
 function ChordFromLDaxis(L,Da) {
@@ -244,6 +244,36 @@ function KahnAxis(L,D) {
   }
 }
 
+// This code taken from:
+// https://stackoverflow.com/questions/22360936/will-three-js-object3d-clone-create-a-deep-copy-of-the-geometry
+
+    /** Gives the aptitude for an object3D to clone recursively with its material cloned (normal clone does not clone material)*/
+
+    THREE.Object3D.prototype.GdeepCloneMaterials = function() {
+        var object = this.clone( new THREE.Object3D(), false );
+
+        for ( var i = 0; i < this.children.length; i++ ) {
+
+            var child = this.children[ i ];
+            if ( child.GdeepCloneMaterials ) {
+                object.add( child.GdeepCloneMaterials() );
+            } else {
+                object.add( child.clone() );
+            }
+
+        }
+        return object;
+    };
+
+    THREE.Mesh.prototype.GdeepCloneMaterials = function( object, recursive ) {
+        if ( object === undefined ) {
+            object = new THREE.Mesh( this.geometry, this.material.clone() );
+        }
+
+        THREE.Object3D.prototype.GdeepCloneMaterials.call( this, object, recursive );
+
+        return object;
+    };
 // Add the novel prism to the old prism by placing the B face
 // aginst the C face of the old with a twist of tau and return.
 // note that old is a prism instance, not a mesh instance,
@@ -253,6 +283,8 @@ function KahnAxis(L,D) {
 // NOTE: A posssible goal here is to return the
 // transforms needed for this transformation, to apply to other
 // Geometry objects in the same frame.
+// Note: I believe the up vector can be computed from
+// tb and tc.
 function adjoinPrism(old,tau,joinToC) {
   // First, we copy the old prism in exactly the same position
 
@@ -269,12 +301,6 @@ function adjoinPrism(old,tau,joinToC) {
   nu.tc = new THREE.Vector3(old.tc.x,old.tc.y,old.tc.z);
   nu.lc = new THREE.Vector3(old.lc.x,old.lc.y,old.lc.z);
   nu.rc = new THREE.Vector3(old.rc.x,old.rc.y,old.rc.z);
-
-  // I don't quite know how to copy the object here....
-
-  if (old.sup) {
-    nu.sup = old.sup.clone();
-  }
 
   // Then we translate along the axis of the old prism
   var av;
@@ -363,7 +389,6 @@ function adjoinPrism(old,tau,joinToC) {
   if (!near(diff.length(),0,1e-4)) {
     console.log("DIFF",diff);
   }
-
   // So that the normal of the C face is the opposite of the B face.
   return nu;
 }
@@ -382,9 +407,11 @@ function applyMatrix4ToPrism(nu,trans) {
 
   nu.b.applyMatrix4(trans);
   nu.c.applyMatrix4(trans);
-  if (nu.sup) {
-    nu.sup.applyMatrix(trans);
-  }
+  // if (nu.sup) {
+  //    console.log("TRANS before:",nu.sup);
+  //    nu.sup.applyMatrix(trans);
+  //    console.log("TRANS after:",nu.sup);
+  // }
 }
 
 function applyQuaternionToPrism(nu,q) {
@@ -398,9 +425,11 @@ function applyQuaternionToPrism(nu,q) {
 
   nu.b.applyQuaternion(q);
   nu.c.applyQuaternion(q);
-  if (nu.sup) {
-    nu.sup.applyQuaternion(q);
-  }
+  // if (nu.sup) {
+  //    console.log("QUAT before:",nu.sup);
+  //    nu.sup.applyQuaternion(q);
+  //    console.log("QUAT after:",nu.sup);
+  // }
 }
 
 // absp is an abstract prism.
@@ -467,6 +496,16 @@ function CreatePrism(absp,PRISM_FACE_RATIO_LENGTH) {
   LC.applyMatrix4(transC);
   RC.applyMatrix4(transC);
 
+  // Now the superstruction prototype should be cloned...
+  var sup = null;
+  // If the suprestructure exists, we presumably
+  // computed the face normal from it, so we don't
+  // presumbaly TB,LB,RB and TC,LC,RC lie on those
+  // faces already
+  if (absp.superstructre_prototype) {
+    sup = absp.superstructre_prototype.clone();
+  }
+
   // for convenience, should I make the instance vectors
   // part of this object? Or should I add the matrices,
   // effective make it a "screw" transformation
@@ -476,7 +515,8 @@ function CreatePrism(absp,PRISM_FACE_RATIO_LENGTH) {
           nb: absp.Nb,
           nc: absp.Nc,
           tb: TB, lb : LB, rb : RB,
-          tc : TC, lc : LC, rc : RC};
+          tc : TC, lc : LC, rc : RC,
+          sup: sup};
 }
 
 function condition_angle(angle) {
@@ -637,8 +677,6 @@ function testAfromLtauMultiple() {
       }
     }
   }
-
-
 }
 
 
