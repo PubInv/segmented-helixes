@@ -20,7 +20,7 @@
 var TET_DISTANCE = 0.5;
 
 
-const NUM_PRISMS = 1;
+const NUM_PRISMS = 5;
 const NUM_SEGMENTS = (2 * NUM_PRISMS) + 1;
 
 // Detects webgl
@@ -127,16 +127,16 @@ function renderPrismInstance(p_i) {
     const q0 = new THREE.Quaternion();
 
     console.log("bcn",bcn);
- //   bcn.multiplyScalar(-1);
 
     q0.setFromUnitVectors(new THREE.Vector3(0,0,1),bcn);
-//    m.z += 1/2;
-//    m.y -= 1/2;
-//    nu.sup.position.copy(m);
     console.log("PRE ROTATION",nu.sup.getWorldPosition().clone());
 //    nu.sup.applyQuaternion(q0);
     console.log("POS ROTATION",nu.sup.getWorldPosition().clone());
 
+    { // The entire matching of the up vector must be rethought...
+      // We need to create a rotation along the BC axis, to
+      // match faces, but I am not sure how to do this, and
+      // I should have it from the other prism work.
     // Then we make up direction correct...
     //    const super_up = nu.sup.localToWorld(nu.sup.up);
     const super_up = nu.sup.up.clone();
@@ -147,7 +147,9 @@ function renderPrismInstance(p_i) {
 
     const q1 = new THREE.Quaternion();
     q1.setFromUnitVectors(super_up,prism_up);
-
+    var rot1 = new THREE.Matrix4();
+    rot1.makeRotationFromQuaternion(q1);
+    }
 //    nu.sup.applyQuaternion(q);
     // finally we move the object to the midpoint...
 
@@ -155,14 +157,15 @@ function renderPrismInstance(p_i) {
     trans.makeTranslation(m.x,m.y,m.z);
     var rot0 = new THREE.Matrix4();
     rot0.makeRotationFromQuaternion(q0);
-    var rot1 = new THREE.Matrix4();
-    rot1.makeRotationFromQuaternion(q1);
-    trans.multiply(rot1).multiply(rot0);
+//    trans.multiply(rot1).multiply(rot0);
+    trans.multiply(rot0);
+
+
     nu.sup.applyMatrix(trans);
     console.log("NU.SUP ",nu.sup);
   }
 
-  if (BOGUS_OBJ_CNT < 2) {
+//  if (BOGUS_OBJ_CNT < 2) {
     if (p_i.p.superstructure_prototype) {
       p_i.sup =
         p_i.p.superstructure_prototype.GdeepCloneMaterials();
@@ -171,13 +174,18 @@ function renderPrismInstance(p_i) {
       // p_i.sup.quaternion.copy(p_i.p.superstructure_prototype.quaternion.clone());
 
       console.log("prototype",p_i.p.superstructure_prototype);
+
+      var unpositioned = p_i.p.superstructure_prototype.GdeepCloneMaterials();
       positionSuperStructure(p_i);
       objects.push(p_i.sup);
+//      unpositioned.translateX(2);
+//      objects.push(unpositioned);
+
       BOGUS_OBJ_CNT++;
     }
-  }
+//  }
   return objects;
-}
+  }
 
 var INITIAL_NORM_POINT_Y = -0.7;
 var INITIAL_NORM_POINT_X = -0.62;
@@ -749,7 +757,7 @@ function clearAm() {
     if (obj.type == "Mesh" && obj.name != "GROUND") {
       am.scene.remove(obj);
     }
-    if ((obj.name == "HELIX") || (obj.name == "AXIS")) {
+    if ((obj.name == "HELIX") || (obj.name == "AXIS") || (obj.name == "SUPERSTRUCTURE")) {
       am.scene.remove(obj);
     }
     if ((obj.type == "PROTRACTOR_LINE") || (obj.type == "PROTRACTOR_SPHERE")) {
@@ -1080,8 +1088,9 @@ function onComputeDelix() {
   var Nb, Nc;
   var tau_v;
   if (SOLID) {
-    [obj,Nb,Nc] = createZAlignedIcosa(SOLID,B,C);
-    tau_v = 0;
+    [obj,Nb,Nc,taus] = createZAlignedIcosa(SOLID,B,C);
+    tau_v = taus[0];
+    // now we should set the legal taus radio set..
   } else {
     var Nb = new THREE.Vector3(NORMAL_B_X,
                                NORMAL_B_Y,
@@ -1534,21 +1543,27 @@ function createZAlignedIcosaAux(solid, B, C, Bf, Cf) {
   // Each of the platonic solids actually requires you to also
   // make a choice as to the face...
   var geo;
+  var taus = [];
   switch(solid) {
   case "TETRAHEDRON":
     geo = new THREE.TetrahedronGeometry(1,0);
+    taus = [-(Math.PI * 2) / 6, 0, (Math.PI * 2) / 6];
     break;
   case "CUBE":
     geo = new THREE.CubeGeometry(1,0);
+    taus = [-(Math.PI * 2) / 4, 0, (Math.PI * 2) / 4];
     break;
   case "OCTAHEDRON":
     geo = new THREE.OctahedronGeometry(1,0);
+    taus = [-(Math.PI * 2) / 6, 0, (Math.PI * 2) / 6];
     break;
   case "DODECAHEDRON":
     geo = new THREE.DodecahedronGeometry(1,0);
+    taus = [- 2 * (Math.PI * 2) / 5, -(Math.PI * 2) / 5, 0, (Math.PI * 2) / 5, 2 * (Math.PI * 2) / 5];
     break;
   case "ICOSAHEDRON":
     geo = new THREE.IcosahedronGeometry(1,0);
+    taus = [-(Math.PI * 2) / 6, 0, (Math.PI * 2) / 6];
     break;
   }
   // This probably doesn't work when the faces aren't triangles...
@@ -1561,6 +1576,7 @@ function createZAlignedIcosaAux(solid, B, C, Bf, Cf) {
   // The are LOCAL face normals....
   var Bnl;
   var Cnl;
+  // There are a fixed set of legal "tau" values for platonic helices
 
   if ((solid != "CUBE") && (solid != "DODECAHEDRON")) {
     Bc.add(geo.vertices[geo.faces[Bf].a]);
@@ -1731,13 +1747,14 @@ function createZAlignedIcosaAux(solid, B, C, Bf, Cf) {
 
   am.scene.add(bsphere);
   am.scene.add(csphere);
-  console.log("returning obj", obj);
 
   let Fx = Cc.clone();
   let Tx = Bc.clone();
   // I hate non-functional math....
   let Bnx = Bnl.clone();
   let Cnx = Cnl.clone();
+  let dir = Cc.clone().sub(Bc.clone());
+  dir.normalize();
 
   // let qw = new THREE.Quaternion();
   // obj.getWorldQuaternion(qw);
@@ -1750,22 +1767,75 @@ function createZAlignedIcosaAux(solid, B, C, Bf, Cf) {
 
   var Cn_arrowHelper = new THREE.ArrowHelper( Cnx, Fx, bclen,
                                               0xff0000,0.2,0.03 );
+
+  var B2C_arrowHelper = new THREE.ArrowHelper( Bc, dir, bclen,
+                                               0xff0000,0.2,0.03 );
+
+  var lgeometry = new THREE.Geometry();
+  lgeometry.vertices.push(
+    new THREE.Vector3(Bc.x,Bc.y,Bc.z-0.1),
+    new THREE.Vector3(Cc.x,Cc.y,Cc.z+0.3)
+  );
+
+  var lmaterial = new THREE.LineBasicMaterial({
+	color: 0xff00
+  });
+
+  var line = new THREE.Line( lgeometry, lmaterial );
+
   var group = new THREE.Group();
+
   var obj = new THREE.Mesh( geo, new THREE.MeshNormalMaterial(
     { transparent: true,
       opacity: 0.5 }
   ));
   group.add(obj);
-  console.log("XXXX",obj.getWorldPosition().clone());
-  group.add(bsphere);
-  group.add(csphere);
+  group.name = "SUPERSTRUCTURE";
+
+  //  group.add(B2C_arrowHelper);
+
+  var osphere = createSphere(1/20, new THREE.Vector3(0,0,0), "yellow");
+  group.add(line);
+  group.add(osphere);
+
+//  group.add(bsphere);
+//  group.add(csphere);
 //  group.add(Bn_arrowHelper);
 //  group.add(Cn_arrowHelper);
 //  am.scene.add(Bn_arrowHelper);
 //  am.scene.add(Cn_arrowHelper);
-  return [group,Bnx,Cnx];
+  return [group,Bnx,Cnx,taus];
 }
 
+function testStupidObjectManipulation() {
+
+  var geometry = new THREE.BoxGeometry( 1/2, 4/2, 9/2 );
+  var material = new THREE.MeshBasicMaterial( new THREE.MeshNormalMaterial(
+    { transparent: true,
+      opacity: 0.5 }));
+  var cube = new THREE.Mesh( geometry, material );
+  var origin = new THREE.Vector3(0,0,0);
+  var csphere = createSphere(1/20, origin, "red");
+  var group = new THREE.Group();
+  group.add(csphere);
+  group.add(cube);
+  group.translateX(-2);
+  group.translateZ(2);
+
+  // Note this is critical!
+  group.updateMatrix();
+
+  var q = new THREE.Quaternion();
+  q.setFromUnitVectors(new THREE.Vector3(0,0,1),new THREE.Vector3(0,1,0));
+  let transform = group.matrixWorld.clone();
+  var rotation =  new THREE.Matrix4();
+  rotation.makeRotationFromQuaternion(q);
+  transform.multiply(rotation);
+  group.applyMatrix(transform);
+  group.matrixWorldNeedsUpdate = true;
+
+  am.scene.add( group );
+}
 
 $( document ).ready(function() {
   runUnitTests();
@@ -1796,6 +1866,8 @@ $( document ).ready(function() {
   $(function () { main(); });
 
   onComputeDelix();
+
+//  testStupidObjectManipulation();
 
 
 });
