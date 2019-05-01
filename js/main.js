@@ -120,18 +120,18 @@ function renderPrismInstance(p_i) {
     m.multiplyScalar(1/2);
     const tm = new THREE.Vector3().addVectors(nu.tb,nu.tc);
     tm.multiplyScalar(1/2);
-    console.log("m,tm",m,tm);
+//    console.log("m,tm",m,tm);
 
     const prism_up = tm.clone().sub(m);
 
     const q0 = new THREE.Quaternion();
 
-    console.log("bcn",bcn);
+//    console.log("bcn",bcn);
 
     q0.setFromUnitVectors(new THREE.Vector3(0,0,1),bcn);
-    console.log("PRE ROTATION",nu.sup.getWorldPosition().clone());
+//    console.log("PRE ROTATION",nu.sup.getWorldPosition().clone());
 //    nu.sup.applyQuaternion(q0);
-    console.log("POS ROTATION",nu.sup.getWorldPosition().clone());
+//    console.log("POS ROTATION",nu.sup.getWorldPosition().clone());
 
     { // The entire matching of the up vector must be rethought...
       // We need to create a rotation along the BC axis, to
@@ -142,8 +142,8 @@ function renderPrismInstance(p_i) {
     const super_up = nu.sup.up.clone();
     super_up.normalize();
     prism_up.normalize();
-    console.log("SUPER_UP",super_up);
-    console.log("PRISM_UP",prism_up);
+//    console.log("SUPER_UP",super_up);
+//    console.log("PRISM_UP",prism_up);
 
     const q1 = new THREE.Quaternion();
     q1.setFromUnitVectors(super_up,prism_up);
@@ -162,7 +162,7 @@ function renderPrismInstance(p_i) {
 
 
     nu.sup.applyMatrix(trans);
-    console.log("NU.SUP ",nu.sup);
+//    console.log("NU.SUP ",nu.sup);
   }
 
 //  if (BOGUS_OBJ_CNT < 2) {
@@ -173,7 +173,7 @@ function renderPrismInstance(p_i) {
       // p_i.sup.position.copy(p_i.p.superstructure_prototype.position.clone());
       // p_i.sup.quaternion.copy(p_i.p.superstructure_prototype.quaternion.clone());
 
-      console.log("prototype",p_i.p.superstructure_prototype);
+//      console.log("prototype",p_i.p.superstructure_prototype);
 
       var unpositioned = p_i.p.superstructure_prototype.GdeepCloneMaterials();
       positionSuperStructure(p_i);
@@ -769,13 +769,83 @@ function clearAm() {
   am.helix_params = [];
 }
 
+function getLegalTauValues(solid) {
+  var taus = [];
+  switch(solid) {
+  case "TETRAHEDRON":
+    taus = [-(Math.PI * 2) / 6, 0, (Math.PI * 2) / 6];
+    break;
+  case "CUBE":
+    taus = [-(Math.PI * 2) / 4, 0, (Math.PI * 2) / 4];
+    break;
+  case "OCTAHEDRON":
+    taus = [-(Math.PI * 2) / 6, 0, (Math.PI * 2) / 6];
+    break;
+  case "DODECAHEDRON":
+    taus = [- 2 * (Math.PI * 2) / 5, -(Math.PI * 2) / 5, 0, (Math.PI * 2) / 5, 2 * (Math.PI * 2) / 5];
+    break;
+  case "ICOSAHEDRON":
+    taus = [-(Math.PI * 2) / 6, 0, (Math.PI * 2) / 6];
+    break;
+  }
+  return taus;
+}
+
+function updateLegalTauValues(solid) {
+  var taus = getLegalTauValues(solid).map(r => r*180/Math.PI);
+  if (taus.length == 3) {
+    $("#radio-t0-l").html("N/A");
+    $("#radio-t1-l").html(format_num(taus[0],0));
+    $("#radio-t2-l").html(format_num(taus[1],0));
+    $("#radio-t3-l").html(format_num(taus[2],0));
+    $("#radio-t4-l").html("N/A");
+  } else {
+    $("#radio-t0-l").html(format_num(taus[0],0));
+    $("#radio-t1-l").html(format_num(taus[1],0));
+    $("#radio-t2-l").html(format_num(taus[2],0));
+    $("#radio-t3-l").html(format_num(taus[3],0));
+    $("#radio-t4-l").html(format_num(taus[4],0));
+  }
+  return taus;
+}
+
+function getSelectedTaus(taus) {
+  var modex = $("input:radio[name=radio-2]:checked").attr('id');
+  console.log("modex",modex);
+  if (!modex) {
+    modex = "0";
+  }
+  let n = modex.substr(-1);
+  var v;
+  if (taus.length == 3) {
+    if (n == 0)
+      n++;
+    if (n == 4)
+      n--;
+    n = n - 1;
+  }
+  return taus[n];
+}
+function onComputeDelix() {
+  var SOLID = getPlatonicSolidInput();
+  var tau_v;
+  if (SOLID == null) {
+    $("#tau-fieldset").hide();
+    tau_v = TAU_d * Math.PI / 180;
+  } else {
+    $("#tau-fieldset").show();
+    var taus = updateLegalTauValues(SOLID);
+    tau_v = getSelectedTaus(taus);
+  }
+  console.log("Render:",SOLID,tau_v);
+  RenderSegmentedHelix(SOLID,tau_v);
+ }
+
 function main() {
   $( "input[type='radio']" ).checkboxradio();
   $('fieldset input').change(function () {
-    // The one that fires the event is always the
-    // checked one; you don't need to test for this
     onComputeDelix();
-    });
+  });
 }
 
 
@@ -1033,14 +1103,7 @@ function renderSprites() {
   LABEL_SPRITES.forEach(s => renderSprite(s));
 }
 
-function onComputeDelix() {
-  clearAm();
-
-  var wfgui = document.getElementById('wireframe');
-  var bcgui = document.getElementById('blendcolor');
-  var wf = wfgui ? wfgui.checked : true;
-  var bc = bcgui ? bcgui.checked : false;
-
+function getPlatonicSolidInput() {
   var mode = $(":radio:checked").attr('id');
   console.log("MODE:",mode);
   var SOLID;
@@ -1065,12 +1128,20 @@ function onComputeDelix() {
     break;
   }
   console.log("SOLID :",SOLID);
-    // Here we attempt to render platonic solids if appropriate
-  //  let SOLID = "OCTAHEDRON";
-  //  let SOLID = "TETRAHEDRON";
-  //  let SOLID = "CUBE";
-  //  let SOLID = "ICOSAHEDRON";
-  // let SOLID = "DODECAHEDRON";
+  return SOLID;
+}
+
+function RenderSegmentedHelix(solid,tau_v) {
+  clearAm();
+
+  var wfgui = document.getElementById('wireframe');
+  var bcgui = document.getElementById('blendcolor');
+  var wf = wfgui ? wfgui.checked : true;
+  var bc = bcgui ? bcgui.checked : false;
+
+//  var mode = $(":radio:checked").attr('id');
+//  console.log("MODE:",mode);
+//  var SOLID = getPlatonicSolidInput();
 
   var res;
   var r;
@@ -1086,10 +1157,12 @@ function onComputeDelix() {
   var Bn_solid;
   var Cn_solid;
   var Nb, Nc;
-  var tau_v;
-  if (SOLID) {
-    [obj,Nb,Nc,taus] = createZAlignedIcosa(SOLID,B,C);
-    tau_v = taus[0];
+//  var tau_v;
+//  var taus = [];
+  if (solid) {
+    [obj,Nb,Nc] = createZAlignedIcosa(solid,B,C);
+//    taus = getLegalTauValues(solid);
+//    tau_v = taus[0];
     // now we should set the legal taus radio set..
   } else {
     var Nb = new THREE.Vector3(NORMAL_B_X,
@@ -1102,7 +1175,7 @@ function onComputeDelix() {
                               );
     Nb.normalize();
     Nc.normalize();
-    tau_v = TAU_d * Math.PI / 180;
+//    tau_v = TAU_d * Math.PI / 180;
   }
 
   let Arot = AfromLtauNbNc(L0,tau_v,Nb,Nc);
@@ -1543,27 +1616,21 @@ function createZAlignedIcosaAux(solid, B, C, Bf, Cf) {
   // Each of the platonic solids actually requires you to also
   // make a choice as to the face...
   var geo;
-  var taus = [];
   switch(solid) {
   case "TETRAHEDRON":
     geo = new THREE.TetrahedronGeometry(1,0);
-    taus = [-(Math.PI * 2) / 6, 0, (Math.PI * 2) / 6];
     break;
   case "CUBE":
     geo = new THREE.CubeGeometry(1,0);
-    taus = [-(Math.PI * 2) / 4, 0, (Math.PI * 2) / 4];
     break;
   case "OCTAHEDRON":
     geo = new THREE.OctahedronGeometry(1,0);
-    taus = [-(Math.PI * 2) / 6, 0, (Math.PI * 2) / 6];
     break;
   case "DODECAHEDRON":
     geo = new THREE.DodecahedronGeometry(1,0);
-    taus = [- 2 * (Math.PI * 2) / 5, -(Math.PI * 2) / 5, 0, (Math.PI * 2) / 5, 2 * (Math.PI * 2) / 5];
     break;
   case "ICOSAHEDRON":
     geo = new THREE.IcosahedronGeometry(1,0);
-    taus = [-(Math.PI * 2) / 6, 0, (Math.PI * 2) / 6];
     break;
   }
   // This probably doesn't work when the faces aren't triangles...
@@ -1613,7 +1680,7 @@ function createZAlignedIcosaAux(solid, B, C, Bf, Cf) {
     Cc.multiplyScalar(1/2);
     Bnl = geo.faces[0].normal.clone();
     Cnl = geo.faces[5].normal.clone();
-    console.log("Bnl, Cnl",Bnl,Cnl);
+//    console.log("Bnl, Cnl",Bnl,Cnl);
   } else if (solid == "DODECAHEDRON") {
     // Now, sadly, we really have to just know the vertices of
     // the first face...this numbering comes from THREE and is
@@ -1634,7 +1701,7 @@ function createZAlignedIcosaAux(solid, B, C, Bf, Cf) {
     Bnl = geo.faces[Bf*3].normal.clone();
     Cnl = geo.faces[13].normal.clone();
   }
-  console.log("Bb,Cc",Bc,Cc);
+//  console.log("Bb,Cc",Bc,Cc);
 
   let O = new THREE.Vector3();
 
@@ -1652,7 +1719,7 @@ function createZAlignedIcosaAux(solid, B, C, Bf, Cf) {
 
   Bc.applyMatrix4(scale_m);
   Cc.applyMatrix4(scale_m);
-  console.log("new len",C.clone().sub(B).length());
+//  console.log("new len",C.clone().sub(B).length());
 
 
   d = Cc.clone();
@@ -1663,13 +1730,13 @@ function createZAlignedIcosaAux(solid, B, C, Bf, Cf) {
   const Z = new THREE.Vector3(0,0,1);
   Z.normalize();
   d.normalize();
-  console.log("F,T,d =",F,T,d);
+//  console.log("F,T,d =",F,T,d);
 
 
    let rotation = new THREE.Matrix4().identity();
    let q = new THREE.Quaternion();
    q.setFromUnitVectors(d,Z);
-   console.log(Z,d);
+//   console.log(Z,d);
   rotation.makeRotationFromQuaternion(q);
   // Note: This is a local transformation!
    geo.applyMatrix(rotation);
@@ -1691,7 +1758,7 @@ function createZAlignedIcosaAux(solid, B, C, Bf, Cf) {
 //  Bnl.applyMatrix4(trans_m);
 //  Cnl.applyMatrix4(trans_m);
   O.applyMatrix4(trans_m);
-  console.log("Bc,Cc",Bc,Cc);
+//  console.log("Bc,Cc",Bc,Cc);
 
     // now we may have Bc and Cc in the right location.
   // We may have to rotate about the Z (Bc-Cc) axis to
@@ -1702,7 +1769,7 @@ function createZAlignedIcosaAux(solid, B, C, Bf, Cf) {
   // vector from the Bc-Cc line point upwards (+Y).
   var cent = findCentroid(geo);
 
-  console.log("centroid ",cent,O);
+//  console.log("centroid ",cent,O);
 
 
   var oxy = new THREE.Vector2(O.x-B.x,O.y-B.y);
@@ -1716,7 +1783,7 @@ function createZAlignedIcosaAux(solid, B, C, Bf, Cf) {
   // I really need to translate the BC vector back to the
   // the Z axis. This is really worth a subroutine here!
 
-  console.log("rot_z",z_angle * 180 / Math.PI);
+//  console.log("rot_z",z_angle * 180 / Math.PI);
 
   // Now, sadly, we have to pute the object back at the axis to
   // rotate...
@@ -1804,7 +1871,7 @@ function createZAlignedIcosaAux(solid, B, C, Bf, Cf) {
 //  group.add(Cn_arrowHelper);
 //  am.scene.add(Bn_arrowHelper);
 //  am.scene.add(Cn_arrowHelper);
-  return [group,Bnx,Cnx,taus];
+  return [group,Bnx,Cnx];
 }
 
 function testStupidObjectManipulation() {
