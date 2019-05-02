@@ -20,7 +20,7 @@
 var TET_DISTANCE = 0.5;
 
 
-const NUM_PRISMS = 5;
+const NUM_PRISMS = 10;
 const NUM_SEGMENTS = (2 * NUM_PRISMS) + 1;
 
 // Detects webgl
@@ -31,8 +31,6 @@ if (!Detector.webgl) {
 
 
 
-
-
 // Here I attempt to create an abstract prism object.
 
 
@@ -40,9 +38,7 @@ const PRISM_FACE_RATIO_LENGTH = 1/2;
 
 var PHI_SPRITE;
 
-var BOGUS_OBJ_CNT = 0;
 var bncG;
-
 
 function renderPrismInstance(p_i) {
   // now that we have the points, we can
@@ -99,7 +95,7 @@ function renderPrismInstance(p_i) {
 
   // Need to return the points here, and the up vector, not just the meshes...
   // That is an "instance of an abstract prism".
-    // POSITION SUPERSTRUCTURE
+  // POSITION SUPERSTRUCTURE
   // Not having computed the transform for this,
   // But rather having computed all the points in the
   // world space, we can postion SUP by moving it
@@ -109,6 +105,15 @@ function renderPrismInstance(p_i) {
 
   var transG;
 
+  // The rejection of a onto b is perpendicular to b.
+  function rejection(a,b) {
+    const bu = b.clone().normalize();
+    const a1 = a.dot(b);
+    const a1v = bu.multiplyScalar(a1);
+    const a2v = a.clone().sub(a1v);
+    console.assert(near(a2v.dot(b),0));
+    return a2v;
+  }
 
   function positionSuperStructure(nu) {
     // First we point axis in bc direction....
@@ -120,72 +125,96 @@ function renderPrismInstance(p_i) {
     m.multiplyScalar(1/2);
     const tm = new THREE.Vector3().addVectors(nu.tb,nu.tc);
     tm.multiplyScalar(1/2);
-//    console.log("m,tm",m,tm);
+    let axis = nu.c.clone().sub(nu.b);
 
-    const prism_up = tm.clone().sub(m);
+    // This is actually not quite right, as it is not
+    // perpendicular to the BC axis.
+    const prism_v = tm.clone().sub(m);
+    const prism_up = rejection(prism_v,axis);
+    console.log("V,UP",prism_v,prism_up);
 
     const q0 = new THREE.Quaternion();
 
-//    console.log("bcn",bcn);
 
     q0.setFromUnitVectors(new THREE.Vector3(0,0,1),bcn);
-//    console.log("PRE ROTATION",nu.sup.getWorldPosition().clone());
-//    nu.sup.applyQuaternion(q0);
-//    console.log("POS ROTATION",nu.sup.getWorldPosition().clone());
+
+    //    nu.sup.applyQuaternion(q);
+    // finally we move the object to the midpoint...
+
+    var transm = new THREE.Matrix4();
+    transm.makeTranslation(m.x,m.y,m.z);
+    var rot0 = new THREE.Matrix4();
+    rot0.makeRotationFromQuaternion(q0);
+    var trans = transm.clone();
+    trans.multiply(rot0);
+    nu.sup.applyMatrix(trans);
+    nu.sup.updateMatrix();
+    // Now that we are in the correct postion, we want to
+    // rotate about the B-C axis to make the prism up match the
+    // super_structure up
+
 
     { // The entire matching of the up vector must be rethought...
       // We need to create a rotation along the BC axis, to
       // match faces, but I am not sure how to do this, and
       // I should have it from the other prism work.
-    // Then we make up direction correct...
-    //    const super_up = nu.sup.localToWorld(nu.sup.up);
-    const super_up = nu.sup.up.clone();
-    super_up.normalize();
-    prism_up.normalize();
-//    console.log("SUPER_UP",super_up);
-//    console.log("PRISM_UP",prism_up);
+      // Then we make up direction correct...
+      //    const super_up = nu.sup.localToWorld(nu.sup.up);
 
-    const q1 = new THREE.Quaternion();
-    q1.setFromUnitVectors(super_up,prism_up);
-    var rot1 = new THREE.Matrix4();
-    rot1.makeRotationFromQuaternion(q1);
+      // I guess instead of using up, I must attach one to the object
+      // or I must compute it from the centroid.
+      const cent = findCentroid(nu.sup.children[0].geometry);
+      console.log("CENTROID: ",cent);
+//      const super_up = nu.sup.up.clone();
+//      console.log("up --- before transformed :",super_up);
+      cent.normalize();
+      cent.applyMatrix4(rot0);
+      cent.normalize();
+      prism_up.normalize();
+      console.log("CENT",cent);
+      console.log("PRISM_UP",prism_up);
+      console.assert(near(axis.dot(cent),0));
+      const q1 = new THREE.Quaternion();
+      q1.setFromUnitVectors(cent,prism_up);
+      var rot1 = new THREE.Matrix4().identity();
+      let theta = -prism_up.angleTo(cent);
+
+      console.log("THETA :",theta * 180 / Math.PI);
+
+ //          rot1.makeRotationAxis(axis,theta);
+      rot1.makeRotationFromQuaternion(q1);
+
+      // Now that we have a rotation axis, we will have
+      // to translate a point on the axis to the origin, then
+      // invert that transform to get back. We'll use m.
+      var transm_i = new THREE.Matrix4();
+      transm_i.getInverse(transm);
+      var up_v_trans = new THREE.Matrix4().identity();
+      //     var up_v_trans = trans;
+      up_v_trans.multiply(transm);
+      up_v_trans.multiply(rot1);
+      up_v_trans.multiply(transm_i);
+
+      nu.sup.applyMatrix(up_v_trans);
+      nu.sup.updateMatrix();
+      const super_up2 = findCentroid(nu.sup.children[0].geometry);
+      console.log("up 2 --- is this transformed :",super_up2);
+      super_up2.applyMatrix4(up_v_trans);
+      console.log("up 3--- is this transformed :",super_up2);
+
     }
-//    nu.sup.applyQuaternion(q);
-    // finally we move the object to the midpoint...
-
-    var trans = new THREE.Matrix4();
-    trans.makeTranslation(m.x,m.y,m.z);
-    var rot0 = new THREE.Matrix4();
-    rot0.makeRotationFromQuaternion(q0);
-//    trans.multiply(rot1).multiply(rot0);
-    trans.multiply(rot0);
-
-
-    nu.sup.applyMatrix(trans);
-//    console.log("NU.SUP ",nu.sup);
   }
 
-//  if (BOGUS_OBJ_CNT < 2) {
-    if (p_i.p.superstructure_prototype) {
-      p_i.sup =
-        p_i.p.superstructure_prototype.GdeepCloneMaterials();
-      // p_i.sup.scale.copy(p_i.p.superstructure_prototype.scale.clone());
-      // p_i.sup.position.copy(p_i.p.superstructure_prototype.position.clone());
-      // p_i.sup.quaternion.copy(p_i.p.superstructure_prototype.quaternion.clone());
+  if (p_i.p.superstructure_prototype) {
+    p_i.sup =
+      p_i.p.superstructure_prototype.GdeepCloneMaterials();
 
-//      console.log("prototype",p_i.p.superstructure_prototype);
-
-      var unpositioned = p_i.p.superstructure_prototype.GdeepCloneMaterials();
-      positionSuperStructure(p_i);
-      objects.push(p_i.sup);
-//      unpositioned.translateX(2);
-//      objects.push(unpositioned);
-
-      BOGUS_OBJ_CNT++;
-    }
-//  }
+    var unpositioned = p_i.p.superstructure_prototype.GdeepCloneMaterials();
+    positionSuperStructure(p_i);
+    objects.push(p_i.sup);
+  }
   return objects;
-  }
+}
 
 var INITIAL_NORM_POINT_Y = -0.7;
 var INITIAL_NORM_POINT_X = -0.62;
@@ -773,19 +802,19 @@ function getLegalTauValues(solid) {
   var taus = [];
   switch(solid) {
   case "TETRAHEDRON":
-    taus = [-(Math.PI * 2) / 6, 0, (Math.PI * 2) / 6];
+    taus = [-(Math.PI * 2) / 3, 0, (Math.PI * 2) / 3];
     break;
   case "CUBE":
     taus = [-(Math.PI * 2) / 4, 0, (Math.PI * 2) / 4];
     break;
   case "OCTAHEDRON":
-    taus = [-(Math.PI * 2) / 6, 0, (Math.PI * 2) / 6];
+    taus = [-(Math.PI * 2) / 3, 0, (Math.PI * 2) / 3];
     break;
   case "DODECAHEDRON":
     taus = [- 2 * (Math.PI * 2) / 5, -(Math.PI * 2) / 5, 0, (Math.PI * 2) / 5, 2 * (Math.PI * 2) / 5];
     break;
   case "ICOSAHEDRON":
-    taus = [-(Math.PI * 2) / 6, 0, (Math.PI * 2) / 6];
+    taus = [-(Math.PI * 2) / 3, 0, (Math.PI * 2) / 3];
     break;
   }
   return taus;
@@ -836,8 +865,10 @@ function onComputeDelix() {
     $("#tau-fieldset").show();
     var taus = updateLegalTauValues(SOLID);
     tau_v = getSelectedTaus(taus);
+    tau_v = tau_v * Math.PI / 180;
   }
   console.log("Render:",SOLID,tau_v);
+
   RenderSegmentedHelix(SOLID,tau_v);
  }
 
@@ -1229,6 +1260,7 @@ function RenderSegmentedHelix(solid,tau_v) {
 //    p_i.sup.applyMatrix(rt);
 //  }
 
+  console.log("tau_v :", tau_v);
   var prisms = createAdjoinedPrisms(p_i,tau_v,NUM_PRISMS);
 
   B = prisms[0][6].position;
@@ -1680,7 +1712,6 @@ function createZAlignedIcosaAux(solid, B, C, Bf, Cf) {
     Cc.multiplyScalar(1/2);
     Bnl = geo.faces[0].normal.clone();
     Cnl = geo.faces[5].normal.clone();
-//    console.log("Bnl, Cnl",Bnl,Cnl);
   } else if (solid == "DODECAHEDRON") {
     // Now, sadly, we really have to just know the vertices of
     // the first face...this numbering comes from THREE and is
@@ -1701,7 +1732,6 @@ function createZAlignedIcosaAux(solid, B, C, Bf, Cf) {
     Bnl = geo.faces[Bf*3].normal.clone();
     Cnl = geo.faces[13].normal.clone();
   }
-//  console.log("Bb,Cc",Bc,Cc);
 
   let O = new THREE.Vector3();
 
@@ -1714,12 +1744,10 @@ function createZAlignedIcosaAux(solid, B, C, Bf, Cf) {
   // we could do this via world transformations, but
   // we are attempting to build a locally aligned object...
   scale_m.makeScale(s,s,s);
-  //  obj.applyMatrix(scale_m);
   geo.scale(s,s,s);
 
   Bc.applyMatrix4(scale_m);
   Cc.applyMatrix4(scale_m);
-//  console.log("new len",C.clone().sub(B).length());
 
 
   d = Cc.clone();
@@ -1730,16 +1758,14 @@ function createZAlignedIcosaAux(solid, B, C, Bf, Cf) {
   const Z = new THREE.Vector3(0,0,1);
   Z.normalize();
   d.normalize();
-//  console.log("F,T,d =",F,T,d);
 
-
-   let rotation = new THREE.Matrix4().identity();
+  let rotation = new THREE.Matrix4().identity();
    let q = new THREE.Quaternion();
    q.setFromUnitVectors(d,Z);
 //   console.log(Z,d);
   rotation.makeRotationFromQuaternion(q);
   // Note: This is a local transformation!
-   geo.applyMatrix(rotation);
+  geo.applyMatrix(rotation);
   Bc.applyMatrix4(rotation);
   Cc.applyMatrix4(rotation);
   Bnl.applyMatrix4(rotation);
@@ -1807,36 +1833,22 @@ function createZAlignedIcosaAux(solid, B, C, Bf, Cf) {
   O.applyMatrix4(trans_down);
 
 
-  var bsphere = createSphere(1/20, Bc, "yellow");
-  var csphere = createSphere(1/20, Cc, "black");
-  bsphere.position.copy(Bc);
-  csphere.position.copy(Cc);
+  // var bsphere = createSphere(1/20, Bc, "yellow");
+  // var csphere = createSphere(1/20, Cc, "black");
+  // bsphere.position.copy(Bc);
+  // csphere.position.copy(Cc);
 
-  am.scene.add(bsphere);
-  am.scene.add(csphere);
+  // am.scene.add(bsphere);
+  // am.scene.add(csphere);
 
   let Fx = Cc.clone();
   let Tx = Bc.clone();
   // I hate non-functional math....
   let Bnx = Bnl.clone();
   let Cnx = Cnl.clone();
-  let dir = Cc.clone().sub(Bc.clone());
-  dir.normalize();
+//  let dir = Cc.clone().sub(Bc.clone());
+//  dir.normalize();
 
-  // let qw = new THREE.Quaternion();
-  // obj.getWorldQuaternion(qw);
-  // Bnx.applyQuaternion(qw);
-  // Cnx.applyQuaternion(qw);
-//  obj.localToWorld(Bnx);
-//  obj.localToWorld(Cnx);
-  var Bn_arrowHelper = new THREE.ArrowHelper( Bnx, Tx, bclen,
-                                           0x00ff00,0.2,0.03 );
-
-  var Cn_arrowHelper = new THREE.ArrowHelper( Cnx, Fx, bclen,
-                                              0xff0000,0.2,0.03 );
-
-  var B2C_arrowHelper = new THREE.ArrowHelper( Bc, dir, bclen,
-                                               0xff0000,0.2,0.03 );
 
   var lgeometry = new THREE.Geometry();
   lgeometry.vertices.push(
@@ -1859,18 +1871,10 @@ function createZAlignedIcosaAux(solid, B, C, Bf, Cf) {
   group.add(obj);
   group.name = "SUPERSTRUCTURE";
 
-  //  group.add(B2C_arrowHelper);
-
   var osphere = createSphere(1/20, new THREE.Vector3(0,0,0), "yellow");
   group.add(line);
   group.add(osphere);
 
-//  group.add(bsphere);
-//  group.add(csphere);
-//  group.add(Bn_arrowHelper);
-//  group.add(Cn_arrowHelper);
-//  am.scene.add(Bn_arrowHelper);
-//  am.scene.add(Cn_arrowHelper);
   return [group,Bnx,Cnx];
 }
 
