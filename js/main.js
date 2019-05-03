@@ -814,7 +814,12 @@ function getLegalTauValues(solid) {
     taus = [- 2 * (Math.PI * 2) / 5, -(Math.PI * 2) / 5, 0, (Math.PI * 2) / 5, 2 * (Math.PI * 2) / 5];
     break;
   case "ICOSAHEDRON":
-    taus = [-(Math.PI * 2) / 3, 0, (Math.PI * 2) / 3];
+    // DANGER!!! This works, but I have no explanation...it is undoubtedly
+    // dependent on the face that we choose. At present, I only allow
+    // one face to be chosen, but this means that the legal values are probably
+    // dependent on that face.
+    const fudge_factor = 75 * Math.PI / 180;
+    taus = [(-(Math.PI * 2) / 3) + fudge_factor, fudge_factor, ((Math.PI * 2) / 3) + fudge_factor];
     break;
   }
   return taus;
