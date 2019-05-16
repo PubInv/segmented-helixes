@@ -131,7 +131,7 @@ function renderPrismInstance(p_i) {
     // perpendicular to the BC axis.
     const prism_v = tm.clone().sub(m);
     const prism_up = rejection(prism_v,axis);
-    console.log("V,UP",prism_v,prism_up);
+//    console.log("V,UP",prism_v,prism_up);
 
     const q0 = new THREE.Quaternion();
 
@@ -164,22 +164,21 @@ function renderPrismInstance(p_i) {
       // I guess instead of using up, I must attach one to the object
       // or I must compute it from the centroid.
       const cent = findCentroid(nu.sup.children[0].geometry);
-      console.log("CENTROID: ",cent);
 //      const super_up = nu.sup.up.clone();
 //      console.log("up --- before transformed :",super_up);
       cent.normalize();
       cent.applyMatrix4(rot0);
       cent.normalize();
       prism_up.normalize();
-      console.log("CENT",cent);
-      console.log("PRISM_UP",prism_up);
+//      console.log("CENT",cent);
+//      console.log("PRISM_UP",prism_up);
       console.assert(near(axis.dot(cent),0));
       const q1 = new THREE.Quaternion();
       q1.setFromUnitVectors(cent,prism_up);
       var rot1 = new THREE.Matrix4().identity();
       let theta = -prism_up.angleTo(cent);
 
-      console.log("THETA :",theta * 180 / Math.PI);
+//      console.log("THETA :",theta * 180 / Math.PI);
 
  //          rot1.makeRotationAxis(axis,theta);
       rot1.makeRotationFromQuaternion(q1);
@@ -198,9 +197,9 @@ function renderPrismInstance(p_i) {
       nu.sup.applyMatrix(up_v_trans);
       nu.sup.updateMatrix();
       const super_up2 = findCentroid(nu.sup.children[0].geometry);
-      console.log("up 2 --- is this transformed :",super_up2);
+//      console.log("up 2 --- is this transformed :",super_up2);
       super_up2.applyMatrix4(up_v_trans);
-      console.log("up 3--- is this transformed :",super_up2);
+//      console.log("up 3--- is this transformed :",super_up2);
 
     }
   }
@@ -1200,6 +1199,11 @@ function RenderSegmentedHelix(solid,tau_v) {
 //    taus = getLegalTauValues(solid);
 //    tau_v = taus[0];
     // now we should set the legal taus radio set..
+    // now we also want to set Nb and Nc....
+    setTauValue(tau_v);
+    setNBValues(Nb);
+    setNCValues(Nc);
+
   } else {
     var Nb = new THREE.Vector3(NORMAL_B_X,
                                NORMAL_B_Y,
@@ -1472,6 +1476,13 @@ var TAU = 0;
 
 {
 
+  function setTauValue(tau) {
+    TAU_d = format_num(tau * 180 / Math.PI,3);
+    $( "#tau_slider" ).slider( "value", TAU_d );
+    $( "#tau_txt" ).val( TAU_d );
+    $( "#tau_d" ).val( TAU_d );
+  }
+
   $(function() {
     $( "#tau_slider" ).slider({
       range: "max",
@@ -1490,6 +1501,38 @@ var TAU = 0;
     $( "#tau_d" ).val( $( "#tau_slider" ).slider( "value" ) );
   });
 
+  function setNBValues(Nb) {
+    NORMAL_B_X =  Nb.x;
+    NORMAL_B_Y =  Nb.y;
+    NORMAL_B_Z =  Nb.z;
+    $( "#normal_b_x_slider" ).slider( "value", NORMAL_B_X );
+    $( "#b_x" ).val( format_num(NORMAL_B_X,3) );
+    $( "#normal_b_x" ).val( format_num(NORMAL_B_X,3) );
+
+    $( "#normal_b_y_slider" ).slider( "value", NORMAL_B_Y );
+    $( "#b_y" ).val( format_num(NORMAL_B_Y,3) );
+    $( "#normal_b_y" ).val( format_num(NORMAL_B_Y,3) );
+
+    $( "#normal_b_z_slider" ).slider( "value", NORMAL_B_Z );
+    $( "#b_z" ).val( format_num(NORMAL_B_Z,3) );
+    $( "#normal_b_z" ).val( format_num(NORMAL_B_Z,3) );
+  }
+  function setNCValues(Nc) {
+    NORMAL_C_X =  Nc.x;
+    NORMAL_C_Y =  Nc.y;
+    NORMAL_C_Z =  Nc.z;
+    $( "#normal_c_x_slider" ).slider( "value", NORMAL_C_X );
+    $( "#c_x" ).val( format_num(NORMAL_C_X,3) );
+    $( "#normal_c_x" ).val( format_num(NORMAL_C_X,3) );
+
+    $( "#normal_c_y_slider" ).slider( "value", NORMAL_C_Y );
+    $( "#c_y" ).val( format_num(NORMAL_C_Y,3) );
+    $( "#normal_c_y" ).val( format_num(NORMAL_C_Y,3) );
+
+    $( "#normal_c_z_slider" ).slider( "value", NORMAL_C_Z );
+    $( "#c_z" ).val( format_num(NORMAL_C_Z,3) );
+    $( "#normal_c_z" ).val( format_num(NORMAL_C_Z,3) );
+  }
   $(function() {
     $( "#normal_b_x_slider" ).slider({
       range: "max",
