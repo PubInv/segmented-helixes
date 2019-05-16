@@ -17,6 +17,8 @@
 // var tm = UGLY_GLOBAL_SINCE_I_CANT_GET_MY_MODULE_INTO_THE_BROWSER;
 // var OPERATION = "normal"; // "normal" or "helices"
 
+var WINDOW_HEIGHT_FACTOR = 0.68;
+
 var TET_DISTANCE = 0.5;
 
 
@@ -461,7 +463,7 @@ var AM = function () {
   this.armMovement = 0;
 
   //    this.window_height_factor = 1/4.0;
-  this.window_height_factor = 0.5;
+  this.window_height_factor = WINDOW_HEIGHT_FACTOR;
   // Sadly, this seems to do nothing!
   this.CAMERA_RADIUS_FACTOR = 1;
 
