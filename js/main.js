@@ -260,7 +260,7 @@ function createAdjoinedPrisms(p_i,tau,num) {
   }
   var cur = p_i;
   for(let i = 0; i < num; i++) {
-    var p_c = adjoinPrism(cur,tau,false);
+    var p_c = adjoinPrism(cur,tau,false,i == 0);
     var TP = renderPrismInstance(p_c);
     TP.forEach(o => { am.scene.add(o); });
     negatives.push(TP);
@@ -1220,7 +1220,7 @@ function RenderSegmentedHelix(solid,tau_v) {
 //    tau_v = TAU_d * Math.PI / 180;
   }
 
-  let Arot = AfromLtauNbNc(L0,tau_v,Nb,Nc);
+  let Arot = AfromLtauNbNc(L0,tau_v,Nb,Nc,true);
   let A = Arot[0];
   // I am not sure whey this is negated...
   //  var rotation = -Arot[1];
@@ -1240,6 +1240,8 @@ function RenderSegmentedHelix(solid,tau_v) {
   let D = new THREE.Vector3(-A.x,A.y,-A.z);
 
   res = KahnAxis(L0,D);
+  console.log("Kahn da,chord",res[2],res[3]);
+  console.log("Kahn theta,phi",res[1]* 180 / Math.PI,res[4] * 180/Math.PI);
 
 
   GLOBAL_P0 = new AbstractPrism(

@@ -53,11 +53,11 @@ function RotationFromRadiusChord(R,C) {
   if (near(v,1,1e-4)) {
     return Math.PI;
   } else {
-    let theta = 2 * Math.asin(C / (2 * R));
+    let theta = 2 * Math.asin(v);
     if (isNaN(theta)) {
       debugger;
     }
-    return 2 * Math.asin(C / (2 * R));
+    return 2 * Math.asin(v);
   }
 }
 
@@ -239,6 +239,8 @@ function KahnAxis(L,D) {
       let c = ChordFromLDaxis(L,da);
       let theta = RotationFromRadiusChord(r,c);
       testAxis(B,Ba,H,da);
+      console.log("KKK da, chord",
+              da,c);
       return [r,theta,da,c,phi,H,Ba];
     }
   }
@@ -285,7 +287,7 @@ function KahnAxis(L,D) {
 // Geometry objects in the same frame.
 // Note: I believe the up vector can be computed from
 // tb and tc.
-function adjoinPrism(old,tau,joinToC) {
+function adjoinPrism(old,tau,joinToC,debug = false) {
   // First, we copy the old prism in exactly the same position
 
   // I was using clone here, but it seems to be unreliable!!!
@@ -364,13 +366,19 @@ function adjoinPrism(old,tau,joinToC) {
                                nu.p.Nb);
   }
 
+  var Rqb = new THREE.Matrix4().makeRotationFromQuaternion(Q_to_Nb);
+  var Rqc = new THREE.Matrix4().makeRotationFromQuaternion(Q_to_Nc);
+  var Unknown = new THREE.Matrix4().identity();
   if (joinToC) {
     applyQuaternionToPrism(nu,Q_to_Nb);
     applyQuaternionToPrism(nu,Q_to_Nc);
+    Unknown.multiplyMatrices(Rqc,Rqb);
   } else {
     applyQuaternionToPrism(nu,Q_to_Nc);
     applyQuaternionToPrism(nu,Q_to_Nb);
+    Unknown.multiplyMatrices(Rqb,Rqc);
   }
+
 
   var rt = new THREE.Matrix4();
   rt.makeRotationAxis(joinToC ? nu.p.Nc : nu.p.Nb,tau);
@@ -378,6 +386,42 @@ function adjoinPrism(old,tau,joinToC) {
   applyMatrix4ToPrism(nu,rt);
 
   applyMatrix4ToPrism(nu,p_trans_r);
+
+  var finalMatrix = new THREE.Matrix4().identity();
+  finalMatrix.premultiply(trans);
+  finalMatrix.premultiply(p_trans);
+  finalMatrix.premultiply(Unknown);
+  finalMatrix.premultiply(rt);
+  finalMatrix.premultiply(p_trans_r);
+  // now we need to check that this matrix applied
+  // to the original prism puts it int the same place...
+  // if we apply this matrix to the point B, we expect
+  // and we are joining to B, we expect it in end up
+  // in the same place as point nu.b.
+  if (!joinToC) {
+    var btest = old.b.clone();
+    btest.applyMatrix4(finalMatrix);
+    console.assert(vnear(btest,nu.b));
+    if (!vnear(btest,nu.b)) {
+      console.log("SHOULD BE NEAR",btest,nu.b);
+      debugger;
+    }
+    // Now, let me try to extract the data and check it...
+
+    // Note: it is not clear that this is computing
+    // the axis in the same direction that I do. However,
+    // it seems to be correct modulo that.
+    if (debug){
+      const L = nu.b.distanceTo(nu.c);
+      [radius,thetaP,da,chord,phi,u] = computeThetaAxisFromMatrix4(L,finalMatrix);
+      console.log("L,RADIUS",L,radius);
+      console.log("THETA, phi",
+                thetaP * 180 / Math.PI,
+                phi * 180 / Math.PI);
+      console.log("BBB da, chord",
+                  da,chord);
+    }
+  }
 
   var diff = new THREE.Vector3();
   if (joinToC) {
@@ -560,7 +604,7 @@ function ADirFromParam(L,v0,tau,Nb) {
 // Compute the A point of an ideally centered prism
 // with normal faces NBu, Ncu.
 // Maybe this should normalize the input for robustness?
-function AfromLtauNbNc(L,tau,NBu,NCu) {
+function AfromLtauNbNc(L,tau,NBu,NCu,debug = false) {
   var abs0 = new AbstractPrism(L,NBu,NCu);
   if (!abs0) {
     debugger;
@@ -568,8 +612,8 @@ function AfromLtauNbNc(L,tau,NBu,NCu) {
   var p_i = CreatePrism(abs0,PRISM_FACE_RATIO_LENGTH);
 
   var rt = new THREE.Matrix4();
-  var p_b = adjoinPrism(p_i,tau,false);
-  var p_c = adjoinPrism(p_i,tau,true);
+  var p_b = adjoinPrism(p_i,tau,false,debug);
+  var p_c = adjoinPrism(p_i,tau,true,debug);
 
   let fb = new THREE.Vector2(p_b.b.x,p_b.b.y);
   let fc = new THREE.Vector2(p_c.c.x,p_c.c.y);
@@ -608,8 +652,8 @@ function AfromLtauNbNc(L,tau,NBu,NCu) {
   p_i.p.Nb.applyMatrix4(rt);
   p_i.p.Nc.applyMatrix4(rt);
 
-  var p_b = adjoinPrism(p_i,tau,false);
-  var p_c = adjoinPrism(p_i,tau,true);
+  var p_b = adjoinPrism(p_i,tau,false,debug);
+  var p_c = adjoinPrism(p_i,tau,true,debug);
 
   return [p_b.b,psi];
 }
@@ -670,8 +714,8 @@ function testAfromLtauMultiple() {
           p_i.p.Nc.applyMatrix4(rt);
 
 
-          var p_b = adjoinPrism(p_i,tau,false);
-          var p_c = adjoinPrism(p_i,tau,true);
+          var p_b = adjoinPrism(p_i,tau,false,true);
+          var p_c = adjoinPrism(p_i,tau,true,true);
           return;
         }
       }
@@ -910,8 +954,110 @@ function testThreeIsRightHanded() {
 }
 
 
+function TraceMatrix4(A) {
+  let t = 0;
+  console.log(A.elements);
+  let xAxis = new THREE.Vector3();
+  let yAxis = new THREE.Vector3();
+  let zAxis = new THREE.Vector3();
+  A.extractBasis(xAxis,yAxis,zAxis);
+  t = xAxis.x + yAxis.y + zAxis.z;
+  // for(var i = 0; i < 4; i++) {
+  //   console.log(i + i * 4);
+  //   t += A.elements[i + i*4];
+  // }
+  return t;
+}
+
+function testTrace() {
+  const theta = Math.PI/11;
+  // now create a rotation matrix based on this angle...
+  const axis = new THREE.Vector3(0,0,1);
+  const R = new THREE.Matrix4().makeRotationAxis(axis,theta);
+  const t0 = TraceMatrix4(R);
+  console.log("TRACE0",t0);
+}
+
+function SubtractMatrices(A,B) {
+  const Ae = A.elements();
+  const Be = B.elements();
+  const Ce = Ae.clone();
+  for(var i = 0; i < Be.elements.length; i++) {
+    Ce[i] -= Be[i];
+  }
+  const C = A.clone();
+  C.fromArray(Ce);
+  return C;
+}
+
+function computeThetaAxisFromMatrix4(L,R) {
+  // now attempt to recover parameters from the rotation matrix....
+  const thetaP = Math.acos((1/2) * (TraceMatrix4(R) - 1));
+
+  // Now we will attempt to extract the screw axis from this matrix...
+  // unfortunately THREE doesn't seem to implment matrix addition and substraction...
+
+  let xAxis = new THREE.Vector3();
+  let yAxis = new THREE.Vector3();
+  let zAxis = new THREE.Vector3();
+  R.extractBasis(xAxis,yAxis,zAxis);
+
+  // const Ro = R.clone();
+  // const Rt = R.transpose();
+  // const d = SubtractMatrices(Ro,Rt);
+  const scale = 1/ (Math.sin(thetaP));
+  // from https://en.wikipedia.org/wiki/Rotation_matrix
+  // note element is column-major
+  const b = yAxis.x;
+  const c = zAxis.x;
+  const d = xAxis.y;
+  const f = zAxis.y;
+  const g = xAxis.z;
+  const h = yAxis.z;
+  const u = new THREE.Vector3(h-f,c-g,d-b);
+  u.multiplyScalar(1/(2 * Math.sin(thetaP)));
+  const SIGN_ADJUST = -1;
+  u.multiplyScalar(SIGN_ADJUST);
+  u.normalize();
+  console.log('AXIS',u,scale);
+
+  const phi = Math.atan2(u.z,u.x) - Math.PI/2;
+//  let da = L * Math.cos(phi);
+  let da = L * u.z/ Math.sqrt(u.x**2 + u.z**2);
+//  da = -da;
+  const chord = ChordFromLDaxis(L,da);
+  // note, this is sin(acos(x)), which is Sqrt(1 - x^2).
+  const r = chord / (2 * Math.sin(thetaP/2));
+  console.log("AAA da, chord",
+              da,chord);
+
+  return [r,thetaP,da,chord,phi,u];
+}
+
+function testAbilityToGetScrewAxisFromRotationMatrix() {
+  const theta = Math.PI/11;
+  // now create a rotation matrix based on this angle...
+  const axis = new THREE.Vector3(0,0,1);
+  //  const R = new THREE.Matrix4().makeRotationAxis(axis,theta);
+  const q = new THREE.Quaternion().setFromAxisAngle(axis,theta);
+  const R = new THREE.Matrix4().makeRotationFromQuaternion(q);
+  // Now we will attempt to extract the screw axis from this matrix...
+  // unfortunately THREE doesn't seem to implment matrix addition and substraction...
+  const L = 1;
+  [thetaP,u,phi,da,c,r] = computeThetaAxisFromMatrix4(L,R);
+
+  // now check that the parameters match...
+  console.assert(near(theta,thetaP));
+  console.assert(vnear(axis,u));
+}
+
+function runChaslesTests() {
+  testTrace();
+  testAbilityToGetScrewAxisFromRotationMatrix();
+}
 
 function runUnitTests() {
+  runChaslesTests();
   testThreeIsRightHanded();
   testAfromLtauNbNnKeepsYPure();
   testAfromLtauNbNnContinuityOfTau();
