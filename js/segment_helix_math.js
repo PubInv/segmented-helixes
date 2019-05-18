@@ -992,7 +992,8 @@ function SubtractMatrices(A,B) {
 
 function computeThetaAxisFromMatrix4(L,R) {
   // now attempt to recover parameters from the rotation matrix....
-  const thetaP = Math.acos((1/2) * (TraceMatrix4(R) - 1));
+  const val = (1/2) * (TraceMatrix4(R) - 1);
+  const thetaP = Math.acos(val);
 
   // Now we will attempt to extract the screw axis from this matrix...
   // unfortunately THREE doesn't seem to implment matrix addition and substraction...
@@ -1018,16 +1019,18 @@ function computeThetaAxisFromMatrix4(L,R) {
   u.multiplyScalar(1/(2 * Math.sin(thetaP)));
   const SIGN_ADJUST = -1;
   u.multiplyScalar(SIGN_ADJUST);
-  u.normalize();
   console.log('AXIS',u,scale);
 
   const phi = Math.atan2(u.z,u.x) - Math.PI/2;
-//  let da = L * Math.cos(phi);
-  let da = L * u.z/ Math.sqrt(u.x**2 + u.z**2);
+  //  let da = L * Math.cos(phi);
+  const denom = Math.sqrt(u.x**2 + u.z**2);
+  let da = L * u.z / denom;
 //  da = -da;
-  const chord = ChordFromLDaxis(L,da);
+//  let chord = ChordFromLDaxis(L,da);
+  let chord = L * u.x / denom;
   // note, this is sin(acos(x)), which is Sqrt(1 - x^2).
-  const r = chord / (2 * Math.sin(thetaP/2));
+  //  const r = chord / (2 * Math.sin(thetaP/2));
+  const r = chord / (2 * Math.sqrt((1 - val)/2));
   console.log("AAA da, chord",
               da,chord);
 
