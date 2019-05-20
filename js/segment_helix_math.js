@@ -239,8 +239,6 @@ function KahnAxis(L,D) {
       let c = ChordFromLDaxis(L,da);
       let theta = RotationFromRadiusChord(r,c);
       testAxis(B,Ba,H,da);
-      console.log("KKK da, chord",
-              da,c);
       return [r,theta,da,c,phi,H,Ba];
     }
   }
@@ -379,6 +377,14 @@ function adjoinPrism(old,tau,joinToC,debug = false) {
     Unknown.multiplyMatrices(Rqb,Rqc);
   }
 
+  // Apparently, Unknown fundamentally makes sure we are z-aligned
+  // By taking into about both normals. This exposes
+  // the possiblity that we could construct this matrix
+  // analytically (though I don't know how) which would
+  // let us analytically apply the latter functions.
+  // In this way we could maybe analytically produce answers
+  // for all platonic solids.  What would that be worth? a week,
+  // for sure!
 
   var rt = new THREE.Matrix4();
   rt.makeRotationAxis(joinToC ? nu.p.Nc : nu.p.Nb,tau);
@@ -388,11 +394,16 @@ function adjoinPrism(old,tau,joinToC,debug = false) {
   applyMatrix4ToPrism(nu,p_trans_r);
 
   var finalMatrix = new THREE.Matrix4().identity();
+  var rotations = new THREE.Matrix4().identity();
+  // Question: Does this work if we take out the translational
+  // elements? YES IT DOES.
   finalMatrix.premultiply(trans);
   finalMatrix.premultiply(p_trans);
-  finalMatrix.premultiply(Unknown);
-  finalMatrix.premultiply(rt);
+  rotations.premultiply(Unknown);
+  rotations.premultiply(rt);
+  finalMatrix.premultiply(rotations);
   finalMatrix.premultiply(p_trans_r);
+
   // now we need to check that this matrix applied
   // to the original prism puts it int the same place...
   // if we apply this matrix to the point B, we expect
@@ -401,19 +412,21 @@ function adjoinPrism(old,tau,joinToC,debug = false) {
   if (!joinToC) {
     var btest = old.b.clone();
     btest.applyMatrix4(finalMatrix);
-    console.assert(vnear(btest,nu.b));
-    if (!vnear(btest,nu.b)) {
-      console.log("SHOULD BE NEAR",btest,nu.b);
-      debugger;
-    }
+  //  console.assert(vnear(btest,nu.b));
+//    if (!vnear(btest,nu.b)) {
+//      console.log("SHOULD BE NEAR",btest,nu.b);
+//      debugger;
+//    }
     // Now, let me try to extract the data and check it...
 
     // Note: it is not clear that this is computing
     // the axis in the same direction that I do. However,
     // it seems to be correct modulo that.
     if (debug){
+      console.log(finalMatrix);
       const L = nu.b.distanceTo(nu.c);
       [radius,thetaP,da,chord,phi,u] = computeThetaAxisFromMatrix4(L,finalMatrix);
+
       console.log("L,RADIUS",L,radius);
       console.log("THETA, phi",
                 thetaP * 180 / Math.PI,
@@ -434,7 +447,7 @@ function adjoinPrism(old,tau,joinToC,debug = false) {
     console.log("DIFF",diff);
   }
   // So that the normal of the C face is the opposite of the B face.
-  return nu;
+  return [nu,finalMatrix];
 }
 
 // TODO--I think this function needs to apply
@@ -612,8 +625,8 @@ function AfromLtauNbNc(L,tau,NBu,NCu,debug = false) {
   var p_i = CreatePrism(abs0,PRISM_FACE_RATIO_LENGTH);
 
   var rt = new THREE.Matrix4();
-  var p_b = adjoinPrism(p_i,tau,false,debug);
-  var p_c = adjoinPrism(p_i,tau,true,debug);
+  var p_b = adjoinPrism(p_i,tau,false,debug)[0];
+  var p_c = adjoinPrism(p_i,tau,true,debug)[0];
 
   let fb = new THREE.Vector2(p_b.b.x,p_b.b.y);
   let fc = new THREE.Vector2(p_c.c.x,p_c.c.y);
@@ -652,8 +665,8 @@ function AfromLtauNbNc(L,tau,NBu,NCu,debug = false) {
   p_i.p.Nb.applyMatrix4(rt);
   p_i.p.Nc.applyMatrix4(rt);
 
-  var p_b = adjoinPrism(p_i,tau,false,debug);
-  var p_c = adjoinPrism(p_i,tau,true,debug);
+  var p_b = adjoinPrism(p_i,tau,false,debug)[0];
+  var p_c = adjoinPrism(p_i,tau,true,debug)[0];
 
   return [p_b.b,psi];
 }
@@ -714,8 +727,8 @@ function testAfromLtauMultiple() {
           p_i.p.Nc.applyMatrix4(rt);
 
 
-          var p_b = adjoinPrism(p_i,tau,false,true);
-          var p_c = adjoinPrism(p_i,tau,true,true);
+          var p_b = adjoinPrism(p_i,tau,false,true)[0];
+          var p_c = adjoinPrism(p_i,tau,true,true)[0];
           return;
         }
       }
@@ -956,7 +969,6 @@ function testThreeIsRightHanded() {
 
 function TraceMatrix4(A) {
   let t = 0;
-  console.log(A.elements);
   let xAxis = new THREE.Vector3();
   let yAxis = new THREE.Vector3();
   let zAxis = new THREE.Vector3();
@@ -1018,11 +1030,18 @@ function computeThetaAxisFromMatrix4(L,R) {
   const u = new THREE.Vector3(h-f,c-g,d-b);
   u.multiplyScalar(1/(2 * Math.sin(thetaP)));
   const SIGN_ADJUST = -1;
+  // this just accomplishes normalization, so it is unclear where we need it!
   u.multiplyScalar(SIGN_ADJUST);
   console.log('AXIS',u,scale);
 
-  const phi = Math.atan2(u.z,u.x) - Math.PI/2;
   //  let da = L * Math.cos(phi);
+  // Clearly this is only true because
+  // I have arrange that the axis is in a plane
+  // parallel to Y --- but can't we always do that?
+  // Or does that make the rotation matrix harder, thus hiding
+  // the truth? Or is this a valulable insight...
+  // that by positioning BC along the Z axis we can make
+  // this possible
   const denom = Math.sqrt(u.x**2 + u.z**2);
   let da = L * u.z / denom;
 //  da = -da;
@@ -1033,6 +1052,8 @@ function computeThetaAxisFromMatrix4(L,R) {
   const r = chord / (2 * Math.sqrt((1 - val)/2));
   console.log("AAA da, chord",
               da,chord);
+
+  const phi = Math.atan2(u.z,u.x) - Math.PI/2;
 
   return [r,thetaP,da,chord,phi,u];
 }
@@ -1047,7 +1068,7 @@ function testAbilityToGetScrewAxisFromRotationMatrix() {
   // Now we will attempt to extract the screw axis from this matrix...
   // unfortunately THREE doesn't seem to implment matrix addition and substraction...
   const L = 1;
-  [thetaP,u,phi,da,c,r] = computeThetaAxisFromMatrix4(L,R);
+  [r,thetaP,da,chord,phi,u] = computeThetaAxisFromMatrix4(L,R);
 
   // now check that the parameters match...
   console.assert(near(theta,thetaP));

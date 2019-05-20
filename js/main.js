@@ -252,7 +252,7 @@ function createAdjoinedPrisms(p_i,tau,num) {
   var negatives = [];
   var cur = p_i;
   for(let i = 0; i < num; i++) {
-    var p_c = adjoinPrism(cur,tau,true);
+    var p_c = adjoinPrism(cur,tau,true)[0];
     var TP = renderPrismInstance(p_c);
     TP.forEach(o => { am.scene.add(o); });
     positives.push(TP);
@@ -260,7 +260,7 @@ function createAdjoinedPrisms(p_i,tau,num) {
   }
   var cur = p_i;
   for(let i = 0; i < num; i++) {
-    var p_c = adjoinPrism(cur,tau,false,i == 0);
+    var p_c = adjoinPrism(cur,tau,false,i == 0)[0];
     var TP = renderPrismInstance(p_c);
     TP.forEach(o => { am.scene.add(o); });
     negatives.push(TP);
@@ -1180,7 +1180,8 @@ function RenderSegmentedHelix(solid,tau_v) {
 //  console.log("MODE:",mode);
 //  var SOLID = getPlatonicSolidInput();
 
-  var res;
+  var resK;
+  var resM;
   var r;
   var theta;
   var d;
@@ -1220,6 +1221,14 @@ function RenderSegmentedHelix(solid,tau_v) {
 //    tau_v = TAU_d * Math.PI / 180;
   }
 
+
+
+  // Apparently, at present I need the
+  // prism to be properly rotated before my call
+  // call to ajoinPrism can produce the right rotations
+  // for the computeThetaAxis that way to work...a catch22
+  // This is probably not right.
+
   let Arot = AfromLtauNbNc(L0,tau_v,Nb,Nc,true);
   let A = Arot[0];
   // I am not sure whey this is negated...
@@ -1236,15 +1245,7 @@ function RenderSegmentedHelix(solid,tau_v) {
 
   rt.makeRotationAxis(new THREE.Vector3(0,0,1),rotation);
 
-  // Why wouldn't this be -A.x?
-  let D = new THREE.Vector3(-A.x,A.y,-A.z);
-
-  res = KahnAxis(L0,D);
-  console.log("Kahn da,chord",res[2],res[3]);
-  console.log("Kahn theta,phi",res[1]* 180 / Math.PI,res[4] * 180/Math.PI);
-
-
-  GLOBAL_P0 = new AbstractPrism(
+   GLOBAL_P0 = new AbstractPrism(
     L0,
     Nb,
     Nc,
@@ -1272,6 +1273,39 @@ function RenderSegmentedHelix(solid,tau_v) {
 //  if (p_i.sup) {
 //    p_i.sup.applyMatrix(rt);
 //  }
+
+
+  // Why wouldn't this be -A.x?
+  let D = new THREE.Vector3(-A.x,A.y,-A.z);
+  resK = KahnAxis(L0,D);
+
+
+
+
+
+ [p_b,rotations] = adjoinPrism(p_i,tau_v,false,true);
+  console.log("rotations, pre",rotations);
+  resM = computeThetaAxisFromMatrix4(L0,rotations);
+  console.log("SHOULD MATCH");
+  console.log(resK);
+  console.log(resM);
+  if (false) {
+    console.assert(near(resK[0],resM[0]));
+    console.assert(near(resK[1],resM[1]));
+    console.assert(near(resK[2],resM[2]));
+    console.assert(near(resK[3],resM[3]));
+    console.assert(near(resK[4],resM[4]));
+  }
+
+  var res = resK;
+  r = res[0];
+  theta = res[1];
+  d = res[2];
+  phi = res[4];
+
+  console.log("da,chord",res[2],res[3]);
+  console.log("theta,phi",res[1]* 180 / Math.PI,res[4] * 180/Math.PI);
+
 
   console.log("tau_v :", tau_v);
   var prisms = createAdjoinedPrisms(p_i,tau_v,NUM_PRISMS);
