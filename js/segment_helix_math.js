@@ -409,20 +409,21 @@ function adjoinPrism(old,tau,joinToC,debug = false) {
   // if we apply this matrix to the point B, we expect
   // and we are joining to B, we expect it in end up
   // in the same place as point nu.b.
-  if (!joinToC) {
-    var btest = old.b.clone();
-    btest.applyMatrix4(finalMatrix);
-  //  console.assert(vnear(btest,nu.b));
-//    if (!vnear(btest,nu.b)) {
-//      console.log("SHOULD BE NEAR",btest,nu.b);
-//      debugger;
-//    }
+  if (true) {
     // Now, let me try to extract the data and check it...
 
     // Note: it is not clear that this is computing
     // the axis in the same direction that I do. However,
     // it seems to be correct modulo that.
     if (debug){
+      var btest = old.b.clone();
+      btest.applyMatrix4(finalMatrix);
+      console.assert(vnear(btest,nu.b));
+      console.log("btest,nu.b",btest,nu.b);
+      if (!vnear(btest,nu.b)) {
+        console.log("SHOULD BE NEAR",btest,nu.b);
+        debugger;
+      }
       console.log(finalMatrix);
       const L = nu.b.distanceTo(nu.c);
       [radius,thetaP,da,chord,phi,u] = computeThetaAxisFromMatrix4(L,finalMatrix);
@@ -1002,6 +1003,9 @@ function SubtractMatrices(A,B) {
   return C;
 }
 
+// https://www.seas.upenn.edu/~meam520/notes02/EulerChasles4.pdf
+// Note: This may solve my problem: https://en.wikipedia.org/wiki/Screw_axis#Computing_a_point_on_the_screw_axis
+
 function computeThetaAxisFromMatrix4(L,R) {
   // now attempt to recover parameters from the rotation matrix....
   const val = (1/2) * (TraceMatrix4(R) - 1);
@@ -1034,7 +1038,16 @@ function computeThetaAxisFromMatrix4(L,R) {
   u.multiplyScalar(SIGN_ADJUST);
   console.log('AXIS',u,scale);
 
-  //  let da = L * Math.cos(phi);
+  var phi;
+  phi = u.angleTo(new THREE.Vector3(0,0,1));
+  phi = - phi;
+
+  let da = L * Math.cos(phi);
+
+  //  if (A.x > 0) {
+  if (false) {
+    da = -da;
+  }
   // Clearly this is only true because
   // I have arrange that the axis is in a plane
   // parallel to Y --- but can't we always do that?
@@ -1043,19 +1056,93 @@ function computeThetaAxisFromMatrix4(L,R) {
   // that by positioning BC along the Z axis we can make
   // this possible
   const denom = Math.sqrt(u.x**2 + u.z**2);
-  let da = L * u.z / denom;
+//  let da = L * u.z / denom;
 //  da = -da;
-//  let chord = ChordFromLDaxis(L,da);
-  let chord = L * u.x / denom;
+  let chord = ChordFromLDaxis(L,da);
+//  let chord = L * u.x / denom;
   // note, this is sin(acos(x)), which is Sqrt(1 - x^2).
-  //  const r = chord / (2 * Math.sin(thetaP/2));
-  const r = chord / (2 * Math.sqrt((1 - val)/2));
+  const r = chord / (2 * Math.sin(thetaP/2));
+//  const r = chord / (2 * Math.sqrt((1 - val)/2));
   console.log("AAA da, chord",
               da,chord);
 
-  const phi = Math.atan2(u.z,u.x) - Math.PI/2;
+//  var phi;
+  //  phi = Math.atan2(u.z,u.x) - Math.PI/2;
+  // Now I will attempt to to use this:
+  // https://en.wikipedia.org/wiki/Screw_axis#Computing_a_point_on_the_screw_axis
+  // to find a point P on the u axis.
+  var P;
+  {
+  const dv = new THREE.Vector3();
+  const q_ = new THREE.Quaternion();
+  const s_ = new THREE.Vector3();
+  R.decompose(dv,q_,s_);
+  const S = u.clone().normalize();
+  // dv is the translation vector
+  // du is the projection along u
+  const du = S.clone().multiplyScalar((dv.dot(S)));
+  // dp is d_perp
+  const dp = new THREE.Vector3().subVectors(dv,du);
 
-  return [r,thetaP,da,chord,phi,u];
+  const bb = S.clone().multiplyScalar(Math.tan(thetaP/2));
+
+  const bxd = new THREE.Vector3().crossVectors(bb,dv);
+  const bxbxd = new THREE.Vector3().crossVectors(bb,bxd);
+  const num = new THREE.Vector3().subVectors(bxd,bxbxd);
+  const dem = bb.dot(bb);
+
+    P = num.multiplyScalar(1 / (2 * dem));
+  }
+  { // here I attempt the method from: https://www.seas.upenn.edu/~meam520/notes02/EulerChasles4.pdf
+
+  }
+  {
+    // Okay!!! THIS FINALLY WORKS!! This assumes
+    // that the B point matches the transformation
+    // matrix that we have been given. This might be a weakness.
+    // This is an attempt to use a different method.
+    // To be more general, B should be an input
+    // to this routine.
+    const uu = u.clone().multiplyScalar(1).setLength(da);
+
+    // I think this point has to be the correct radius
+    // away from the axis---but how do we know that?
+    //    const B = new THREE.Vector3(0,2,-L/2);
+    const B = new THREE.Vector3(0,1,-L/2);
+    const C = B.clone().applyMatrix4(R);
+    const dist = B.distanceTo(C);
+//    console.assert(vnear(C,new THREE.Vector3(0,2,L/2)));
+    const Bp = new THREE.Vector3().subVectors(B,uu);
+    // Now we want to create a vector of length r
+    // on the x axis, and rotate by
+    const Cp = new THREE.Vector3().subVectors(C,uu);
+
+    const Bm = new THREE.Vector3().addVectors(B,Bp);
+    Bm.multiplyScalar(1/2);
+
+    const Cm = new THREE.Vector3().addVectors(C,Cp);
+    Cm.multiplyScalar(1/2);
+
+    const Mv = new THREE.Vector3().subVectors(B,C);
+    const Mp = new THREE.Vector3().addVectors(B,C);
+    Mp.multiplyScalar(1/2);
+
+    const BBp = new THREE.Vector3().subVectors(B,Bp);
+    const Q = uu.cross(Mv);
+    const ql = Math.sqrt(r**2 - (chord**2)/4);
+    console.log("ql:",ql);
+    Q.setLength(-ql/(L/dist));
+    console.log("Bm,Q",Bm,Q);
+    const Ba = Mp.clone().add(Q);
+    P = Ba;
+    console.log("B,C,Bp,Cp",B,C,Bp,Cp);
+    console.log("Bm,Cm,Q,Ba",Bm,Cm,Q,Ba);
+    // Now in theory C is on the axis is
+    return [r,thetaP,da,chord,phi,u,P,[Bm,Cm,Bp,Cp,B,C]];
+  }
+
+
+  return [r,thetaP,da,chord,phi,u,P];
 }
 
 function testAbilityToGetScrewAxisFromRotationMatrix() {
@@ -1072,6 +1159,9 @@ function testAbilityToGetScrewAxisFromRotationMatrix() {
 
   // now check that the parameters match...
   console.assert(near(theta,thetaP));
+  if (!vnear(axis,u)) {
+    console.log("axis,U",axis,u);
+  }
   console.assert(vnear(axis,u));
 }
 
