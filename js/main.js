@@ -1293,22 +1293,13 @@ function RenderSegmentedHelix(solid,tau_v) {
   let Cp = resM[6];
   if (Cp) {
     var Cpa = new THREE.Vector3(Cp.x,Cp.y,Cp.z);
-    cSphere(am.JOINT_RADIUS/2,Cpa,"red");
-    var Bm = resM[7][0];
-    var Cm = resM[7][1];
-    var Bpr = resM[7][2];
-    var Cpr = resM[7][3];
-    var B_ = resM[7][4];
-    var C_ = resM[7][5];
-
-    var Cpa = new THREE.Vector3(Cp.x,Cp.y,Cp.z);
+    cSphere(am.JOINT_RADIUS/4,Cpa,"red");
+    var B_ = resM[7][0];
+    var C_ = resM[7][1];
+    var Mp = resM[7][2];
     cSphere(am.JOINT_RADIUS/3,B_,"green");
-    cSphere(am.JOINT_RADIUS/5,Bm,"orange");
-    cSphere(am.JOINT_RADIUS/5,Bpr,"white");
-
-    cSphere(am.JOINT_RADIUS/5,Cpr,"black");
-    cSphere(am.JOINT_RADIUS/5,Cm,"purple");
     cSphere(am.JOINT_RADIUS/3,C_,"red");
+    cSphere(am.JOINT_RADIUS/3,Mp,"purple");
   }
   if (false) {
     console.assert(near(resK[0],resM[0]));

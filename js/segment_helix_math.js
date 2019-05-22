@@ -1072,27 +1072,27 @@ function computeThetaAxisFromMatrix4(L,R) {
   // https://en.wikipedia.org/wiki/Screw_axis#Computing_a_point_on_the_screw_axis
   // to find a point P on the u axis.
   var P;
-  {
-  const dv = new THREE.Vector3();
-  const q_ = new THREE.Quaternion();
-  const s_ = new THREE.Vector3();
-  R.decompose(dv,q_,s_);
-  const S = u.clone().normalize();
-  // dv is the translation vector
-  // du is the projection along u
-  const du = S.clone().multiplyScalar((dv.dot(S)));
-  // dp is d_perp
-  const dp = new THREE.Vector3().subVectors(dv,du);
+  // {
+  // const dv = new THREE.Vector3();
+  // const q_ = new THREE.Quaternion();
+  // const s_ = new THREE.Vector3();
+  // R.decompose(dv,q_,s_);
+  // const S = u.clone().normalize();
+  // // dv is the translation vector
+  // // du is the projection along u
+  // const du = S.clone().multiplyScalar((dv.dot(S)));
+  // // dp is d_perp
+  // const dp = new THREE.Vector3().subVectors(dv,du);
 
-  const bb = S.clone().multiplyScalar(Math.tan(thetaP/2));
+  // const bb = S.clone().multiplyScalar(Math.tan(thetaP/2));
 
-  const bxd = new THREE.Vector3().crossVectors(bb,dv);
-  const bxbxd = new THREE.Vector3().crossVectors(bb,bxd);
-  const num = new THREE.Vector3().subVectors(bxd,bxbxd);
-  const dem = bb.dot(bb);
+  // const bxd = new THREE.Vector3().crossVectors(bb,dv);
+  // const bxbxd = new THREE.Vector3().crossVectors(bb,bxd);
+  // const num = new THREE.Vector3().subVectors(bxd,bxbxd);
+  // const dem = bb.dot(bb);
 
-    P = num.multiplyScalar(1 / (2 * dem));
-  }
+  //   P = num.multiplyScalar(1 / (2 * dem));
+  // }
   { // here I attempt the method from: https://www.seas.upenn.edu/~meam520/notes02/EulerChasles4.pdf
 
   }
@@ -1103,19 +1103,32 @@ function computeThetaAxisFromMatrix4(L,R) {
     // This is an attempt to use a different method.
     // To be more general, B should be an input
     // to this routine.
+    // IMPLICATIONS: We can finally find a point
+    // on the axis from an ARBITRARY point.
     const uu = u.clone().multiplyScalar(1).setLength(da);
 
     // I think this point has to be the correct radius
     // away from the axis---but how do we know that?
     //    const B = new THREE.Vector3(0,2,-L/2);
-    const B = new THREE.Vector3(0,1,-L/2);
+    const B = new THREE.Vector3(-4,4,-L/2);
     const C = B.clone().applyMatrix4(R);
-    const dist = B.distanceTo(C);
-//    console.assert(vnear(C,new THREE.Vector3(0,2,L/2)));
+    const BC = new THREE.Vector3().subVectors(C,B);
+    const phi_p = u.angleTo(BC);
+    const L_p = B.distanceTo(C);
+    let da_p = L_p * Math.cos(phi_p);
+    let chord_p = ChordFromLDaxis(L_p,da_p);
+    const r_p = chord_p / (2 * Math.sin(thetaP/2));
+    console.log("chord,chord_p",chord,chord_p,chord_p/chord);
+    console.log("L,L_p", L, L_p,L_p/L);
+    console.log("da,da_p", da, da_p,da_p/da);
+    console.log("r,r_p", r, r_p,r_p/r);
+    console.log("u",u);
+    console.log("phi, cos(phi)",phi_p * 180/Math.PI,Math.cos(phi_p));
+
     const Bp = new THREE.Vector3().subVectors(B,uu);
     // Now we want to create a vector of length r
     // on the x axis, and rotate by
-    const Cp = new THREE.Vector3().subVectors(C,uu);
+   const Cp = new THREE.Vector3().subVectors(C,uu);
 
     const Bm = new THREE.Vector3().addVectors(B,Bp);
     Bm.multiplyScalar(1/2);
@@ -1127,18 +1140,24 @@ function computeThetaAxisFromMatrix4(L,R) {
     const Mp = new THREE.Vector3().addVectors(B,C);
     Mp.multiplyScalar(1/2);
 
-    const BBp = new THREE.Vector3().subVectors(B,Bp);
-    const Q = uu.cross(Mv);
-    const ql = Math.sqrt(r**2 - (chord**2)/4);
+  //  const BBp = new THREE.Vector3().subVectors(B,Bp);
+    const Q = Mv.clone()
+    Q.cross(u);
+    const ql = Math.sqrt(r_p**2 - (chord_p/2)**2);
     console.log("ql:",ql);
-    Q.setLength(-ql/(L/dist));
-    console.log("Bm,Q",Bm,Q);
+    Q.setLength(-ql);
+    console.log("length:",Q.length());
+  //  console.log("Bm,Q",Bm,Q);
     const Ba = Mp.clone().add(Q);
-    P = Ba;
-    console.log("B,C,Bp,Cp",B,C,Bp,Cp);
-    console.log("Bm,Cm,Q,Ba",Bm,Cm,Q,Ba);
+
+    const uuhalf = uu.clone();
+    uuhalf.multiplyScalar(-1/2);
+    const nBa = new THREE.Vector3().addVectors(Ba,uuhalf);
+    P = nBa;
+ //   console.log("B,C,Bp,Cp",B,C,Bp,Cp);
+//    console.log("Bm,Cm,Q,Ba",Bm,Cm,Q,Ba);
     // Now in theory C is on the axis is
-    return [r,thetaP,da,chord,phi,u,P,[Bm,Cm,Bp,Cp,B,C]];
+    return [r,thetaP,da,chord,phi,u,P,[B,C,Mp,Q]];
   }
 
 
