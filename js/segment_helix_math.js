@@ -1039,9 +1039,13 @@ function computeThetaAxisFromMatrix4(L,R) {
   console.log('AXIS',u,scale);
 
   var phi;
+  // Could I replace this with the vector B-C generated from R
+  // via an arbitrary point, thus making this more robust?
   phi = u.angleTo(new THREE.Vector3(0,0,1));
   phi = - phi;
 
+  // could this be replaced with a dot product,
+  // thus making our whole computation more robust?
   let da = L * Math.cos(phi);
 
   //  if (A.x > 0) {
@@ -1097,10 +1101,10 @@ function computeThetaAxisFromMatrix4(L,R) {
 
   }
   {
-    // Okay!!! THIS FINALLY WORKS!! This assumes
-    // that the B point matches the transformation
-    // matrix that we have been given. This might be a weakness.
-    // This is an attempt to use a different method.
+    // Note: This math was more or less my own invention,
+    // by applying the matrix to an arbitrary point!
+    // I'm not sure this is docuemnted anywhere else,
+    // and I'm not sure how it relates to other methods.
     // To be more general, B should be an input
     // to this routine.
     // IMPLICATIONS: We can finally find a point
