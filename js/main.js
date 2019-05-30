@@ -916,7 +916,7 @@ function RenderHelix(l,r,d,theta,v,phi,wh,MAX_POINTS) {
     points3D.vertices.push(p);
   }
   var line2 = new THREE.Line(points3D, gmat);
-  line2.rotation.y = -phi;
+  line2.rotation.y = phi;
   line2.name = "HELIX";
   am.scene.add(line2);
 }

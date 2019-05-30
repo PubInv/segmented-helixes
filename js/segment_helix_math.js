@@ -184,11 +184,14 @@ function KahnAxis(L,D) {
       // let phix = Math.acos(da/L);
 
       // phi is actually correct as measured against the z axis....
-      let phi = Math.atan2(H.z,H.x) - Math.PI/2;
-      if (near(phi,Math.PI)) {
+      // TODO: This value of phi requires us to change the rendering
+      let phi = -(Math.atan2(H.z,H.x) - Math.PI/2);
+      if (near(phi,-Math.PI)) {
         console.log("PHI is 180! Correcting!");
         phi = 0;
       }
+
+      if (phi < 0) phi = -phi;
 
       // This sin could be computed with a perp dot....
       // Note: Sin(acos(x)) = sqrt(1 - x^2) https://socratic.org/questions/how-do-you-simplify-sin-arccos-x-1
@@ -891,10 +894,11 @@ function testKahnAxisFull()
 function testKahnAxisFullAux(tau,NB1,NC1)
 {
   let L0 = 2;
-  let A = AfromLtauNbNc(L0,tau,NB1,NC1)[0];
-  let B = new THREE.Vector3(0,0,-L0/2);
-  let D = new THREE.Vector3(-A.x,A.y,-A.z);
-  let res = KahnAxis(L0,D);
+//  let A = AfromLtauNbNc(L0,tau,NB1,NC1)[0];
+//  let B = new THREE.Vector3(0,0,-L0/2);
+//  let D = new THREE.Vector3(-A.x,A.y,-A.z);
+//  let res = KahnAxis(L0,D);
+  let res = compareMethods(L0,tau,NB1,NC1);
   let r = res[0];
   let theta = res[1];
   let da = res[2];
@@ -902,6 +906,7 @@ function testKahnAxisFullAux(tau,NB1,NC1)
   let phi = res[4];
   let H = res[5];
   let Ba = res[6];
+  let B = res[7];
   console.assert(!isNaN(theta));
 
   // Now test that H*da + Ba = Ca;
@@ -940,6 +945,8 @@ function compareMethods(L,tau,NB1,NC1) {
   }
   console.assert(near(da,res[2]));
   console.assert(near(chord,res[3]));
+
+  // TODO: This is producing a sign error....
   console.assert(near(phi,res[4]));
   if (!(near(phi,res[4]))) {
     debugger;
