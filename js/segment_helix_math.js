@@ -122,7 +122,8 @@ function KahnAxis(L,D) {
     let r = 0;
     let c = 0;
     // I need to define this more clearly....
-    let phi = Math.PI;
+    //    let phi = Math.PI;
+    let phi = 0;
     let theta = 0;
     return [r,theta,da,c,phi,H,null];
   } else {
@@ -184,6 +185,10 @@ function KahnAxis(L,D) {
 
       // phi is actually correct as measured against the z axis....
       let phi = Math.atan2(H.z,H.x) - Math.PI/2;
+      if (near(phi,Math.PI)) {
+        console.log("PHI is 180! Correcting!");
+        phi = 0;
+      }
 
       // This sin could be computed with a perp dot....
       // Note: Sin(acos(x)) = sqrt(1 - x^2) https://socratic.org/questions/how-do-you-simplify-sin-arccos-x-1
@@ -666,10 +671,10 @@ function AfromLtauNbNc(L,tau,NBu,NCu,debug = false) {
   p_i.p.Nb.applyMatrix4(rt);
   p_i.p.Nc.applyMatrix4(rt);
 
-  var p_b = adjoinPrism(p_i,tau,false,debug)[0];
+  var p_b = adjoinPrism(p_i,tau,false,debug);
   var p_c = adjoinPrism(p_i,tau,true,debug)[0];
 
-  return [p_b.b,psi];
+  return [p_b[0].b,psi,p_b[1]];
 }
 
 
@@ -920,6 +925,38 @@ function testKahnAxisFlat()
     testKahnAxisFlatAux(angle);
   }
 }
+function compareMethods(L,tau,NB1,NC1) {
+  let AR = AfromLtauNbNc(L,tau,NB1,NC1);
+  let A = AR[0];
+  let B = new THREE.Vector3(0,0,-L/2);
+  let D = new THREE.Vector3(-A.x,A.y,-A.z);
+  let R = AR[2];
+  let res = KahnAxis(L,D);
+  [r,thetaP,da,chord,phi,u,Ba] = computeThetaAxisFromMatrix4(L,R);
+  console.assert(near(r,res[0]));
+  console.assert(near(res[1],0) || near(thetaP,res[1]));
+  if (!((near(res[1],0) || near(thetaP,res[1])))) {
+    debugger;
+  }
+  console.assert(near(da,res[2]));
+  console.assert(near(chord,res[3]));
+  console.assert(near(phi,res[4]));
+  if (!(near(phi,res[4]))) {
+    debugger;
+  }
+
+  // Although possibly I should make the axis the length of da,
+  // but instead
+
+  console.assert(vnear(u.clone().normalize(),res[5].clone().normalize()));
+  if (!(vnear(u.clone().normalize(),res[5].clone().normalize()))) {
+    debugger;
+  }
+  // TODO: Apparently computeThetaAxis is not computeing Ba correctly!!!
+ // console.assert(vnear(Ba,res[6]));
+
+  return [...res,B];
+}
 function testKahnAxisFlatAux(angle)
 {
   let L0 = 2;
@@ -928,10 +965,11 @@ function testKahnAxisFlatAux(angle)
   // We add in a little here so we are not a torus
   let NC1 = new THREE.Vector3(Math.sin(angle),0,1);
   let tau = Math.PI;
-  let A = AfromLtauNbNc(L0,tau,NB1,NC1)[0];
-  let B = new THREE.Vector3(0,0,-L0/2);
-  let D = new THREE.Vector3(-A.x,A.y,-A.z);
-  let res = KahnAxis(L0,D);
+//  let A = AfromLtauNbNc(L0,tau,NB1,NC1)[0];
+//  let B = new THREE.Vector3(0,0,-L0/2);
+//  let D = new THREE.Vector3(-A.x,A.y,-A.z);
+  //  let res = KahnAxis(L0,D);
+  let res = compareMethods(L0,tau,NB1,NC1);
   let r = res[0];
   let theta = res[1];
   let da = res[2];
@@ -939,6 +977,7 @@ function testKahnAxisFlatAux(angle)
   let phi = res[4];
   let H = res[5];
   let Ba = res[6];
+  let B = res[7];
   console.assert(!isNaN(theta));
 
   // Now test that H*da + Ba = Ca;
@@ -1009,7 +1048,7 @@ function SubtractMatrices(A,B) {
 function computeThetaAxisFromMatrix4(L,R) {
   // now attempt to recover parameters from the rotation matrix....
   const val = (1/2) * (TraceMatrix4(R) - 1);
-  const thetaP = Math.acos(val);
+  const thetaP = (near(val,-1)) ? Math.PI :  Math.acos(val);
 
   // Now we will attempt to extract the screw axis from this matrix...
   // unfortunately THREE doesn't seem to implment matrix addition and substraction...
@@ -1018,6 +1057,8 @@ function computeThetaAxisFromMatrix4(L,R) {
   let yAxis = new THREE.Vector3();
   let zAxis = new THREE.Vector3();
   R.extractBasis(xAxis,yAxis,zAxis);
+
+  // Note: if there is no rotation, we have the special "straight line" case....
 
   // const Ro = R.clone();
   // const Rt = R.transpose();
@@ -1042,7 +1083,7 @@ function computeThetaAxisFromMatrix4(L,R) {
   // Could I replace this with the vector B-C generated from R
   // via an arbitrary point, thus making this more robust?
   phi = u.angleTo(new THREE.Vector3(0,0,1));
-  phi = - phi;
+//  phi = phi;
 
   // could this be replaced with a dot product,
   // thus making our whole computation more robust?
@@ -1165,7 +1206,7 @@ function computeThetaAxisFromMatrix4(L,R) {
   }
 
 
-  return [r,thetaP,da,chord,phi,u,P];
+//  return [r,thetaP,da,chord,phi,u,P];
 }
 
 function testAbilityToGetScrewAxisFromRotationMatrix() {
