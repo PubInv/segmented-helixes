@@ -124,8 +124,9 @@ function KahnAxis(L,D) {
     // I need to define this more clearly....
     //    let phi = Math.PI;
     let phi = 0;
-    let theta = 0;
-    return [r,theta,da,c,phi,H,null];
+    // We don't have enough information to define theta!!!
+    let theta = null;
+    return [r,null,da,c,phi,H,null];
   } else {
     let CmB = C.clone();
     CmB.sub(B);
@@ -788,8 +789,9 @@ function testRegularTetsKahnAxis()
   let tau = 2 * Math.PI /3;
   let A = AfromLtauNbNc(L0,tau,NB1,NC1)[0];
   let B = new THREE.Vector3(0,0,-L0/2);
-  let D = new THREE.Vector3(-A.x,A.y,-A.z);
-  let res = KahnAxis(L0,D);
+  // let D = new THREE.Vector3(-A.x,A.y,-A.z);
+  // let res = KahnAxis(L0,D);
+  let res = compareMethods(L0,tau,NB1,NC1);
   let r = res[0];
   let theta = res[1];
   let da = res[2];
@@ -829,8 +831,9 @@ function testKahnAxisYTorusAux(angle)
   let tau = 0;
   let A = AfromLtauNbNc(L0,tau,NB1,NC1)[0];
   let B = new THREE.Vector3(0,0,-L0/2);
-  let D = new THREE.Vector3(-A.x,A.y,-A.z);
-  let res = KahnAxis(L0,D);
+  //  let D = new THREE.Vector3(-A.x,A.y,-A.z);
+  //  let res = KahnAxis(L0,D);
+  let res = compareMethods(L0,tau,NB1,NC1);
   let r = res[0];
   let theta = res[1];
   let da = res[2];
@@ -858,9 +861,11 @@ function testKahnAxisTau180()
   let NC1 = new THREE.Vector3(0,-Math.sin(angle),Math.cos(angle));
   let tau = Math.PI;
   let A = AfromLtauNbNc(L0,tau,NB1,NC1)[0];
-  let B = new THREE.Vector3(0,0,-L0/2);
-  let D = new THREE.Vector3(-A.x,A.y,-A.z);
-  let res = KahnAxis(L0,D);
+//  let B = new THREE.Vector3(0,0,-L0/2);
+//  let D = new THREE.Vector3(-A.x,A.y,-A.z);
+//  let res = KahnAxis(L0,D);
+
+  let res = compareMethods(L0,tau,NB1,NC1);
   let r = res[0];
   let theta = res[1];
   let da = res[2];
@@ -938,6 +943,10 @@ function compareMethods(L,tau,NB1,NC1) {
   let R = AR[2];
   let res = KahnAxis(L,D);
   [r,thetaP,da,chord,phi,u,Ba] = computeThetaAxisFromMatrix4(L,R);
+  if (res[1] == null) {
+    // In this case, KahnAxis is undefined and we cannot compare!!!
+    return [...res,B];
+  }
   console.assert(near(r,res[0]));
   console.assert(near(res[1],0) || near(thetaP,res[1]));
   if (!((near(res[1],0) || near(thetaP,res[1])))) {
@@ -1053,6 +1062,9 @@ function SubtractMatrices(A,B) {
 // Note: This may solve my problem: https://en.wikipedia.org/wiki/Screw_axis#Computing_a_point_on_the_screw_axis
 
 function computeThetaAxisFromMatrix4(L,R) {
+  if (near(R.determinant(),-1)) {
+    console.log("R.det",R.determinant());
+  }
   // now attempt to recover parameters from the rotation matrix....
   const val = (1/2) * (TraceMatrix4(R) - 1);
   const thetaP = (near(val,-1)) ? Math.PI :  Math.acos(val);
@@ -1080,11 +1092,24 @@ function computeThetaAxisFromMatrix4(L,R) {
   const g = xAxis.z;
   const h = yAxis.z;
   const u = new THREE.Vector3(h-f,c-g,d-b);
+  // TODO: sometimes u is very small. I am not sure that is a numerically stable compuation;
+  // I need to check this.
+
+  // This may not be the best way to detect it, but I believe
+  // that if u is "vnear" zero we have an undefined "straight line" case.
+  if (vnear(u, new THREE.Vector3(0,0,0))) {
+    console.log("WARNING!!! NUMERICAL Instability!");
+    // This is occuring in the "flat" or "zig-zag" case!!!
+    // I need to figure out a different way to compute this,
+    // even though it seems to work, which is weird.
+//     debugger;
+  }
+
   u.multiplyScalar(1/(2 * Math.sin(thetaP)));
   const SIGN_ADJUST = -1;
   // this just accomplishes normalization, so it is unclear where we need it!
   u.multiplyScalar(SIGN_ADJUST);
-  console.log('AXIS',u,scale);
+//  console.log('AXIS',u,scale);
 
   var phi;
   // Could I replace this with the vector B-C generated from R
@@ -1115,8 +1140,8 @@ function computeThetaAxisFromMatrix4(L,R) {
   // note, this is sin(acos(x)), which is Sqrt(1 - x^2).
   const r = chord / (2 * Math.sin(thetaP/2));
 //  const r = chord / (2 * Math.sqrt((1 - val)/2));
-  console.log("AAA da, chord",
-              da,chord);
+//  console.log("AAA da, chord",
+//              da,chord);
 
 //  var phi;
   //  phi = Math.atan2(u.z,u.x) - Math.PI/2;
@@ -1170,12 +1195,12 @@ function computeThetaAxisFromMatrix4(L,R) {
     let da_p = L_p * Math.cos(phi_p);
     let chord_p = ChordFromLDaxis(L_p,da_p);
     const r_p = chord_p / (2 * Math.sin(thetaP/2));
-    console.log("chord,chord_p",chord,chord_p,chord_p/chord);
-    console.log("L,L_p", L, L_p,L_p/L);
-    console.log("da,da_p", da, da_p,da_p/da);
-    console.log("r,r_p", r, r_p,r_p/r);
-    console.log("u",u);
-    console.log("phi, cos(phi)",phi_p * 180/Math.PI,Math.cos(phi_p));
+    // console.log("chord,chord_p",chord,chord_p,chord_p/chord);
+    // console.log("L,L_p", L, L_p,L_p/L);
+    // console.log("da,da_p", da, da_p,da_p/da);
+    // console.log("r,r_p", r, r_p,r_p/r);
+    // console.log("u",u);
+    // console.log("phi, cos(phi)",phi_p * 180/Math.PI,Math.cos(phi_p));
 
     const Bp = new THREE.Vector3().subVectors(B,uu);
     // Now we want to create a vector of length r
@@ -1196,9 +1221,9 @@ function computeThetaAxisFromMatrix4(L,R) {
     const Q = Mv.clone()
     Q.cross(u);
     const ql = Math.sqrt(r_p**2 - (chord_p/2)**2);
-    console.log("ql:",ql);
+//    console.log("ql:",ql);
     Q.setLength(-ql);
-    console.log("length:",Q.length());
+//    console.log("length:",Q.length());
   //  console.log("Bm,Q",Bm,Q);
     const Ba = Mp.clone().add(Q);
 

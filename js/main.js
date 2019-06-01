@@ -1280,6 +1280,7 @@ function RenderSegmentedHelix(solid,tau_v) {
   resK = KahnAxis(L0,D);
 
 
+  // TODO: Phi is being miscalculated in the case of tau = 180 or -180!!!
 
 
 
