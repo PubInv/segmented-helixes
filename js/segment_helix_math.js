@@ -676,9 +676,10 @@ function AfromLtauNbNc(L,tau,NBu,NCu,debug = false) {
   p_i.p.Nc.applyMatrix4(rt);
 
   var p_b = adjoinPrism(p_i,tau,false,debug);
-  var p_c = adjoinPrism(p_i,tau,true,debug)[0];
+  var p_c = adjoinPrism(p_i,tau,true,debug);
 
-  return [p_b[0].b,psi,p_b[1]];
+  // We are assuming the rotation goes from C to D, even though we are returning A
+  return [p_b[0].b,psi,p_c[1]];
 }
 
 
@@ -737,8 +738,8 @@ function testAfromLtauMultiple() {
           p_i.p.Nc.applyMatrix4(rt);
 
 
-          var p_b = adjoinPrism(p_i,tau,false,true)[0];
-          var p_c = adjoinPrism(p_i,tau,true,true)[0];
+          var p_b = adjoinPrism(p_i,tau,false,false)[0];
+          var p_c = adjoinPrism(p_i,tau,true,false)[0];
           return;
         }
       }
@@ -1068,6 +1069,11 @@ function computeThetaAxisFromMatrix4(L,R) {
   // now attempt to recover parameters from the rotation matrix....
   const val = (1/2) * (TraceMatrix4(R) - 1);
   const thetaP = (near(val,-1)) ? Math.PI :  Math.acos(val);
+  // somewhat by
+
+  const B = new THREE.Vector3(-4,4,-L/2);
+  const C = B.clone().applyMatrix4(R);
+  const BC = new THREE.Vector3().subVectors(C,B);
 
   // Now we will attempt to extract the screw axis from this matrix...
   // unfortunately THREE doesn't seem to implment matrix addition and substraction...
@@ -1092,13 +1098,19 @@ function computeThetaAxisFromMatrix4(L,R) {
   const g = xAxis.z;
   const h = yAxis.z;
   const u = new THREE.Vector3(h-f,c-g,d-b);
+  // I believe this computation (which I got from reference above) is wrong,
+  // or I am losing sign infomration in taking the arccosign in thetaP.
+  const SIGN_ADJUST = 1;
+  // this just accomplishes normalization, so it is unclear where we need it!
+  u.multiplyScalar(SIGN_ADJUST);
+
   // TODO: sometimes u is very small. I am not sure that is a numerically stable compuation;
   // I need to check this.
 
   // This may not be the best way to detect it, but I believe
   // that if u is "vnear" zero we have an undefined "straight line" case.
   if (vnear(u, new THREE.Vector3(0,0,0))) {
-    console.log("WARNING!!! NUMERICAL Instability!");
+    console.log("WARNING!!! NUMERICAL Instability!",thetaP);
     // This is occuring in the "flat" or "zig-zag" case!!!
     // I need to figure out a different way to compute this,
     // even though it seems to work, which is weird.
@@ -1106,25 +1118,23 @@ function computeThetaAxisFromMatrix4(L,R) {
   }
 
   u.multiplyScalar(1/(2 * Math.sin(thetaP)));
-  const SIGN_ADJUST = -1;
+//  const SIGN_ADJUST = -1;
   // this just accomplishes normalization, so it is unclear where we need it!
-  u.multiplyScalar(SIGN_ADJUST);
+//  u.multiplyScalar(SIGN_ADJUST);
 //  console.log('AXIS',u,scale);
 
   var phi;
   // Could I replace this with the vector B-C generated from R
   // via an arbitrary point, thus making this more robust?
   phi = u.angleTo(new THREE.Vector3(0,0,1));
-//  phi = phi;
+//  if (near(thetaP,Math.PI)) {
+  console.log("DEBUG THIS",thetaP * 180 / Math.PI,phi * 180 / Math.PI, Math.sin(thetaP));
+//  }
 
   // could this be replaced with a dot product,
   // thus making our whole computation more robust?
   let da = L * Math.cos(phi);
 
-  //  if (A.x > 0) {
-  if (false) {
-    da = -da;
-  }
   // Clearly this is only true because
   // I have arrange that the axis is in a plane
   // parallel to Y --- but can't we always do that?
@@ -1134,7 +1144,6 @@ function computeThetaAxisFromMatrix4(L,R) {
   // this possible
   const denom = Math.sqrt(u.x**2 + u.z**2);
 //  let da = L * u.z / denom;
-//  da = -da;
   let chord = ChordFromLDaxis(L,da);
 //  let chord = L * u.x / denom;
   // note, this is sin(acos(x)), which is Sqrt(1 - x^2).
@@ -1187,9 +1196,9 @@ function computeThetaAxisFromMatrix4(L,R) {
     // I think this point has to be the correct radius
     // away from the axis---but how do we know that?
     //    const B = new THREE.Vector3(0,2,-L/2);
-    const B = new THREE.Vector3(-4,4,-L/2);
-    const C = B.clone().applyMatrix4(R);
-    const BC = new THREE.Vector3().subVectors(C,B);
+//    const B = new THREE.Vector3(-4,4,-L/2);
+//    const C = B.clone().applyMatrix4(R);
+//    const BC = new THREE.Vector3().subVectors(C,B);
     const phi_p = u.angleTo(BC);
     const L_p = B.distanceTo(C);
     let da_p = L_p * Math.cos(phi_p);

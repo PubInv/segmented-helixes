@@ -260,7 +260,7 @@ function createAdjoinedPrisms(p_i,tau,num) {
   }
   var cur = p_i;
   for(let i = 0; i < num; i++) {
-    var p_c = adjoinPrism(cur,tau,false,i == 0)[0];
+    var p_c = adjoinPrism(cur,tau,false,false)[0];
     var TP = renderPrismInstance(p_c);
     TP.forEach(o => { am.scene.add(o); });
     negatives.push(TP);
@@ -1229,7 +1229,7 @@ function RenderSegmentedHelix(solid,tau_v) {
   // for the computeThetaAxis that way to work...a catch22
   // This is probably not right.
 
-  let Arot = AfromLtauNbNc(L0,tau_v,Nb,Nc,true);
+  let Arot = AfromLtauNbNc(L0,tau_v,Nb,Nc,false);
   let A = Arot[0];
   // I am not sure whey this is negated...
   //  var rotation = -Arot[1];
@@ -1284,7 +1284,7 @@ function RenderSegmentedHelix(solid,tau_v) {
 
 
 
- [p_b,rotations] = adjoinPrism(p_i,tau_v,false,true);
+ [p_b,rotations] = adjoinPrism(p_i,tau_v,false,false);
   console.log("rotations, pre",rotations);
   resM = computeThetaAxisFromMatrix4(L0,rotations);
   console.log("SHOULD MATCH");
@@ -1302,7 +1302,7 @@ function RenderSegmentedHelix(solid,tau_v) {
     cSphere(am.JOINT_RADIUS/3,C_,"red");
     cSphere(am.JOINT_RADIUS/3,Mp,"purple");
   }
-  if (false) {
+  if (true) {
     console.assert(near(resK[0],resM[0]));
     console.assert(near(resK[1],resM[1]));
     console.assert(near(resK[2],resM[2]));
@@ -1310,14 +1310,17 @@ function RenderSegmentedHelix(solid,tau_v) {
     console.assert(near(resK[4],resM[4]));
   }
 
+  // TODO: Figure out why I can't use this tomorrow!
   var res = resK;
   r = res[0];
-  theta = res[1];
+  // NOTE!!!
+  theta = resM[1];
   d = res[2];
-  phi = res[4];
+  // NOTE!!!
+  phi = resM[4];
 
-  console.log("da,chord",res[2],res[3]);
-  console.log("theta,phi",res[1]* 180 / Math.PI,res[4] * 180/Math.PI);
+  console.log("da,chord",d,res[3]);
+  console.log("theta,phi",theta* 180 / Math.PI,phi * 180/Math.PI);
 
 
   console.log("tau_v :", tau_v);
