@@ -72,7 +72,7 @@ function testAxis(B,Ba,H,da) {
   Hc.multiplyScalar(da);
   X.add(Hc);
   if (!vnear(X,Ca)) {
-    debugger;
+//    debugger;
   }
   console.assert(vnear(X,Ca));
 
@@ -1059,10 +1059,8 @@ function SubtractMatrices(A,B) {
   return C;
 }
 
-// https://www.seas.upenn.edu/~meam520/notes02/EulerChasles4.pdf
-// Note: This may solve my problem: https://en.wikipedia.org/wiki/Screw_axis#Computing_a_point_on_the_screw_axis
 
-function computeThetaAxisFromMatrix4(L,R) {
+function computeThetaUDa(R) {
   if (near(R.determinant(),-1)) {
     console.log("R.det",R.determinant());
   }
@@ -1071,9 +1069,6 @@ function computeThetaAxisFromMatrix4(L,R) {
   const thetaP = (near(val,-1)) ? Math.PI :  Math.acos(val);
   // somewhat by
 
-  const B = new THREE.Vector3(-4,4,-L/2);
-  const C = B.clone().applyMatrix4(R);
-  const BC = new THREE.Vector3().subVectors(C,B);
 
   // Now we will attempt to extract the screw axis from this matrix...
   // unfortunately THREE doesn't seem to implment matrix addition and substraction...
@@ -1114,74 +1109,55 @@ function computeThetaAxisFromMatrix4(L,R) {
     // This is occuring in the "flat" or "zig-zag" case!!!
     // I need to figure out a different way to compute this,
     // even though it seems to work, which is weird.
-//     debugger;
+    //     debugger;
   }
 
   u.multiplyScalar(1/(2 * Math.sin(thetaP)));
-//  const SIGN_ADJUST = -1;
+  //  const SIGN_ADJUST = -1;
   // this just accomplishes normalization, so it is unclear where we need it!
-//  u.multiplyScalar(SIGN_ADJUST);
-//  console.log('AXIS',u,scale);
+  //  u.multiplyScalar(SIGN_ADJUST);
+  //  console.log('AXIS',u,scale);
 
-  var phi;
-  // Could I replace this with the vector B-C generated from R
-  // via an arbitrary point, thus making this more robust?
-  phi = u.angleTo(new THREE.Vector3(0,0,1));
-//  if (near(thetaP,Math.PI)) {
-  console.log("DEBUG THIS",thetaP * 180 / Math.PI,phi * 180 / Math.PI, Math.sin(thetaP));
-//  }
+  // Now I believe da is indepednet of L and any point.
+  const B = new THREE.Vector3(-4,4,-4/2);
+  const C = B.clone().applyMatrix4(R);
+  const BC = new THREE.Vector3().subVectors(C,B);
 
-  // could this be replaced with a dot product,
-  // thus making our whole computation more robust?
-  let da = L * Math.cos(phi);
+  // Now BC.u sould give us da...
+  const unorm = u.clone().normalize();
+  const da_scalar_project = BC.dot(unorm);
 
-  // Clearly this is only true because
-  // I have arrange that the axis is in a plane
-  // parallel to Y --- but can't we always do that?
-  // Or does that make the rotation matrix harder, thus hiding
-  // the truth? Or is this a valulable insight...
-  // that by positioning BC along the Z axis we can make
-  // this possible
-  const denom = Math.sqrt(u.x**2 + u.z**2);
-//  let da = L * u.z / denom;
+  return [thetaP,u,da_scalar_project];
+}
+
+
+// https://www.seas.upenn.edu/~meam520/notes02/EulerChasles4.pdf
+// Note: This may solve my problem: https://en.wikipedia.org/wiki/Screw_axis#Computing_a_point_on_the_screw_axis
+function computePhiRChord(L,thetaP,da) {
+  let phi = Math.acos(da/L);
   let chord = ChordFromLDaxis(L,da);
-//  let chord = L * u.x / denom;
-  // note, this is sin(acos(x)), which is Sqrt(1 - x^2).
   const r = chord / (2 * Math.sin(thetaP/2));
-//  const r = chord / (2 * Math.sqrt((1 - val)/2));
-//  console.log("AAA da, chord",
-//              da,chord);
+  return [phi,r,chord];
+}
 
-//  var phi;
-  //  phi = Math.atan2(u.z,u.x) - Math.PI/2;
-  // Now I will attempt to to use this:
-  // https://en.wikipedia.org/wiki/Screw_axis#Computing_a_point_on_the_screw_axis
-  // to find a point P on the u axis.
-  var P;
-  // {
-  // const dv = new THREE.Vector3();
-  // const q_ = new THREE.Quaternion();
-  // const s_ = new THREE.Vector3();
-  // R.decompose(dv,q_,s_);
-  // const S = u.clone().normalize();
-  // // dv is the translation vector
-  // // du is the projection along u
-  // const du = S.clone().multiplyScalar((dv.dot(S)));
-  // // dp is d_perp
-  // const dp = new THREE.Vector3().subVectors(dv,du);
+function computePointIndependentParameters(L,R) {
+  [thetaP,u,da] = computeThetaUDa(R);
+  [phi,r,chord] = computePhiRChord(L,thetaP,da);
+  // Now this has in fact given us everyting we need until such time
+  // as we want to compute Ba, which requires a point B to be specified....
+  // Can all of this be true?
+  return [r,thetaP,da,chord,phi,u];
+}
 
-  // const bb = S.clone().multiplyScalar(Math.tan(thetaP/2));
+function computeThetaAxisFromMatrix4(L,R) {
 
-  // const bxd = new THREE.Vector3().crossVectors(bb,dv);
-  // const bxbxd = new THREE.Vector3().crossVectors(bb,bxd);
-  // const num = new THREE.Vector3().subVectors(bxd,bxbxd);
-  // const dem = bb.dot(bb);
+  [r,thetaP,da,chord,phi,u] = computePointIndependentParameters(L,R);
 
-  //   P = num.multiplyScalar(1 / (2 * dem));
-  // }
-  { // here I attempt the method from: https://www.seas.upenn.edu/~meam520/notes02/EulerChasles4.pdf
+  // Now I believe da is indepednet of L and any point.
+  const B = new THREE.Vector3(-4,4,-L/2);
+  const C = B.clone().applyMatrix4(R);
+  const BC = new THREE.Vector3().subVectors(C,B);
 
-  }
   {
     // Note: This math was more or less my own invention,
     // by applying the matrix to an arbitrary point!
