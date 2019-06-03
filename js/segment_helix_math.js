@@ -946,7 +946,6 @@ function compareMethods(L,tau,NB1,NC1) {
   let res = KahnAxis(L,D);
   [r,thetaP,da,chord,phi,u,Ba] = computeThetaAxisFromMatrix4(L,R,B);
   const BC = new THREE.Vector3().subVectors(C,B);
-  let phi_p = Math.acos(da/BC.length());
 
   if (res[1] == null) {
     // In this case, KahnAxis is undefined and we cannot compare!!!
@@ -1115,6 +1114,11 @@ function computeThetaUDa(R) {
     const g = xAxis.z;
     const h = yAxis.z;
     u = new THREE.Vector3(h-f,c-g,d-b);
+    // Note: I am defining my axis with a right hand rule from B to C,
+    // and with a negative travel to represent the other direction.
+    // Therefore I negate this algorithm.
+    //    u.multiplyScalar(-1);
+
     // This may not be the best way to detect it, but I believe
     // that if u is "vnear" zero we have an undefined "straight line" case.
     if (vnear(u, new THREE.Vector3(0,0,0))) {
@@ -1140,7 +1144,6 @@ function computeThetaUDa(R) {
 
   // Now BC.u sould give us da...
   const unorm = u.clone().normalize();
-  console.log("UNORM",unorm);
   const da_scalar_project = BC.dot(unorm);
 
   return [thetaP,u,da_scalar_project];
@@ -1168,26 +1171,23 @@ function computeThetaAxisFromMatrix4(L,R,B) {
 
   [r,thetaP,da,chord,u] = computePointIndependentParameters(L,R);
 
-  // Now I believe da is indepednet of L and any point.
-  // const B = new THREE.Vector3(-4,4,-L/2);
   const C = B.clone().applyMatrix4(R);
   const BC = new THREE.Vector3().subVectors(C,B);
+
+  console.assert(near(L,BC.length()));
+  // This assertion most likely indicates B does not match the rotation matrix
+  if (!near(L,BC.length())) {
+    debugger;
+  }
+
 
   // NOTE: phi is NOT DEFINED until a point B is given!!!!
 //  let phi = (near(da,BC.length())) ? 0 : Math.acos(da / BC.length());
 
   let phi = (near(da,L)) ? 0 : Math.acos(da / L);
 
-
-  // I really have to understanad this---why is this failing!
-  console.assert(near(L,BC.length()));
-  if (!near(L,BC.length())) {
-    debugger;
-  }
-
-  console.log("da,bc",da,BC.length());
-  console.log("phi",phi * 180/Math.PI);
   if (isNaN(phi)) debugger;
+
 
   {
     // Note: This math was more or less my own invention,
@@ -1199,24 +1199,6 @@ function computeThetaAxisFromMatrix4(L,R,B) {
     // IMPLICATIONS: We can finally find a point
     // on the axis from an ARBITRARY point.
     const uu = u.clone().multiplyScalar(1).setLength(da);
-
-    // I think this point has to be the correct radius
-    // away from the axis---but how do we know that?
-    //    const B = new THREE.Vector3(0,2,-L/2);
-//    const B = new THREE.Vector3(-4,4,-L/2);
-//    const C = B.clone().applyMatrix4(R);
-//    const BC = new THREE.Vector3().subVectors(C,B);
-    const phi_p = u.angleTo(BC);
-    const L_p = B.distanceTo(C);
-    let da_p = L_p * Math.cos(phi_p);
-    let chord_p = ChordFromLDaxis(L_p,da_p);
-    const r_p = chord_p / (2 * Math.sin(thetaP/2));
-    // console.log("chord,chord_p",chord,chord_p,chord_p/chord);
-    // console.log("L,L_p", L, L_p,L_p/L);
-    // console.log("da,da_p", da, da_p,da_p/da);
-    // console.log("r,r_p", r, r_p,r_p/r);
-    // console.log("u",u);
-    // console.log("phi, cos(phi)",phi_p * 180/Math.PI,Math.cos(phi_p));
 
     const Bp = new THREE.Vector3().subVectors(B,uu);
     // Now we want to create a vector of length r
@@ -1236,7 +1218,7 @@ function computeThetaAxisFromMatrix4(L,R,B) {
   //  const BBp = new THREE.Vector3().subVectors(B,Bp);
     const Q = Mv.clone()
     Q.cross(u);
-    const ql = Math.sqrt(r_p**2 - (chord_p/2)**2);
+    const ql = Math.sqrt(r**2 - (chord/2)**2);
 //    console.log("ql:",ql);
     Q.setLength(-ql);
 //    console.log("length:",Q.length());
@@ -1266,8 +1248,10 @@ function testAbilityToGetScrewAxisFromRotationMatrix() {
   const R = new THREE.Matrix4().makeRotationFromQuaternion(q);
   // Now we will attempt to extract the screw axis from this matrix...
   // unfortunately THREE doesn't seem to implment matrix addition and substraction...
-  const L = 1;
+
   const B = new THREE.Vector3(4,4,4);
+  const C = B.clone().applyMatrix4(R);
+  const L = B.distanceTo(C);
   [r,thetaP,da,chord,phi,u] = computeThetaAxisFromMatrix4(L,R,B);
 
   // now check that the parameters match...

@@ -1286,17 +1286,8 @@ function RenderSegmentedHelix(solid,tau_v) {
   // coordinates (+2 y upward.) This makes everything
   // terribly confusing. I need to rework this with clarity.
 
- [p_b,rotations] = adjoinPrism(p_i,tau_v,false,true);
+ [p_b,rotations] = adjoinPrism(p_i,tau_v,true,false);
   console.log("rotations, pre",rotations);
-
-  const Cprime = C.clone().applyMatrix4(rotations);
-  const Bprime = p_b.c.clone().applyMatrix4(rotations);
-  const Aprime = A.clone().applyMatrix4(rotations);
-  const Dprime = D.clone().applyMatrix4(rotations);
-  console.log("Bprime,CPrime",Bprime,Cprime);
-  console.log("Aprime,DPrime",Aprime,Dprime);
-  console.log("A,D",A,D);
-
 
   // I have to use this point instead of B because my
   // rotations matrix is computed in world coordinates!!!
@@ -1324,6 +1315,10 @@ function RenderSegmentedHelix(solid,tau_v) {
     console.assert(near(resK[4],resM[4]));
     if (!(near(resK[4],resM[4]))) {
       console.log("Kahn Phi, Matrix Phi", resK[4] * 180 / Math.PI, resM[4] * 180 / Math.PI);
+    }
+    console.assert(vnear(resK[5],resM[5]));
+    if (!vnear(resK[5],resM[5])) {
+      console.log("AXIS KAHN, MATRIX", resK[5],resM[5]);
     }
   }
 
