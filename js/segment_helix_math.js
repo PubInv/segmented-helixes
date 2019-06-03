@@ -1167,10 +1167,7 @@ function computePointIndependentParameters(L,R) {
   return [r,thetaP,da,chord,u];
 }
 
-function computeThetaAxisFromMatrix4(L,R,B) {
-
-  [r,thetaP,da,chord,u] = computePointIndependentParameters(L,R);
-
+function computePhi(L,R,B) {
   const C = B.clone().applyMatrix4(R);
   const BC = new THREE.Vector3().subVectors(C,B);
 
@@ -1179,45 +1176,42 @@ function computeThetaAxisFromMatrix4(L,R,B) {
   if (!near(L,BC.length())) {
     debugger;
   }
-
-
-  // NOTE: phi is NOT DEFINED until a point B is given!!!!
-//  let phi = (near(da,BC.length())) ? 0 : Math.acos(da / BC.length());
-
   let phi = (near(da,L)) ? 0 : Math.acos(da / L);
 
   if (isNaN(phi)) debugger;
+  return phi;
+}
 
+function computeAxisPoint(r,chord,u,R,B) {
+  const C = B.clone().applyMatrix4(R);
+  const BC = new THREE.Vector3().subVectors(C,B);
 
-  {
-    // Note: This math was more or less my own invention,
-    // by applying the matrix to an arbitrary point!
-    // I'm not sure this is docuemnted anywhere else,
-    // and I'm not sure how it relates to other methods.
-    // To be more general, B should be an input
-    // to this routine.
-    // IMPLICATIONS: We can finally find a point
-    // on the axis from an ARBITRARY point.
+  const Mp = new THREE.Vector3().addVectors(B,C);
 
+  Mp.multiplyScalar(1/2);
+  const Q = BC.clone()
+  Q.cross(u);
 
-    const Mp = new THREE.Vector3().addVectors(B,C);
-    Mp.multiplyScalar(1/2);
-    const Q = BC.clone()
-    Q.cross(u);
-    const ql = Math.sqrt(r**2 - (chord/2)**2);
-    console.log("ql:",ql);
-    Q.setLength(-ql);
-   console.log("length:",Q.length());
-  //  console.log("Bm,Q",Bm,Q);
-    const Ba = Mp.clone().add(Q);
+  const ql = Math.sqrt(r**2 - (chord/2)**2);
+  // ql is effectively the radius of the helix measure from the midpoint
+  // of a member, which is slightly less that the joint radius
+  Q.setLength(-ql);
+  const Ba = Mp.clone().add(Q);
 
-    // At this point Ba is on the axis, but does not match B yet...
-    const uuhalf = u.clone();
-    uuhalf.multiplyScalar(-da/2);
-    console.log("uuhalf length",uuhalf.length());
-    const nBa = new THREE.Vector3().addVectors(Ba,uuhalf);
-    return [r,thetaP,da,chord,phi,u,nBa,[B,C,Mp,Q]];
-  }
+  // At this point Ba is on the axis, but does not match B yet...
+  const uuhalf = u.clone().multiplyScalar(-da/2);
+  const nBa = new THREE.Vector3().addVectors(Ba,uuhalf);
+  return nBa;
+}
+
+function computeThetaAxisFromMatrix4(L,R,B) {
+  [r,thetaP,da,chord,u] = computePointIndependentParameters(L,R);
+
+  let phi = computePhi(L,R,B);
+
+  let nBa = computeAxisPoint(r,chord,u,R,B);
+
+  return [r,thetaP,da,chord,phi,u,nBa,[B]];
 }
 
 function testAbilityToGetScrewAxisFromRotationMatrix() {
@@ -1258,11 +1252,7 @@ function testPointOnAxisRotationMatrix() {
   const C = B.clone().applyMatrix4(RT);
   const L = B.distanceTo(C);
 
-  [r,thetaP,da,chord,phi,u,Ba,[Bx,Cx,Mx,Qx]] = computeThetaAxisFromMatrix4(L,R,B);
-
-  // We first assert that is perpedicular to axis!!!
-  console.assert(near(Qx.dot(axis),0));
-
+  [r,thetaP,da,chord,phi,u,Ba,[Bx]] = computeThetaAxisFromMatrix4(L,R,B);
 
   console.log("POINT ON AXIS:",Ba);
 
