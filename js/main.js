@@ -1274,7 +1274,6 @@ function RenderSegmentedHelix(solid,tau_v) {
 //    p_i.sup.applyMatrix(rt);
 //  }
 
-
   // Why wouldn't this be -A.x?
   let D = new THREE.Vector3(-A.x,A.y,-A.z);
   resK = KahnAxis(L0,D);
@@ -1283,10 +1282,25 @@ function RenderSegmentedHelix(solid,tau_v) {
   // TODO: Phi is being miscalculated in the case of tau = 180 or -180!!!
 
 
+  // NOTE: the rotations here is translated into world
+  // coordinates (+2 y upward.) This makes everything
+  // terribly confusing. I need to rework this with clarity.
 
- [p_b,rotations] = adjoinPrism(p_i,tau_v,false,false);
+ [p_b,rotations] = adjoinPrism(p_i,tau_v,false,true);
   console.log("rotations, pre",rotations);
-  resM = computeThetaAxisFromMatrix4(L0,rotations);
+
+  const Cprime = C.clone().applyMatrix4(rotations);
+  const Bprime = p_b.c.clone().applyMatrix4(rotations);
+  const Aprime = A.clone().applyMatrix4(rotations);
+  const Dprime = D.clone().applyMatrix4(rotations);
+  console.log("Bprime,CPrime",Bprime,Cprime);
+  console.log("Aprime,DPrime",Aprime,Dprime);
+  console.log("A,D",A,D);
+
+
+  // I have to use this point instead of B because my
+  // rotations matrix is computed in world coordinates!!!
+  resM = computeThetaAxisFromMatrix4(L0,rotations,p_b.c.clone());
   console.log("SHOULD MATCH");
   console.log(resK);
   console.log(resM);
@@ -1308,6 +1322,9 @@ function RenderSegmentedHelix(solid,tau_v) {
     console.assert(near(resK[2],resM[2]));
     console.assert(near(resK[3],resM[3]));
     console.assert(near(resK[4],resM[4]));
+    if (!(near(resK[4],resM[4]))) {
+      console.log("Kahn Phi, Matrix Phi", resK[4] * 180 / Math.PI, resM[4] * 180 / Math.PI);
+    }
   }
 
   // TODO: Figure out why I can't use this tomorrow!

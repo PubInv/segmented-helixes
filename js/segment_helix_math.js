@@ -435,7 +435,7 @@ function adjoinPrism(old,tau,joinToC,debug = false) {
       }
       console.log(finalMatrix);
       const L = nu.b.distanceTo(nu.c);
-      [radius,thetaP,da,chord,phi,u] = computeThetaAxisFromMatrix4(L,finalMatrix);
+      [radius,thetaP,da,chord,phi,u] = computeThetaAxisFromMatrix4(L,finalMatrix,nu.b);
 
       console.log("L,RADIUS",L,radius);
       console.log("THETA, phi",
@@ -940,10 +940,14 @@ function compareMethods(L,tau,NB1,NC1) {
   let AR = AfromLtauNbNc(L,tau,NB1,NC1);
   let A = AR[0];
   let B = new THREE.Vector3(0,0,-L/2);
+  let C = new THREE.Vector3(0,0,L/2);
   let D = new THREE.Vector3(-A.x,A.y,-A.z);
   let R = AR[2];
   let res = KahnAxis(L,D);
-  [r,thetaP,da,chord,phi,u,Ba] = computeThetaAxisFromMatrix4(L,R);
+  [r,thetaP,da,chord,phi,u,Ba] = computeThetaAxisFromMatrix4(L,R,B);
+  const BC = new THREE.Vector3().subVectors(C,B);
+  let phi_p = Math.acos(da/BC.length());
+
   if (res[1] == null) {
     // In this case, KahnAxis is undefined and we cannot compare!!!
     return [...res,B];
@@ -959,6 +963,7 @@ function compareMethods(L,tau,NB1,NC1) {
   // TODO: This is producing a sign error....
   console.assert(near(phi,res[4]));
   if (!(near(phi,res[4]))) {
+    console.log("phi,Res[4]", phi * 180 / Math.PI, res[4] * 180 / Math.PI);
     debugger;
   }
 
@@ -1067,64 +1072,75 @@ function computeThetaUDa(R) {
   // now attempt to recover parameters from the rotation matrix....
   const val = (1/2) * (TraceMatrix4(R) - 1);
   const thetaP = (near(val,-1)) ? Math.PI :  Math.acos(val);
-  // somewhat by
 
+  // We need an arbitray point.. technically we should check
+  // this is not on the axis, but that is unlikely....
+  const B = new THREE.Vector3(-4,4,-4/2);
+  const C = B.clone().applyMatrix4(R);
+  let u = null;
+  if (thetaP == Math.PI) {
+    // In this case our normal method is numerically unstable
+    // (it defines an axis vector of zero length.). However,
+    // in this "zig-zag" case, u is easily computed as R^2(P) - P,
+    // where P is an arbitrary point.
+    // Sine we need B and C in other cases, we will compute D
+    // as a further application of R to C.
+    const D = C.clone().applyMatrix4(R);
 
-  // Now we will attempt to extract the screw axis from this matrix...
-  // unfortunately THREE doesn't seem to implment matrix addition and substraction...
+    // This appears to somehow be conceptually wrong.
+    u = new THREE.Vector3().subVectors(D,B);
+    u.normalize();
+  } else {
 
-  let xAxis = new THREE.Vector3();
-  let yAxis = new THREE.Vector3();
-  let zAxis = new THREE.Vector3();
-  R.extractBasis(xAxis,yAxis,zAxis);
+    // Now we will attempt to extract the screw axis from this matrix...
+    // unfortunately THREE doesn't seem to implment matrix addition and substraction...
 
-  // Note: if there is no rotation, we have the special "straight line" case....
+    let xAxis = new THREE.Vector3();
+    let yAxis = new THREE.Vector3();
+    let zAxis = new THREE.Vector3();
+    R.extractBasis(xAxis,yAxis,zAxis);
 
-  // const Ro = R.clone();
-  // const Rt = R.transpose();
-  // const d = SubtractMatrices(Ro,Rt);
-  const scale = 1/ (Math.sin(thetaP));
-  // from https://en.wikipedia.org/wiki/Rotation_matrix
-  // note element is column-major
-  const b = yAxis.x;
-  const c = zAxis.x;
-  const d = xAxis.y;
-  const f = zAxis.y;
-  const g = xAxis.z;
-  const h = yAxis.z;
-  const u = new THREE.Vector3(h-f,c-g,d-b);
-  // I believe this computation (which I got from reference above) is wrong,
-  // or I am losing sign infomration in taking the arccosign in thetaP.
-  const SIGN_ADJUST = 1;
-  // this just accomplishes normalization, so it is unclear where we need it!
-  u.multiplyScalar(SIGN_ADJUST);
+    // Note: if there is no rotation, we have the special "straight line" case....
 
-  // TODO: sometimes u is very small. I am not sure that is a numerically stable compuation;
-  // I need to check this.
+    // const Ro = R.clone();
+    // const Rt = R.transpose();
+    // const d = SubtractMatrices(Ro,Rt);
+    const scale = 1/ (Math.sin(thetaP));
+    // from https://en.wikipedia.org/wiki/Rotation_matrix
+    // note element is column-major
+    const b = yAxis.x;
+    const c = zAxis.x;
+    const d = xAxis.y;
+    const f = zAxis.y;
+    const g = xAxis.z;
+    const h = yAxis.z;
+    u = new THREE.Vector3(h-f,c-g,d-b);
+    // This may not be the best way to detect it, but I believe
+    // that if u is "vnear" zero we have an undefined "straight line" case.
+    if (vnear(u, new THREE.Vector3(0,0,0))) {
+      console.log("WARNING!!! NUMERICAL Instability!",thetaP);
+      // This is occuring in the "flat" or "zig-zag" case!!!
+      // I need to figure out a different way to compute this,
+      // even though it seems to work, which is weird.
+      //     debugger;
+    }
 
-  // This may not be the best way to detect it, but I believe
-  // that if u is "vnear" zero we have an undefined "straight line" case.
-  if (vnear(u, new THREE.Vector3(0,0,0))) {
-    console.log("WARNING!!! NUMERICAL Instability!",thetaP);
-    // This is occuring in the "flat" or "zig-zag" case!!!
-    // I need to figure out a different way to compute this,
-    // even though it seems to work, which is weird.
-    //     debugger;
+    u.multiplyScalar(1/(2 * Math.sin(thetaP)));
   }
 
-  u.multiplyScalar(1/(2 * Math.sin(thetaP)));
   //  const SIGN_ADJUST = -1;
   // this just accomplishes normalization, so it is unclear where we need it!
   //  u.multiplyScalar(SIGN_ADJUST);
   //  console.log('AXIS',u,scale);
 
   // Now I believe da is indepednet of L and any point.
-  const B = new THREE.Vector3(-4,4,-4/2);
-  const C = B.clone().applyMatrix4(R);
+  //  const B = new THREE.Vector3(-4,4,-4/2);
+  //  const C = B.clone().applyMatrix4(R);
   const BC = new THREE.Vector3().subVectors(C,B);
 
   // Now BC.u sould give us da...
   const unorm = u.clone().normalize();
+  console.log("UNORM",unorm);
   const da_scalar_project = BC.dot(unorm);
 
   return [thetaP,u,da_scalar_project];
@@ -1133,30 +1149,45 @@ function computeThetaUDa(R) {
 
 // https://www.seas.upenn.edu/~meam520/notes02/EulerChasles4.pdf
 // Note: This may solve my problem: https://en.wikipedia.org/wiki/Screw_axis#Computing_a_point_on_the_screw_axis
-function computePhiRChord(L,thetaP,da) {
-  let phi = Math.acos(da/L);
+function computeRChord(L,thetaP,da) {
   let chord = ChordFromLDaxis(L,da);
   const r = chord / (2 * Math.sin(thetaP/2));
-  return [phi,r,chord];
+  return [r,chord];
 }
 
 function computePointIndependentParameters(L,R) {
   [thetaP,u,da] = computeThetaUDa(R);
-  [phi,r,chord] = computePhiRChord(L,thetaP,da);
+  [r,chord] = computeRChord(L,thetaP,da);
   // Now this has in fact given us everyting we need until such time
   // as we want to compute Ba, which requires a point B to be specified....
   // Can all of this be true?
-  return [r,thetaP,da,chord,phi,u];
+  return [r,thetaP,da,chord,u];
 }
 
-function computeThetaAxisFromMatrix4(L,R) {
+function computeThetaAxisFromMatrix4(L,R,B) {
 
-  [r,thetaP,da,chord,phi,u] = computePointIndependentParameters(L,R);
+  [r,thetaP,da,chord,u] = computePointIndependentParameters(L,R);
 
   // Now I believe da is indepednet of L and any point.
-  const B = new THREE.Vector3(-4,4,-L/2);
+  // const B = new THREE.Vector3(-4,4,-L/2);
   const C = B.clone().applyMatrix4(R);
   const BC = new THREE.Vector3().subVectors(C,B);
+
+  // NOTE: phi is NOT DEFINED until a point B is given!!!!
+//  let phi = (near(da,BC.length())) ? 0 : Math.acos(da / BC.length());
+
+  let phi = (near(da,L)) ? 0 : Math.acos(da / L);
+
+
+  // I really have to understanad this---why is this failing!
+  console.assert(near(L,BC.length()));
+  if (!near(L,BC.length())) {
+    debugger;
+  }
+
+  console.log("da,bc",da,BC.length());
+  console.log("phi",phi * 180/Math.PI);
+  if (isNaN(phi)) debugger;
 
   {
     // Note: This math was more or less my own invention,
@@ -1236,7 +1267,8 @@ function testAbilityToGetScrewAxisFromRotationMatrix() {
   // Now we will attempt to extract the screw axis from this matrix...
   // unfortunately THREE doesn't seem to implment matrix addition and substraction...
   const L = 1;
-  [r,thetaP,da,chord,phi,u] = computeThetaAxisFromMatrix4(L,R);
+  const B = new THREE.Vector3(4,4,4);
+  [r,thetaP,da,chord,phi,u] = computeThetaAxisFromMatrix4(L,R,B);
 
   // now check that the parameters match...
   console.assert(near(theta,thetaP));
