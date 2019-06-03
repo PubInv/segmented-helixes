@@ -1198,45 +1198,26 @@ function computeThetaAxisFromMatrix4(L,R,B) {
     // to this routine.
     // IMPLICATIONS: We can finally find a point
     // on the axis from an ARBITRARY point.
-    const uu = u.clone().multiplyScalar(1).setLength(da);
 
-    const Bp = new THREE.Vector3().subVectors(B,uu);
-    // Now we want to create a vector of length r
-    // on the x axis, and rotate by
-   const Cp = new THREE.Vector3().subVectors(C,uu);
 
-    const Bm = new THREE.Vector3().addVectors(B,Bp);
-    Bm.multiplyScalar(1/2);
-
-    const Cm = new THREE.Vector3().addVectors(C,Cp);
-    Cm.multiplyScalar(1/2);
-
-    const Mv = new THREE.Vector3().subVectors(B,C);
     const Mp = new THREE.Vector3().addVectors(B,C);
     Mp.multiplyScalar(1/2);
-
-  //  const BBp = new THREE.Vector3().subVectors(B,Bp);
-    const Q = Mv.clone()
+    const Q = BC.clone()
     Q.cross(u);
     const ql = Math.sqrt(r**2 - (chord/2)**2);
-//    console.log("ql:",ql);
+    console.log("ql:",ql);
     Q.setLength(-ql);
-//    console.log("length:",Q.length());
+   console.log("length:",Q.length());
   //  console.log("Bm,Q",Bm,Q);
     const Ba = Mp.clone().add(Q);
 
-    const uuhalf = uu.clone();
-    uuhalf.multiplyScalar(-1/2);
+    // At this point Ba is on the axis, but does not match B yet...
+    const uuhalf = u.clone();
+    uuhalf.multiplyScalar(-da/2);
+    console.log("uuhalf length",uuhalf.length());
     const nBa = new THREE.Vector3().addVectors(Ba,uuhalf);
-    P = nBa;
- //   console.log("B,C,Bp,Cp",B,C,Bp,Cp);
-//    console.log("Bm,Cm,Q,Ba",Bm,Cm,Q,Ba);
-    // Now in theory C is on the axis is
-    return [r,thetaP,da,chord,phi,u,P,[B,C,Mp,Q]];
+    return [r,thetaP,da,chord,phi,u,nBa,[B,C,Mp,Q]];
   }
-
-
-//  return [r,thetaP,da,chord,phi,u,P];
 }
 
 function testAbilityToGetScrewAxisFromRotationMatrix() {
@@ -1262,6 +1243,36 @@ function testAbilityToGetScrewAxisFromRotationMatrix() {
   console.assert(vnear(axis,u));
 }
 
+function testPointOnAxisRotationMatrix() {
+  const theta = Math.PI/11;
+  // now create a rotation matrix based on this angle...
+  const axis = new THREE.Vector3(0,0,1);
+  //  const R = new THREE.Matrix4().makeRotationAxis(axis,theta);
+  const q = new THREE.Quaternion().setFromAxisAngle(axis,theta);
+  const R = new THREE.Matrix4().makeRotationFromQuaternion(q);
+  const T = new THREE.Matrix4().makeTranslation(0,0,1);
+  const RT = R.multiply(T);
+  // Now we will attempt to extract the screw axis from this matrix...
+  // unfortunately THREE doesn't seem to implment matrix addition and substraction...
+  const B = new THREE.Vector3(0,1,0);
+  const C = B.clone().applyMatrix4(RT);
+  const L = B.distanceTo(C);
+
+  [r,thetaP,da,chord,phi,u,Ba,[Bx,Cx,Mx,Qx]] = computeThetaAxisFromMatrix4(L,R,B);
+
+  // We first assert that is perpedicular to axis!!!
+  console.assert(near(Qx.dot(axis),0));
+
+
+  console.log("POINT ON AXIS:",Ba);
+
+  console.assert(near(Ba.z,0));
+  console.assert(near(Ba.x,0));
+  console.assert(near(Ba.y,0));
+}
+
+
+
 function runChaslesTests() {
   testTrace();
   testAbilityToGetScrewAxisFromRotationMatrix();
@@ -1270,6 +1281,8 @@ function runChaslesTests() {
 function runUnitTests() {
   runChaslesTests();
   testThreeIsRightHanded();
+  testPointOnAxisRotationMatrix();
+
   testAfromLtauNbNnKeepsYPure();
   testAfromLtauNbNnContinuityOfTau();
   testRegularTetsKahnAxis();

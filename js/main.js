@@ -1291,7 +1291,8 @@ function RenderSegmentedHelix(solid,tau_v) {
 
   // I have to use this point instead of B because my
   // rotations matrix is computed in world coordinates!!!
-  resM = computeThetaAxisFromMatrix4(L0,rotations,p_b.c.clone());
+  let Btrans = B.clone().applyMatrix4(GTRANS);
+  resM = computeThetaAxisFromMatrix4(L0,rotations,Btrans);
   console.log("SHOULD MATCH");
   console.log(resK);
   console.log(resM);
@@ -1323,13 +1324,19 @@ function RenderSegmentedHelix(solid,tau_v) {
   }
 
   // TODO: Figure out why I can't use this tomorrow!
-  var res = resK;
+  var USE_MATRIX = true;
+  var res;
+  if (USE_MATRIX)
+    res = resM;
+  else
+    res = resK;
+
   r = res[0];
   // NOTE!!!
-  theta = resM[1];
+  theta = res[1];
   d = res[2];
   // NOTE!!!
-  phi = resM[4];
+  phi = res[4];
 
   console.log("da,chord",d,res[3]);
   console.log("theta,phi",theta* 180 / Math.PI,phi * 180/Math.PI);
@@ -1342,12 +1349,16 @@ function RenderSegmentedHelix(solid,tau_v) {
 
   // vector pointing from B to Ba
   var Ba = res[6];
+  console.log("BA ",Ba);
   // Ba may not be defined!
   if (Ba) {
-    Ba.applyMatrix4(GTRANS);
+    if (!USE_MATRIX) {
+      Ba.applyMatrix4(GTRANS);
+    }
 
     // We'll put a Ball at Ba ...
-    cSphere(am.JOINT_RADIUS/5,Ba,"red");
+    cSphere(am.JOINT_RADIUS/5,new THREE.Vector3(Ba.x,Ba.y,Ba.z),"red");
+    //    cSphere(am.JOINT_RADIUS/2,new THREE.Vector3(-Ba.x,Ba.y,-Ba.z),"red");
   }
 
   // Ba and Ca need to be on the axis, that is an assertion.
@@ -1364,12 +1375,13 @@ function RenderSegmentedHelix(solid,tau_v) {
     // Since we've set the first prism up symmetrically, Ca
     // mirrors Ba...
     var Ca = new THREE.Vector3(-Ba.x,Ba.y,-Ba.z);
+//    var Ca = new THREE.Vector3(Ba.x,Ba.y,Ba.z);
     cSphere(am.JOINT_RADIUS/5,Ca,"blue");
   }
-  r = res[0];
-  theta = res[1];
-  d = res[2];
-  phi = res[4];
+  // r = res[0];
+  // theta = res[1];
+  // d = res[2];
+  // phi = res[4];
   set_outputs(r,theta,d,phi);
 
 
