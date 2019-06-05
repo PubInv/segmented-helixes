@@ -887,7 +887,8 @@ function testKahnAxisTau180()
   console.assert(near(Ba.x,0));
   console.assert(near(Ba.y,0));
   let zaxis = new THREE.Vector3(0,0,1);
-  console.assert(vnear(H,zaxis));
+  let nzaxis = new THREE.Vector3(0,0,-1);
+  console.assert(vnear(H,zaxis) || vnear(H,nzaxis));
   console.assert(phi >= 0);
 }
 
