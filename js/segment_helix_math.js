@@ -45,12 +45,14 @@ function AbstractPrism(L,Nb,Nc,Sup = null) {
 }
 
 function ChordFromLDaxis(L,Da) {
+  // this is a numerical nicety, for when Da is erroneously greater than Da
+  if (Da > L) return 0;
   return Math.sqrt((L**2) - (Da**2));
 }
 // Note this has a "special" case...
 function RotationFromRadiusChord(R,C) {
   let v = C / (2 * R);
-  if (near(v,1,1e-4)) {
+  if (v > 1) {
     return Math.PI;
   } else {
     let theta = 2 * Math.asin(v);
@@ -78,6 +80,7 @@ function testAxis(B,Ba,H,da) {
 
   var Ba_m_B = Ba.clone();
   // Ba_minus_B
+//  console.log(Ba_m_B,B);
   Ba_m_B.sub(B);
   console.assert(near(0,H.dot(Ba_m_B)),"dot product");
 }
@@ -149,10 +152,11 @@ function KahnAxis(L,D) {
       // How do I know phi should be positive?
       let phix = Math.acos(da/L);
       // This seems a better alternative....
-      let phi = Math.atan2(H.z,H.x) - Math.PI/2;
+      let phi = (Math.atan2(H.z,H.x) - Math.PI/2);
       let theta = Math.PI;
+      // This is a similar choice when theta = PI made computeThetaUDa!!!
       if (A.x < 0) {
-        theta = -theta;
+        phi = -phi;
       }
       let Bax = Math.sqrt(1 - da**2/L**2) * Math.abs(da) /2;
       if (A.x < 0) { // this is becasue of da
@@ -160,6 +164,12 @@ function KahnAxis(L,D) {
       }
       let Ba = new THREE.Vector3(Bax,0, -(da**2)/(2*L));
       testAxis(B,Ba,H,da);
+      console.log("FLAT: ",A.x,[r,theta,da,c,phi,H,Ba]);
+      if (A.x > 0) {
+        da = -da;
+        phi = Math.PI - phi;
+        H.multiplyScalar(-1);
+      }
       return [r,theta,da,c,phi,H,Ba];
     } else {
       let Cb = new THREE.Vector3(-Bb.x,Bb.y,-Bb.z);
@@ -862,21 +872,52 @@ function testKahnAxisTau180()
   let NC1 = new THREE.Vector3(0,-Math.sin(angle),Math.cos(angle));
   let tau = Math.PI;
   let A = AfromLtauNbNc(L0,tau,NB1,NC1)[0];
-//  let B = new THREE.Vector3(0,0,-L0/2);
-//  let D = new THREE.Vector3(-A.x,A.y,-A.z);
-//  let res = KahnAxis(L0,D);
-
   let res = compareMethods(L0,tau,NB1,NC1);
   let r = res[0];
+  console.assert(near(r,0));
   let theta = res[1];
   let da = res[2];
   let c = res[3];
   let phi = res[4];
   let H = res[5];
   let Ba = res[6];
-  // What did I mean here?
+  let zero = new THREE.Vector3(0,0,0);
   console.assert(!near(da,0,0.1));
   console.assert(!isNaN(theta));
+  console.assert(near(Ba.x,0));
+  console.assert(near(Ba.y,0));
+  let zaxis = new THREE.Vector3(0,0,1);
+  console.assert(vnear(H,zaxis));
+  console.assert(phi >= 0);
+}
+
+function testKahnAxisTauNeg180()
+{
+  let L0 = 2;
+  let angle = Math.PI/7;
+//  let angle = 0;
+  let NB1 = new THREE.Vector3(0,-Math.sin(angle),-Math.cos(angle));
+  // We add in a little here so we are not a torus
+  let NC1 = new THREE.Vector3(0,-Math.sin(angle),Math.cos(angle));
+  let tau = -Math.PI;
+  let A = AfromLtauNbNc(L0,tau,NB1,NC1)[0];
+  let res = compareMethods(L0,tau,NB1,NC1);
+  let r = res[0];
+  console.assert(near(r,0));
+  let theta = res[1];
+  let da = res[2];
+  let c = res[3];
+  let phi = res[4];
+  let H = res[5];
+  let Ba = res[6];
+  let zero = new THREE.Vector3(0,0,0);
+  console.assert(!near(da,0,0.1));
+  console.assert(!isNaN(theta));
+  console.assert(near(Ba.x,0));
+  console.assert(near(Ba.y,0));
+  let zaxis = new THREE.Vector3(0,0,1);
+  console.assert(vnear(H,zaxis));
+  console.assert(phi >= 0);
 }
 
 function testKahnAxisFull()
@@ -913,16 +954,13 @@ function testKahnAxisFullAux(tau,NB1,NC1)
   let H = res[5];
   let Ba = res[6];
   let B = res[7];
+  console.assert(" B = ", B);
   console.assert(!isNaN(theta));
-
-  // Now test that H*da + Ba = Ca;
-  let Ca = new THREE.Vector3(-Ba.x,Ba.y,-Ba.z);
-  let X = Ba.clone();
-
-  //  WHY DOES THIS WORK?????
-  // This suggests Ba is correct but H points the wrong
-  // way.
-  //  let Hc = (tau < 0) ? H.clone().negate() : H.clone();
+  try {
+    console.log(B.x);
+  } catch (e) {
+    debugger;
+  }
   testAxis(B,Ba,H,da);
 }
 
@@ -949,7 +987,7 @@ function compareMethods(L,tau,NB1,NC1) {
 
   if (res[1] == null) {
     // In this case, KahnAxis is undefined and we cannot compare!!!
-    return [...res,B];
+    return [r,thetaP,da,chord,phi,u,Ba,B];
   }
   console.assert(near(r,res[0]));
   console.assert(near(res[1],0) || near(thetaP,res[1]));
@@ -973,10 +1011,17 @@ function compareMethods(L,tau,NB1,NC1) {
   if (!(vnear(u.clone().normalize(),res[5].clone().normalize()))) {
     debugger;
   }
+
+  console.assert(vnear(Ba,res[6]));
+  if (!(vnear(Ba,res[6]))) {
+    debugger;
+  }
+
+
   // TODO: Apparently computeThetaAxis is not computeing Ba correctly!!!
  // console.assert(vnear(Ba,res[6]));
 
-  return [...res,B];
+  return [r,thetaP,da,chord,phi,u,Ba,B];
 }
 function testKahnAxisFlatAux(angle)
 {
@@ -1070,11 +1115,21 @@ function computeThetaUDa(R) {
   }
   // now attempt to recover parameters from the rotation matrix....
   const val = (1/2) * (TraceMatrix4(R) - 1);
+  // Possibly this needs to be signed based on something
+  // else we compute (A.x) when val = -1.
   const thetaP = (near(val,-1)) ? Math.PI :  Math.acos(val);
+
+  var PROBLEM = false;
+  if (near(val,-1)) {
+    console.log("WARNING!!! TRACE DEGENERATE");
+    PROBLEM = true;
+  }
+
+  console.assert(!isNaN(thetaP));
 
   // We need an arbitray point.. technically we should check
   // this is not on the axis, but that is unlikely....
-  const B = new THREE.Vector3(-4,4,-4/2);
+  const B = new THREE.Vector3(0,4,-4/2);
   const C = B.clone().applyMatrix4(R);
   let u = null;
   if (thetaP == Math.PI) {
@@ -1085,10 +1140,27 @@ function computeThetaUDa(R) {
     // Sine we need B and C in other cases, we will compute D
     // as a further application of R to C.
     const D = C.clone().applyMatrix4(R);
+    let Ri = new THREE.Matrix4().getInverse(R);
+    const A = B.clone().applyMatrix4(Ri);
 
-    // This appears to somehow be conceptually wrong.
     u = new THREE.Vector3().subVectors(D,B);
     u.normalize();
+    console.log("A,B,C,D",A,B,C,D);
+    // This is problematic, but we have chosen the
+    // axis to be from the right-hand rule of B to C.
+    // But if theta = 180, this is not well-defined.
+    //     u.multiplyScalar(-1);
+    let Z = new THREE.Vector3(0,0,1);
+    let Zneg = new THREE.Vector3(0,0,-1);
+    let Zu = u.angleTo(Z);
+    let Zuneg = u.angleTo(Zneg);
+//    console.log("Zu, Zuneg", Zu * 180 / Math.PI, Zuneg * 180 / Math.PI);
+    //    if (Math.abs(Zuneg) < Math.abs(Zu)) {
+    if (A.x > 0) {
+      console.log("XXX");
+      u.multiplyScalar(-1);
+    }
+
   } else {
 
     // Now we will attempt to extract the screw axis from this matrix...
@@ -1138,14 +1210,14 @@ function computeThetaUDa(R) {
   //  console.log('AXIS',u,scale);
 
   // Now I believe da is indepednet of L and any point.
-  //  const B = new THREE.Vector3(-4,4,-4/2);
-  //  const C = B.clone().applyMatrix4(R);
   const BC = new THREE.Vector3().subVectors(C,B);
 
   // Now BC.u sould give us da...
   const unorm = u.clone().normalize();
   const da_scalar_project = BC.dot(unorm);
-
+//  if (PROBLEM) {
+    console.log("unorm,BC,da_scalar_project",unorm,BC,da_scalar_project);
+//  }
   return [thetaP,u,da_scalar_project];
 }
 
@@ -1154,6 +1226,10 @@ function computeThetaUDa(R) {
 // Note: This may solve my problem: https://en.wikipedia.org/wiki/Screw_axis#Computing_a_point_on_the_screw_axis
 function computeRChord(L,thetaP,da) {
   let chord = ChordFromLDaxis(L,da);
+  if (near(0,Math.sin(thetaP/2))) {
+    console.log("WARNING!!!");
+    debugger;
+  }
   const r = chord / (2 * Math.sin(thetaP/2));
   return [r,chord];
 }
@@ -1211,7 +1287,7 @@ function computeThetaAxisFromMatrix4(L,R,B) {
 
   let nBa = computeAxisPoint(r,chord,u,R,B);
 
-  return [r,thetaP,da,chord,phi,u,nBa,[B]];
+  return [r,thetaP,da,chord,phi,u,nBa,B];
 }
 
 function testAbilityToGetScrewAxisFromRotationMatrix() {
@@ -1252,7 +1328,7 @@ function testPointOnAxisRotationMatrix() {
   const C = B.clone().applyMatrix4(RT);
   const L = B.distanceTo(C);
 
-  [r,thetaP,da,chord,phi,u,Ba,[Bx]] = computeThetaAxisFromMatrix4(L,R,B);
+  [r,thetaP,da,chord,phi,u,Ba,Bx] = computeThetaAxisFromMatrix4(L,R,B);
 
   console.log("POINT ON AXIS:",Ba);
 
@@ -1280,6 +1356,7 @@ function runUnitTests() {
   testKahnAxisFull();
   testKahnAxisFlat()
   testKahnAxisTau180();
+  testKahnAxisTauNeg180();
   testAfromLfailureCase1();
   testAfromLtauMultiple();
 }

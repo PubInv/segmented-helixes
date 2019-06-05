@@ -903,6 +903,7 @@ function RenderHelix(l,r,d,theta,v,phi,wh,MAX_POINTS) {
   var points3D = new THREE.Geometry();
   // We'll tack on some extra segments to make it look better.
   let POINTS =  (2 + Math.floor(MAX_POINTS / 2)) * 2;
+  console.log("d,theta,phi",d,theta,phi);
   for (var i=0; i < POINTS; i++) {
     var n = i - (POINTS/2) + 0.5;
     var y = r * Math.cos(n*theta);
@@ -1287,7 +1288,7 @@ function RenderSegmentedHelix(solid,tau_v) {
   // terribly confusing. I need to rework this with clarity.
 
  [p_b,rotations] = adjoinPrism(p_i,tau_v,true,false);
-  console.log("rotations, pre",rotations);
+//  console.log("rotations, pre",rotations);
 
   // I have to use this point instead of B because my
   // rotations matrix is computed in world coordinates!!!
@@ -1301,21 +1302,22 @@ function RenderSegmentedHelix(solid,tau_v) {
   if (Cp) {
     var Cpa = new THREE.Vector3(Cp.x,Cp.y,Cp.z);
     cSphere(am.JOINT_RADIUS/4,Cpa,"red");
-    var B_ = resM[7][0];
-//    var C_ = resM[7][1];
-//    var Mp = resM[7][2];
+    var B_ = resM[7];
     cSphere(am.JOINT_RADIUS/3,B_,"green");
-//    cSphere(am.JOINT_RADIUS/3,C_,"red");
-//    cSphere(am.JOINT_RADIUS/3,Mp,"purple");
   }
   if (true) {
     console.assert(near(resK[0],resM[0]));
     console.assert(near(resK[1],resM[1]));
+    if (!near(resK[1],resM[1])) {
+      console.log("Kahn, Matrix",resK[1] * 180 / Math.PI, resM[1] * 180 / Math.PI);
+      debugger;
+    }
     console.assert(near(resK[2],resM[2]));
     console.assert(near(resK[3],resM[3]));
     console.assert(near(resK[4],resM[4]));
     if (!(near(resK[4],resM[4]))) {
       console.log("Kahn Phi, Matrix Phi", resK[4] * 180 / Math.PI, resM[4] * 180 / Math.PI);
+      debugger;
     }
     console.assert(vnear(resK[5],resM[5]));
     if (!vnear(resK[5],resM[5])) {

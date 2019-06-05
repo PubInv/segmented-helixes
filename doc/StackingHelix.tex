@@ -206,6 +206,9 @@ These quantities are related:
     p &= d \frac{2 \pi}{\theta} \\
 \end{align}
 
+Note: Measuring $\phi$ requires us to decide on the sign of the direction of the axis, which is aribtrary and not based on the
+physical shape.
+
 Any point on on the segmented helix has a closest point on the axis of the helix. In particular, we will call the points closest to the
 joints ``joint axis points''. Then $d$ is the distance between consecutive joint axis points.
 
@@ -647,6 +650,26 @@ are different, this mechanism works.
 TODO: Properly code in Mathematica and place code here.
 Figure out how to express this mathematically.
 
+\subsection{On the Choice of the Screw Axis Direction}
+
+Given only a physical segmented helix without position in space, we may arbitrarily choose the
+direction for the axis. Changing our decision will make the screw axis point in the negative direction,
+change the sign of the travel $d$ along the axis, and choose $\phi$ to be $\pi - \phi$.
+
+As can be seen from interactive play with our software, it is entirely possible for the travel along
+the axis of the helix to be $0$--in fact, choosing $\tau = 0$ produces toruses, which have no
+travel along the axis.
+
+We could represent this be makng the length of the vector representing the axis be the length of the
+travel $d$. However, this would have the drawback than when $d$ is zero we would be unable to determine
+the axis of revolution of the torus. Although somewhat arbitrary, I have chosen instead to represent the
+axis as a normalized vector of unit length, and to allow the travel to be negative. This has the value that
+chaning $\tau$ through zero smoothly changes $d$. However, it creates the problem that as $\tau$ approaches
+$\pi$ from different directions the signs of the axes are different. That is, $\tau = \pi$ and $\tau = -pi$ decscribe exactly
+the same shape, but in our calculation they will have different signs for the axes. The radius, pitch and
+absolute value of the travel,
+which are intrinsic to the shape, will be the same, but the axis vector, $\phi$, and the sign of $d$ will be different.
+
 \section{A comparison of the Point Method with the transformation Matrix Method}
 
 From balanced points it is easy to compute a Transformation Matrix, and from a
@@ -658,11 +681,50 @@ This hypothesis can be tested on Thursday by expanding our
 test and removing the dependence on the Z-axis, and testing
 with unbalanced transformation matrices.
 
+YES.  I now have software working which completely computes all parameters with both methods, the transformation matrix
+method, and the 4-point method.
+
 \section{Checks and Explorations}
+
+
+\subsection{Changing $\tau$ Smoothly Changes Tightness}
+
+\begin{theorem}[Twist Spectrum]
+  For any choice of face normals having non-zero $x$ or $y$ components, changing $\tau$ smoothly varies the segmented helix
+  between a torus and zig-zag cases.
+  \end{theorem}
+
+\begin{proof}
+  By interactively manipulating the software it is apparent.
+  \end{proof}
+
+\begin{theorem}[Torus Corollary]
+  For any choice of face normals, there is choice of the twist $\tau$ for which the segmented helix is a planar polygon,
+  thereby resembling a torus.
+  \end{theorem}
+
+\begin{proof}
+  By interactively manipulating the software it is apparent.
+  \end{proof}
+
+TODO: Can we calculate the $\tau$ value as a function of the face normeals? That would make a nice little constructive theorem.
+
 
 In this section add graphs. Also, a check against the BC helix.
 Possibly software should be used to produce a 3D simulation
 of the issues.
+
+Idea: Define ``tightness'' to be $p/r$, where $p$ is pitch and $r$ is radius. Attempt to prove that in some ways tightness increases with increasing $\tau$.
+
+\subsection{Qualitative observations}
+
+Varying $\tau$ smoothly varies the tightlness of the coiling of the helix, moving through vary linear cases towards a torus,
+to a torus, to a very linear case on the other side.
+
+In fact it is possible to that there is always a ``tightest coil'' which does not self-intersect. If we had many objects,
+we could pack them into a conveneient space by computing the $\tau$ of the tightest coil and stacking them this way.
+If we had a means to change $\tau$, perhaps via motors in a robot arm, we would have a smoothly telescoping and contracting
+robot arm.
 
 
 \section{Applying to The Boerdijk-Coxeter Tetrahelix}
@@ -861,6 +923,10 @@ amino acids, which tend to be cross bonded.
 Need to answer the Math stack  exchange question.
 
 Need to understand possibility of further simplifying specification of object.
+
+Need to understand if I can redefine things in terms of ``pitch''.
+
+Need to create an mathematical definition of the tightness of a helix. Probably the ratio of pitch to radius.
 
 \section{Acknowledgements}
 
