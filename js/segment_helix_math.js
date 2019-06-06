@@ -1314,28 +1314,47 @@ function testAbilityToGetScrewAxisFromRotationMatrix() {
   console.assert(vnear(axis,u));
 }
 
+// The purpose of this test is to the computation of the rotation matrix
+//
 function testPointOnAxisRotationMatrix() {
   const theta = Math.PI/11;
   // now create a rotation matrix based on this angle...
-  const axis = new THREE.Vector3(0,0,1);
-  //  const R = new THREE.Matrix4().makeRotationAxis(axis,theta);
-  const q = new THREE.Quaternion().setFromAxisAngle(axis,theta);
-  const R = new THREE.Matrix4().makeRotationFromQuaternion(q);
-  const T = new THREE.Matrix4().makeTranslation(0,0,1);
-  const RT = R.multiply(T);
-  // Now we will attempt to extract the screw axis from this matrix...
-  // unfortunately THREE doesn't seem to implment matrix addition and substraction...
+  const zaxis = new THREE.Vector3(0,0,1);
   const B = new THREE.Vector3(0,1,0);
-  const C = B.clone().applyMatrix4(RT);
-  const L = B.distanceTo(C);
+  const O = new THREE.Vector3(0,0,0);
+  const re = B.length();
 
-  [r,thetaP,da,chord,phi,u,Ba,Bx] = computeThetaAxisFromMatrix4(L,R,B);
+  function compute_from_arbitrary_axis(B,R) {
+    const C = B.clone().applyMatrix4(R);
+    const L = B.distanceTo(C);
+    return  computeThetaAxisFromMatrix4(L,R,B);
+  }
+
+  const N = 4;
+  // now let's rotate though various Euler angles and test
+  for(var a = 1; a < N+1; a++) {
+    for(var b = 1; b < N+1; b++) {
+      for(var c = 1; c < N+1; c++) {
+        const axis_pre = new THREE.Vector3(a,b,c).normalize();
+        const pre = new THREE.Matrix4().makeRotationAxis(axis_pre,theta)
+//        const T = new THREE.Matrix4().makeTranslation(a,b,c);
+//        const RT = R.multiply(T);
+        const axis = zaxis.clone().applyMatrix4(pre);
+        const Bpre = B.clone().applyMatrix4(pre);
+        const R = new THREE.Matrix4().makeRotationAxis(axis,theta)
+        const RT = R;
+        console.assert(near(Bpre.length(),1));
+        [r,thetaP,da,chord,phi,u,Ba,Bx] = compute_from_arbitrary_axis(Bpre,RT);
+        console.assert(near(re,r));
+        console.assert(near(thetaP,theta));
+        console.assert(vnear(u,axis));
+        console.assert(vnear(Ba,O));
+      }
+    }
+  }
 
   console.log("POINT ON AXIS:",Ba);
 
-  console.assert(near(Ba.z,0));
-  console.assert(near(Ba.x,0));
-  console.assert(near(Ba.y,0));
 }
 
 

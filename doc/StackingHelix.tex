@@ -387,23 +387,37 @@ are practically the same.
 
 Using standard screw theory\cite{wittenburg2016kinematics}, a screw can be computed from such
 a transformation matrix. This consists of the axis of the screw $S$, a point on the screw axis $P$,
-the rotation around the axis, and the
-travel along the axis of one transformation.
+the rotation $\theta$ around the axis, and the
+transposition, or travel, along the axis of one transformation.
 
-The screw by itself does not produce a segmented helix of definited radius, because it maps any point,
-no matter its distance from the screw axis, to a new point similar distant from the axis.
+Neither a transforamtion matrix or its corresponding screw completely define all of the intrinsic
+properties of a segmented helix. In particular, a matrix $M$ maps any point $p$ to a point $p'$.
+Since this applies to all points no matter how far from the screw axis or the axis of rotation and
+such transformation preserve distance to this axis (the radius), the radius is of a segmented helix
+is not determined by a transformation matrix or a screw. Since the helix angle $\phi$ changes
+with radius for a helix of a given pitch, $\phi$ is not determined.
 
-However, once we have the screw and specify a joint of a periodic chain, we have now a definite
-radius $r$ and other parameters of the segmented helix.
+However, if we have transformation matrix and one joint position, all of the properties of segmented
+helix are determined. If we have a screw and one point on the axis of the screw fixing it in space
+and the location of one joint, all of the properties of the segmented helix are completely determined.
 
+In our software, we have coded the calculation of the screw directly from a transformation matrix, and
+the additional routines which determine all intrinsic properties from a joint position.
 
+As is common in kinematics, there are many ways to represent the same physcial or mathematical situation.
+Four consecutive joint positions also completely determine a segmented helix.
+We present an approach to doing this in the code below.
+Because joints can be computed from transformation matrices and transformation matrices from joints,
+which method of calculation is preferable would be a matter of choice and clarity. We have
+in fact coded both and used the comparison as automated tests in our software to ensure
+the correctness of our coding.
+
+A mechanical engineer, robotocist, or computer graphics expert is likely to find the computation from the
+transformation matrix more natural and convenient. A chemist or crystallographer is more likely to
+have learned the position of four points and wish to compute from that. At one level, of course,
+either method can be used.
 
 \section{KahnAxis: Computing Segmented Helices from Joints}
-
-Because joints can be computed from transformation matrices and transformation matrices from joints,
-which method of calculation is preferable would be a matter of choice and clarity. We here
-present a point-based method.
-
 
 \begin{figure}
      \centering
@@ -640,7 +654,7 @@ face-to-face baces on the face normals; we will assume this
 as a subroutine called ``adjoinPrism'' which takes $\tau$
 (the rotation inside the plane of the joint).
 
-The key insight to finding $psi$ to note that we
+The key insight to finding $\psi$ to note that we
 can consider the projections of the $B$ and $C$ face normal vectors
 projected into the $XY$ plane, and rotate these so that they
 are balanced around the negative $y$ unit vector. Even
@@ -657,7 +671,7 @@ direction for the axis. Changing our decision will make the screw axis point in 
 change the sign of the travel $d$ along the axis, and choose $\phi$ to be $\pi - \phi$.
 
 As can be seen from interactive play with our software, it is entirely possible for the travel along
-the axis of the helix to be $0$--in fact, choosing $\tau = 0$ produces toruses, which have no
+the axis of the helix to be $0$--in fact, choosing $\tau \approx 0$ produces toruses, which have no
 travel along the axis.
 
 We could represent this be makng the length of the vector representing the axis be the length of the
@@ -683,6 +697,9 @@ with unbalanced transformation matrices.
 
 YES.  I now have software working which completely computes all parameters with both methods, the transformation matrix
 method, and the 4-point method.
+
+HOWEVER, my tests current use matrices which are balanced; I need to expand tests to use aribitrary axes to make sure
+this assertion is correct.
 
 \section{Checks and Explorations}
 
@@ -796,21 +813,35 @@ that is, segmented helices constructed solely out of regular Platonic solids. Su
 have been mentioned in a number of papers\cite{elgersma2016quadrahelix,babiker2012combinatorial,lord2001sphere}, but not exhaustively studied in the purely helical form. Because in some cases Platonic segmented helices may be found in nature or related to structures found in nature\cite{lord2004gamma},
 it would be convenient to have a table, and images, of all such Platonic segmented helices for reference.
 
+\section{ To Do}
+
+\begin{itemize}
+\item Check that my matrix computation works in any orientation.
+\item Clean up the code.
+\item Try to get list of references to the computation of a screw from an arbitrary matrix, and compare and contrast to our code.
+\item Need to understand what an ``alpha coil'' protein structure is. (Done: An alpha coil is one of the most common
+and studied protein forms, roughly providing distance in the protein, consisting of a helix formed by
+amino acids, which tend to be cross bonded.
+\item Need to answer the Math stack  exchange question.
+\item Need to understand possibility of further simplifying specification of object.
+\item Need to understand if I can redefine things in terms of ``pitch''.
+\item Need to define and calculate analogs of curvature and torsion for the segmented helix, and make those part of
+  the interactive software.
+\item Complete the table of platonic helices, including a count software to identify intrinsically symmetric cases.
+  That is, create software to create the ``zoo'' of platonic helices.
+  \end{itemize}
+
 \section{References to Check}
 
 Note: Must read this: \url{https://www.researchgate.net/profile/Peter_Kahn/publication/220667044_Defining_the_axis_of_a_helix/links/5b86ab1e299bf1d5a730ff2e/Defining-the-axis-of-a-helix.pdf}\cite{kahn1989defining}.
 
-Note this extremely important observation: ``Since V1 and V2 are both perpendicular to the axis, their cross product will have the direction of the axis''. (Here V1 and V2 are angle bisectors.) This should make my work much simpler!  To some extent this suggest that this work is not as original as I had thought.
-
 Note further that Equations 7 and 8 of this paper give BETTER equations for radius $r$ and the distance $d$ than what I have so far given.
-
 
 Note: Here is an example of a question asked on Math Stack Exchange which is essentially answered by this paper:
 
 \url{https://math.stackexchange.com/questions/878051/why-does-a-3d-line-of-segments-with-constant-angles-always-make-a-helix/878079#878079}
 
 The answerer in fact predicts the linear bisection method which I have outlined.
-
 
 Note: This must be studied immediately:
 
@@ -914,19 +945,6 @@ Note: An historical review of the theoretical development of rigid body displace
 Note: Might need to get this book.
 \url{https://link.springer.com/chapter/10.1007/978-3-319-31126-5_1}
 
-\subsection{To Be Done}
-
-Need to understand what an ``alpha coil'' protein structure is. (Done: An alpha coil is one of the most common
-and studied protein forms, roughly providing distance in the protein, consisting of a helix formed by
-amino acids, which tend to be cross bonded.
-
-Need to answer the Math stack  exchange question.
-
-Need to understand possibility of further simplifying specification of object.
-
-Need to understand if I can redefine things in terms of ``pitch''.
-
-Need to create an mathematical definition of the tightness of a helix. Probably the ratio of pitch to radius.
 
 \section{Acknowledgements}
 
