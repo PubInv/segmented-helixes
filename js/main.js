@@ -1199,7 +1199,12 @@ function RenderSegmentedHelix(solid,tau_v) {
 //  var tau_v;
 //  var taus = [];
   if (solid) {
-    [obj,Nb,Nc] = createZAlignedIcosa(solid,B,C);
+    const face = $( "#face-spinner" ).spinner( "value" );
+    [obj,Nb,Nc] = createZAlignedPlatonic(solid,face,B,C);
+
+    console.assert(Nb.length() > 0.01);
+    console.assert(Nc.length() > 0.01);
+
 //    taus = getLegalTauValues(solid);
 //    tau_v = taus[0];
     // now we should set the legal taus radio set..
@@ -1305,7 +1310,7 @@ function RenderSegmentedHelix(solid,tau_v) {
     var B_ = resM[7];
     cSphere(am.JOINT_RADIUS/3,B_,"green");
   }
-  if (true) {
+  if (false) {
     console.assert(near(resK[0],resM[0]));
     console.assert(near(resK[1],resM[1]));
     if (!near(resK[1],resM[1])) {
@@ -1326,7 +1331,7 @@ function RenderSegmentedHelix(solid,tau_v) {
   }
 
   // TODO: Figure out why I can't use this tomorrow!
-  var USE_MATRIX = true;
+  var USE_MATRIX = false;
   var res;
   if (USE_MATRIX)
     res = resM;
@@ -1746,19 +1751,45 @@ function setup_input_molecule(slider,ro,txt,x,set)
   });
 }
 
-function createZAlignedIcosa(solid,B,C) {
-  let Bf = 0;
+function numFaces(solid) {
   switch(solid) {
   case "TETRAHEDRON":
-    return createZAlignedIcosaAux(solid,B,C,Bf,2);
+    return 4;
   case "CUBE":
-    return createZAlignedIcosaAux(solid,B,C,Bf,1);
+    return 6;
   case "OCTAHEDRON":
-    return createZAlignedIcosaAux(solid,B,C,Bf,6);
+    return 8;
   case "DODECAHEDRON":
-    return createZAlignedIcosaAux(solid,B,C,Bf,7);
+    return 12;
   case "ICOSAHEDRON":
-    return createZAlignedIcosaAux(solid,B,C,Bf,10);
+    return 20;
+  }
+}
+
+function createZAlignedPlatonic(solid,face,B,C) {
+  let Bf = 0;
+  // We disallow using face 0. Altought this is mathematically
+  // possible, it is the ultimate self-intersection and not
+  // terribly interesting, and major pain to try to handle
+  // algorithmically
+  face = Math.max(1,face);
+  face = Math.min(numFaces(solid)-1,face);
+  switch(solid) {
+  case "TETRAHEDRON":
+    face = Math.min(3,face);
+    return createZAlignedPlatonicAux(solid,B,C,Bf,face);
+  case "CUBE":
+    face = Math.min(5,face);
+    return createZAlignedPlatonicAux(solid,B,C,Bf,face);
+  case "OCTAHEDRON":
+    face = Math.min(7,face);
+    return createZAlignedPlatonicAux(solid,B,C,Bf,face);
+  case "DODECAHEDRON":
+    face = Math.min(11,face);
+    return createZAlignedPlatonicAux(solid,B,C,Bf,face);
+  case "ICOSAHEDRON":
+    face = Math.min(19,face);
+    return createZAlignedPlatonicAux(solid,B,C,Bf,face);
   }
 }
 
@@ -1772,7 +1803,7 @@ function findCentroid(geo) {
 // This routine needs to return not only the object
 // for rending, but also the normal vectors!
 // And legal tau values!
-function createZAlignedIcosaAux(solid, B, C, Bf, Cf) {
+function createZAlignedPlatonicAux(solid, B, C, Bf, Cf) {
   // Each of the platonic solids actually requires you to also
   // make a choice as to the face...
   var geo;
@@ -1830,20 +1861,40 @@ function createZAlignedIcosaAux(solid, B, C, Bf, Cf) {
     // fifth face (which is a very boring helix, having parallel
     // normals, but so be it. I will capture this by aborting if
     // you don't choose 0,1 for the faces.
-    console.assert((Bf == 0) && (Cf == 1));
-    Bc.add(geo.vertices[0]);
-    Bc.add(geo.vertices[3]);
+
+    const vFF = []; // vertices crossing this face
+    // How do I figure out how to fill this in?
+    vFF[0] = [0,3];
+    vFF[1] = [4,7];
+    vFF[2] = [0,4];
+    vFF[3] = [3,7];
+    vFF[4] = [2,5];
+    vFF[5] = [1,6];
+
+    const geoF = []; // map our face into triangle normals
+    geoF[0] = 0;
+    geoF[1] = 3;
+    geoF[2] = 5;
+    geoF[3] = 7;
+    geoF[4] = 9;
+    geoF[5] = 11;
+
+    Bc.add(geo.vertices[vFF[Bf][0]]);
+    Bc.add(geo.vertices[vFF[Bf][1]]);
     Bc.multiplyScalar(1/2);
 
-    Cc.add(geo.vertices[0]);
-    Cc.add(geo.vertices[4]);
+    Cc.add(geo.vertices[vFF[Cf][0]]);
+    Cc.add(geo.vertices[vFF[Cf][1]]);
     Cc.multiplyScalar(1/2);
-    Bnl = geo.faces[0].normal.clone();
-    Cnl = geo.faces[5].normal.clone();
+
+    Bnl = geo.faces[geoF[Bf]].normal.clone();
+    Cnl = geo.faces[geoF[Cf]].normal.clone();
   } else if (solid == "DODECAHEDRON") {
     // Now, sadly, we really have to just know the vertices of
     // the first face...this numbering comes from THREE and is
     // effectively arbitrary as far as we are concerned.
+
+
     Bc.add(geo.vertices[0]);
     Bc.add(geo.vertices[1]);
     Bc.add(geo.vertices[2]);
@@ -1860,15 +1911,21 @@ function createZAlignedIcosaAux(solid, B, C, Bf, Cf) {
     Bnl = geo.faces[Bf*3].normal.clone();
     Cnl = geo.faces[13].normal.clone();
   }
+  console.assert(Bnl.length() > 0.1);
+  console.assert(Cnl.length() > 0.1);
 
   let O = new THREE.Vector3();
 
+  // The problem is when the faces are the same, this
+  // becomes zero...I think this
   var d = Cc.clone();
   d.sub(Bc);
   var olen = d.length();
   let bclen = C.clone().sub(B).length();
   let scale_m = new THREE.Matrix4().identity();
-  let s = bclen/olen;
+  // If the olen is zero, which means they are same face,
+  // we cannot determine scale in this way, so we will default to 1.
+  let s = (olen == 0) ? 1 : bclen/olen;
   // we could do this via world transformations, but
   // we are attempting to build a locally aligned object...
   scale_m.makeScale(s,s,s);
@@ -1889,16 +1946,22 @@ function createZAlignedIcosaAux(solid, B, C, Bf, Cf) {
 
   let rotation = new THREE.Matrix4().identity();
    let q = new THREE.Quaternion();
-   q.setFromUnitVectors(d,Z);
+  q.setFromUnitVectors(d,Z);
+  console.log('quaternion',q);
 //   console.log(Z,d);
   rotation.makeRotationFromQuaternion(q);
   // Note: This is a local transformation!
   geo.applyMatrix(rotation);
   Bc.applyMatrix4(rotation);
   Cc.applyMatrix4(rotation);
+  console.assert(Bnl.length() > 0.1);
+  console.assert(Cnl.length() > 0.1);
+
   Bnl.applyMatrix4(rotation);
   Cnl.applyMatrix4(rotation);
   O.applyMatrix4(rotation);
+  console.assert(Bnl.length() > 0.1);
+  console.assert(Cnl.length() > 0.1);
 
 
   let trans = B.clone().sub(Bc);
@@ -1930,6 +1993,8 @@ function createZAlignedIcosaAux(solid, B, C, Bf, Cf) {
 
   // angle is measured against
   var z_angle = oxy.angle() -Math.PI/2;
+
+
 
   let rot_z = new THREE.Matrix4().makeRotationZ(-z_angle);
 
@@ -2061,6 +2126,26 @@ $( document ).ready(function() {
                        "#c_y",NORMAL_C_Y,(v => NORMAL_C_Y = v));
   setup_input_molecule("#normal_c_z_slider","#normal_c_z",
                        "#c_z",NORMAL_C_Z,(v => NORMAL_C_Z = v));
+
+  function faceValueChanged( event, ui ) {
+    var face = $( "#face-spinner" ).spinner( "value" );
+    var solid = getPlatonicSolidInput();
+    if (solid) {
+      face = Math.max(1,face);
+      face = Math.min(numFaces(solid)-1,face);
+      $( "#face-spinner" ).spinner( "value",face );
+    }
+    onComputeDelix();
+  }
+
+   $( function() {
+     var spinner = $( "#face-spinner" ).spinner();
+//     $( "#face-spinner" ).on( "change",faceValueChanged);
+     $( "#face-spinner" ).on( "spinchange",faceValueChanged);
+//     $( "#face-spinner" ).on( "change",faceValueChanged);
+
+     var value = $( "#face-spinner" ).spinner( "value", 0 );
+  } );
 
   $(function () { main(); });
 

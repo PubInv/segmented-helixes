@@ -293,6 +293,18 @@ function KahnAxis(L,D) {
 
         return object;
     };
+
+function checkNonScaling(M) {
+  let t = 0;
+  let xAxis = new THREE.Vector3();
+  let yAxis = new THREE.Vector3();
+  let zAxis = new THREE.Vector3();
+  M.extractBasis(xAxis,yAxis,zAxis);
+  let sx = new THREE.Vector3(xAxis.x,yAxis.x,zAxis.x);
+  let sy = new THREE.Vector3(xAxis.y,yAxis.y,zAxis.y);
+  let sz = new THREE.Vector3(xAxis.z,yAxis.z,zAxis.z);
+  return (near(sx.length(),1) && near(sy.length(),1) && near(sz.length(),1));
+}
 // Add the novel prism to the old prism by placing the B face
 // aginst the C face of the old with a twist of tau and return.
 // note that old is a prism instance, not a mesh instance,
@@ -320,6 +332,9 @@ function adjoinPrism(old,tau,joinToC,debug = false) {
   nu.tc = new THREE.Vector3(old.tc.x,old.tc.y,old.tc.z);
   nu.lc = new THREE.Vector3(old.lc.x,old.lc.y,old.lc.z);
   nu.rc = new THREE.Vector3(old.rc.x,old.rc.y,old.rc.z);
+
+  console.assert(!vnear(new THREE.Vector3(0,0,0),
+                        (joinToC ? nu.p.Nc : nu.p.Nb)));
 
   // Then we translate along the axis of the old prism
   var av;
@@ -382,6 +397,7 @@ function adjoinPrism(old,tau,joinToC,debug = false) {
     Q_to_Nb.setFromUnitVectors(new THREE.Vector3(0,0,-1),
                                nu.p.Nb);
   }
+  console.assert(!vnear(new THREE.Vector3(0,0,0),(joinToC ? nu.p.Nc : nu.p.Nb)));
 
   var Rqb = new THREE.Matrix4().makeRotationFromQuaternion(Q_to_Nb);
   var Rqc = new THREE.Matrix4().makeRotationFromQuaternion(Q_to_Nc);
@@ -404,7 +420,7 @@ function adjoinPrism(old,tau,joinToC,debug = false) {
   // In this way we could maybe analytically produce answers
   // for all platonic solids.  What would that be worth? a week,
   // for sure!
-
+  console.assert(!vnear(new THREE.Vector3(0,0,0),(joinToC ? nu.p.Nc : nu.p.Nb)));
   var rt = new THREE.Matrix4();
   rt.makeRotationAxis(joinToC ? nu.p.Nc : nu.p.Nb,tau);
 
@@ -423,6 +439,10 @@ function adjoinPrism(old,tau,joinToC,debug = false) {
   finalMatrix.premultiply(rotations);
   finalMatrix.premultiply(p_trans_r);
 
+  console.assert(checkNonScaling(finalMatrix));
+  if (!checkNonScaling(finalMatrix)) {
+    debugger;
+  }
   // now we need to check that this matrix applied
   // to the original prism puts it int the same place...
   // if we apply this matrix to the point B, we expect
@@ -1109,13 +1129,68 @@ function SubtractMatrices(A,B) {
   return C;
 }
 
+function compute_da(u,B,C) {
+  // Now I believe da is indepednet of L and any point.
+  const BC = new THREE.Vector3().subVectors(C,B);
+
+  // The computation of this should be removed to a different function.
+  // That will allow us to remove the arbitrary points out, I think.
+  // Now BC.u sould give us da...
+  const unorm = u.clone().normalize();
+  const da_scalar_project = BC.dot(unorm);
+  return da_scalar_project;
+}
+
+function compute_da_X(R,u,B,C) {
+  // Now I believe da is indepednet of L and any point.
+  const BC = new THREE.Vector3().subVectors(C,B);
+
+  // The computation of this should be removed to a different function.
+  // That will allow us to remove the arbitrary points out, I think.
+  // Now BC.u sould give us da...
+  const unorm = u.clone().normalize();
+  const da_scalar_project = BC.dot(unorm);
+  const ele = R.elements;
+  const a = ele[0];
+  const e = ele[1];
+  const i = ele[2];
+
+  const b = ele[4];
+  const f = ele[5];
+  const j = ele[6];
+
+  const c = ele[8];
+  const g = ele[9];
+  const k = ele[10];
+
+  const d = ele[12];
+  const h = ele[13];
+  const l = ele[14];
+
+  const x = (a+b+c+d);
+  const y = (e+f+g+h);
+  const z = (i+j+k+l);
+  console.assert(a+b+c+x,1);
+  const BCp = new THREE.Vector3(x-1,y-1,z-1);
+  console.assert(vnear(BC,BCp));
+  const da = BCp.dot(unorm);
+  console.assert(near(da,da_scalar_project));
+
+  return da_scalar_project;
+}
 
 function computeThetaUDa(R) {
   if (near(R.determinant(),-1)) {
     console.log("R.det",R.determinant());
   }
+  console.assert(checkNonScaling(R));
   // now attempt to recover parameters from the rotation matrix....
-  const val = (1/2) * (TraceMatrix4(R) - 1);
+  const tr = TraceMatrix4(R);
+  const val = (1/2) * (tr - 1);
+
+  // I don't know what to do if this condition holds
+  console.assert(Math.abs(val) < 1.01);
+
   // Possibly this needs to be signed based on something
   // else we compute (A.x) when val = -1.
   const thetaP = (near(val,-1)) ? Math.PI :  Math.acos(val);
@@ -1146,24 +1221,11 @@ function computeThetaUDa(R) {
 
     u = new THREE.Vector3().subVectors(D,B);
     u.normalize();
-    console.log("A,B,C,D",A,B,C,D);
-    // This is problematic, but we have chosen the
-    // axis to be from the right-hand rule of B to C.
-    // But if theta = 180, this is not well-defined.
-    //     u.multiplyScalar(-1);
-    let Z = new THREE.Vector3(0,0,1);
-    let Zneg = new THREE.Vector3(0,0,-1);
-    let Zu = u.angleTo(Z);
-    let Zuneg = u.angleTo(Zneg);
-//    console.log("Zu, Zuneg", Zu * 180 / Math.PI, Zuneg * 180 / Math.PI);
-    //    if (Math.abs(Zuneg) < Math.abs(Zu)) {
     if (A.x > 0) {
-      console.log("XXX");
       u.multiplyScalar(-1);
     }
-
+    return [thetaP,u];
   } else {
-
     // Now we will attempt to extract the screw axis from this matrix...
     // unfortunately THREE doesn't seem to implment matrix addition and substraction...
 
@@ -1189,8 +1251,6 @@ function computeThetaUDa(R) {
     u = new THREE.Vector3(h-f,c-g,d-b);
     // Note: I am defining my axis with a right hand rule from B to C,
     // and with a negative travel to represent the other direction.
-    // Therefore I negate this algorithm.
-    //    u.multiplyScalar(-1);
 
     // This may not be the best way to detect it, but I believe
     // that if u is "vnear" zero we have an undefined "straight line" case.
@@ -1203,23 +1263,8 @@ function computeThetaUDa(R) {
     }
 
     u.multiplyScalar(1/(2 * Math.sin(thetaP)));
+    return [thetaP,u];
   }
-
-  //  const SIGN_ADJUST = -1;
-  // this just accomplishes normalization, so it is unclear where we need it!
-  //  u.multiplyScalar(SIGN_ADJUST);
-  //  console.log('AXIS',u,scale);
-
-  // Now I believe da is indepednet of L and any point.
-  const BC = new THREE.Vector3().subVectors(C,B);
-
-  // Now BC.u sould give us da...
-  const unorm = u.clone().normalize();
-  const da_scalar_project = BC.dot(unorm);
-//  if (PROBLEM) {
-    console.log("unorm,BC,da_scalar_project",unorm,BC,da_scalar_project);
-//  }
-  return [thetaP,u,da_scalar_project];
 }
 
 
@@ -1236,11 +1281,17 @@ function computeRChord(L,thetaP,da) {
 }
 
 function computePointIndependentParameters(L,R) {
-  [thetaP,u,da] = computeThetaUDa(R);
+  [thetaP,u] = computeThetaUDa(R);
+
+  // We need an arbitray point.. technically we should check
+  // this is not on the axis, but that is unlikely....
+  // TODO: See if this can be determined without using an aribitrary point..
+  const B = new THREE.Vector3(1,1,1);
+  const C = B.clone().applyMatrix4(R);
+//  const da = compute_da(u,B,C);
+  const da = compute_da_X(R,u,B,C);
+
   [r,chord] = computeRChord(L,thetaP,da);
-  // Now this has in fact given us everyting we need until such time
-  // as we want to compute Ba, which requires a point B to be specified....
-  // Can all of this be true?
   return [r,thetaP,da,chord,u];
 }
 
@@ -1259,10 +1310,20 @@ function computePhi(L,R,B) {
   return phi;
 }
 
+
+// Possibly this is the same math, or a different approach to
+// the formula given: https://en.wikipedia.org/wiki/Screw_axis
+// C = b x d - b b x (b x d) / (2b . b).
+// where C is a point on the axis, d is the displacement,
+// and b is the Rodrigues' vector.
+// Questions remain:
+// Is one better than the other?
+// Is does that computed point correspond to a perpendicular to B, as this
+// produces (which is a major advantage) (though I suppose that approach doesn't
+// require us to namea point at all.
 function computeAxisPoint(r,chord,u,R,B) {
   const C = B.clone().applyMatrix4(R);
   const BC = new THREE.Vector3().subVectors(C,B);
-
   const Mp = new THREE.Vector3().addVectors(B,C);
 
   Mp.multiplyScalar(1/2);
