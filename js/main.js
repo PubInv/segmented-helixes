@@ -826,8 +826,20 @@ function getLegalTauValues(solid) {
   return taus;
 }
 
-function updateLegalTauValues(solid) {
-  var taus = getLegalTauValues(solid).map(r => r*180/Math.PI);
+function getLegalTauValuesX(solid,face) {
+  var taus = [];
+  const n = numFaces(solid);
+  [numrots,base,delta] = twistBaseIncrement(solid,face);
+  const values = [numrots];
+  for(var i = 0; i < numrots; i++) {
+    const degrees = base + ((i - (Math.floor(numrots/2))))*delta;
+    values[i] = degrees * Math.PI / 180;
+  }
+  return values;
+}
+
+function updateLegalTauValues(solid,face) {
+  var taus = getLegalTauValuesX(solid,face).map(r => r*180/Math.PI);
   if (taus.length == 3) {
     $("#radio-t0-l").html("N/A");
     $("#radio-t1-l").html(format_num(taus[0],0));
@@ -862,25 +874,41 @@ function getSelectedTaus(taus) {
   return taus[n];
 }
 function onComputeDelix() {
-  var SOLID = getPlatonicSolidInput();
-  var tau_v;
-  if (SOLID == null) {
-    $("#tau-fieldset").hide();
-    tau_v = TAU_d * Math.PI / 180;
-  } else {
-    $("#tau-fieldset").show();
-    var taus = updateLegalTauValues(SOLID);
-    tau_v = getSelectedTaus(taus);
-    tau_v = tau_v * Math.PI / 180;
-  }
-  console.log("Render:",SOLID,tau_v);
-
+  const SOLID = getPlatonicSolidInput();
+  const tau_v = TAU_d * Math.PI / 180;
   RenderSegmentedHelix(SOLID,tau_v);
  }
 
 function main() {
   $( "input[type='radio']" ).checkboxradio();
+  $('fieldset[id="superstructure"] input').change(function () {
+    var modex = $("input:radio[name=radio-2]:checked")
+    modex.removeAttr('checked');
+    modex.button( "refresh" )
+
+    var SOLID = getPlatonicSolidInput();
+    const face = $( "#face-spinner" ).spinner( "value" );
+    var taus = updateLegalTauValues(SOLID,face);
+    tau_v = getSelectedTaus(taus);
+    tau_v = tau_v * Math.PI / 180;
+    if (SOLID == null) {
+      $("#tau-fieldset").hide();
+    } else {
+      $("#tau-fieldset").show();
+    }
+  });
+
+  $('fieldset[id="tau-fieldset"] input').change(function () {
+    var SOLID = getPlatonicSolidInput();
+    const face = $( "#face-spinner" ).spinner( "value" );
+    var taus = updateLegalTauValues(SOLID,face);
+    var tau_v = getSelectedTaus(taus);
+    tau_v = tau_v * Math.PI / 180;
+    setTauValue(tau_v);
+  });
+
   $('fieldset input').change(function () {
+
     onComputeDelix();
   });
 }
@@ -1766,6 +1794,44 @@ function numFaces(solid) {
   }
 }
 
+function twistBaseIncrement(solid,face) {
+  switch(solid) {
+  case "TETRAHEDRON":
+    return [3,0,120];
+  case "CUBE":
+    return [4,0,90];
+  case "OCTAHEDRON":
+    return [3,0,120];
+  case "DODECAHEDRON":
+    return [5,0,72];
+  case "ICOSAHEDRON":
+    // Thewe were developed by hand;
+    // the represent the angles for
+    // exact face-to-face match (with +- 120 degrees)
+    const map_face = [];
+    map_face[1] = 120;
+    map_face[2] = 120;
+    map_face[3] = 120;
+    map_face[4] = 120;
+    map_face[5] = 120;
+    map_face[6] = 120;
+    map_face[7] = 120;
+    map_face[8] = 45;
+    map_face[9] = 45;
+    map_face[10] = 45;
+    map_face[11] = 45;
+    map_face[12] = 120;
+    map_face[13] = 0;
+    map_face[14] = 120;
+    map_face[15] = 120;
+    map_face[16] = 120;
+    map_face[17] = 45;
+    map_face[18] = 120;
+    map_face[19] = 45;
+    return [3,map_face[face],120];
+  }
+}
+
 function createZAlignedPlatonic(solid,face,B,C) {
   let Bf = 0;
   // We disallow using face 0. Altought this is mathematically
@@ -1893,23 +1959,51 @@ function createZAlignedPlatonicAux(solid, B, C, Bf, Cf) {
     // Now, sadly, we really have to just know the vertices of
     // the first face...this numbering comes from THREE and is
     // effectively arbitrary as far as we are concerned.
+    const vFF = []; // vertices crossing this face
+    // How do I figure out how to fill this in?
+    vFF[0] = [0,1,2,3,4];
+    vFF[1] = [1,3,5,6,7];
+    vFF[2] = [6,7,8,9,10];
+    vFF[3] = [9,11,12,13,10];
+    vFF[4] = [11,12,14,15,16];
+    vFF[5] = [3,4,7,10,13];
+    vFF[6] = [2,4,12,13,16];
+    vFF[7] = [0,2,15,16,17];
+    vFF[8] = [8,9,11,14,18];
+    vFF[9] = [0,1,5,17,19];
+    vFF[10] = [5,6,8,18,19];
+    vFF[11] = [14,15,17,18,19];
 
+    const geoF = []; // map our face into triangle normals
+    geoF[0] = 0;
+    geoF[1] = 3;
+    geoF[2] = 6;
+    geoF[3] = 9;
+    geoF[4] = 12;
+    geoF[5] = 15;
+    geoF[6] = 18;
+    geoF[7] = 21;
+    geoF[8] = 24;
+    geoF[9] = 27;
+    geoF[10] = 30;
+    geoF[11] = 33;
 
-    Bc.add(geo.vertices[0]);
-    Bc.add(geo.vertices[1]);
-    Bc.add(geo.vertices[2]);
-    Bc.add(geo.vertices[3]);
-    Bc.add(geo.vertices[4]);
+    Bc.add(geo.vertices[vFF[Bf][0]]);
+    Bc.add(geo.vertices[vFF[Bf][1]]);
+    Bc.add(geo.vertices[vFF[Bf][2]]);
+    Bc.add(geo.vertices[vFF[Bf][3]]);
+    Bc.add(geo.vertices[vFF[Bf][4]]);
     Bc.multiplyScalar(1/5);
 
-    Cc.add(geo.vertices[11]);
-    Cc.add(geo.vertices[12]);
-    Cc.add(geo.vertices[14]);
-    Cc.add(geo.vertices[15]);
-    Cc.add(geo.vertices[16]);
+    Cc.add(geo.vertices[vFF[Cf][0]]);
+    Cc.add(geo.vertices[vFF[Cf][1]]);
+    Cc.add(geo.vertices[vFF[Cf][2]]);
+    Cc.add(geo.vertices[vFF[Cf][3]]);
+    Cc.add(geo.vertices[vFF[Cf][4]]);
     Cc.multiplyScalar(1/5);
-    Bnl = geo.faces[Bf*3].normal.clone();
-    Cnl = geo.faces[13].normal.clone();
+
+    Bnl = geo.faces[geoF[Bf]].normal.clone();
+    Cnl = geo.faces[geoF[Cf]].normal.clone();
   }
   console.assert(Bnl.length() > 0.1);
   console.assert(Cnl.length() > 0.1);
@@ -2134,6 +2228,12 @@ $( document ).ready(function() {
       face = Math.max(1,face);
       face = Math.min(numFaces(solid)-1,face);
       $( "#face-spinner" ).spinner( "value",face );
+      var taus = updateLegalTauValues(solid,face);
+      tau_v = getSelectedTaus(taus);
+      var modex = $("input:radio[name=radio-2]:checked")
+      modex.removeAttr('checked');
+      modex.button( "refresh" )
+
     }
     onComputeDelix();
   }
@@ -2142,9 +2242,10 @@ $( document ).ready(function() {
      var spinner = $( "#face-spinner" ).spinner();
 //     $( "#face-spinner" ).on( "change",faceValueChanged);
      $( "#face-spinner" ).on( "spinchange",faceValueChanged);
+     $( "#face-spinner" ).on( "spin",faceValueChanged);
 //     $( "#face-spinner" ).on( "change",faceValueChanged);
 
-     var value = $( "#face-spinner" ).spinner( "value", 0 );
+     var value = $( "#face-spinner" ).spinner( "value", 1 );
   } );
 
   $(function () { main(); });
