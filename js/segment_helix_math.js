@@ -677,6 +677,8 @@ function AfromLtauNbNc(L,tau,NBu,NCu,debug = false) {
     // oppose each other. We should produce a psi to
     // rotate so that b is in the X - Z plane
 
+    // TODO: explacing this with a dot-product is probably
+    // nicer.
     if (near(fbc.length(),0,1e-3)) { // The angles are in opposition
       let fba = fb.angle();
       let fca = fc.angle();

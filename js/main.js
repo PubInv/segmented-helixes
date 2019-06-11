@@ -31,6 +31,7 @@ if (!Detector.webgl) {
   document.getElementById('threecontainer').innerHTML = "";
 }
 
+const PLATONIC_SOLIDS = ["TETRAHEDRON","CUBE","OCTAHEDRON","DODECAHEDRON","ICOSAHEDRON"];
 
 
 // Here I attempt to create an abstract prism object.
@@ -175,6 +176,9 @@ function renderPrismInstance(p_i) {
 //      console.log("CENT",cent);
 //      console.log("PRISM_UP",prism_up);
       console.assert(near(axis.dot(cent),0));
+      if (!near(axis.dot(cent),0)) {
+        debugger;
+      }
       const q1 = new THREE.Quaternion();
       q1.setFromUnitVectors(cent,prism_up);
       var rot1 = new THREE.Matrix4().identity();
@@ -856,6 +860,7 @@ function updateLegalTauValues(solid,face) {
   return taus;
 }
 
+
 function getSelectedTaus(taus) {
   var modex = $("input:radio[name=radio-2]:checked").attr('id');
   console.log("modex",modex);
@@ -1197,6 +1202,76 @@ function getPlatonicSolidInput() {
   return SOLID;
 }
 
+function computeInternal(L0,B,C,tau_v,p_i,Nb,Nc) {
+
+  // Apparently, at present I need the
+  // prism to be properly rotated before my call
+  // call to ajoinPrism can produce the right rotations
+  // for the computeThetaAxis that way to work...a catch22
+  // This is probably not right.
+
+  let Arot = AfromLtauNbNc(L0,tau_v,Nb,Nc,false);
+  let A = Arot[0];
+  // I am not sure whey this is negated...
+  //  var rotation = -Arot[1];
+
+  // The rotation here is the amount we rotated
+  // the initial prism to get it into a "balanced" position.
+  // Balanced means the midpoint of the project of the normals
+  // is pointing straight down. So we roation by this distance
+  // to form rt, that must be applied to the prism  below.
+  var rotation = Arot[1];
+
+  var rt = new THREE.Matrix4();
+
+  rt.makeRotationAxis(new THREE.Vector3(0,0,1),rotation);
+
+
+  // // This should probably be added...
+  // //  p_i.sup = obj;
+
+  // // We shall place this upward, for the purpose of
+  // // making it easier to see...
+
+  // // Take this out, and input an instance!
+  // applyMatrix4ToPrism(p_i,rt);
+
+  // // GTRANS sets us into position in the world
+  // applyMatrix4ToPrism(p_i,GTRANS);
+
+  // // if (p_i.sup) {
+  // //    p_i.sup.applyMatrix(GTRANS);
+  // // }
+  // p_i.p.Nb.applyMatrix4(rt);
+  // p_i.p.Nc.applyMatrix4(rt);
+
+  //  if (p_i.sup) {
+  //    p_i.sup.applyMatrix(rt);
+  //  }
+
+  // Why wouldn't this be -A.x?
+  let D = new THREE.Vector3(-A.x,A.y,-A.z);
+  resK = KahnAxis(L0,D);
+
+
+  // TODO: Phi is being miscalculated in the case of tau = 180 or -180!!!
+
+
+  // NOTE: the rotations here is translated into world
+  // coordinates (+2 y upward.) This makes everything
+  // terribly confusing. I need to rework this with clarity.
+
+  [p_b,rotations] = adjoinPrism(p_i,tau_v,true,false);
+  //  console.log("rotations, pre",rotations);
+
+  // I have to use this point instead of B because my
+  // rotations matrix is computed in world coordinates!!!
+//  let Btrans = B.clone().applyMatrix4(GTRANS);
+  let Btrans = B.clone();
+  resM = computeThetaAxisFromMatrix4(L0,rotations,Btrans);
+  return [resK,resM,p_i,rt];
+}
+
 function RenderSegmentedHelix(solid,tau_v) {
   clearAm();
 
@@ -1256,37 +1331,21 @@ function RenderSegmentedHelix(solid,tau_v) {
   }
 
 
-
-  // Apparently, at present I need the
-  // prism to be properly rotated before my call
-  // call to ajoinPrism can produce the right rotations
-  // for the computeThetaAxis that way to work...a catch22
-  // This is probably not right.
-
-  let Arot = AfromLtauNbNc(L0,tau_v,Nb,Nc,false);
-  let A = Arot[0];
-  // I am not sure whey this is negated...
-  //  var rotation = -Arot[1];
-
-  // The rotation here is the amount we rotated
-  // the initial prism to get it into a "balanced" position.
-  // Balanced means the midpoint of the project of the normals
-  // is pointing straight down. So we roation by this distance
-  // to form rt, that must be applied to the prism  below.
-  var rotation = Arot[1];
-
-  var rt = new THREE.Matrix4();
-
-  rt.makeRotationAxis(new THREE.Vector3(0,0,1),rotation);
-
    GLOBAL_P0 = new AbstractPrism(
     L0,
     Nb,
     Nc,
     obj);
 
-  var p_i = CreatePrism( GLOBAL_P0,PRISM_FACE_RATIO_LENGTH);
-  // This should probably be added...
+
+  var p_temp = CreatePrism(GLOBAL_P0,PRISM_FACE_RATIO_LENGTH);
+
+  [resK,resM,p_i,rt] = computeInternal(L0,B,C,tau_v,p_temp,Nb,Nc);
+
+  console.log("SHOULD MATCH");
+  console.log(resK);
+  console.log(resM);
+ // This should probably be added...
   //  p_i.sup = obj;
 
   // We shall place this upward, for the purpose of
@@ -1298,38 +1357,11 @@ function RenderSegmentedHelix(solid,tau_v) {
   // GTRANS sets us into position in the world
   applyMatrix4ToPrism(p_i,GTRANS);
 
-// if (p_i.sup) {
-//    p_i.sup.applyMatrix(GTRANS);
-// }
+  // if (p_i.sup) {
+  //    p_i.sup.applyMatrix(GTRANS);
+  // }
   p_i.p.Nb.applyMatrix4(rt);
   p_i.p.Nc.applyMatrix4(rt);
-
-//  if (p_i.sup) {
-//    p_i.sup.applyMatrix(rt);
-//  }
-
-  // Why wouldn't this be -A.x?
-  let D = new THREE.Vector3(-A.x,A.y,-A.z);
-  resK = KahnAxis(L0,D);
-
-
-  // TODO: Phi is being miscalculated in the case of tau = 180 or -180!!!
-
-
-  // NOTE: the rotations here is translated into world
-  // coordinates (+2 y upward.) This makes everything
-  // terribly confusing. I need to rework this with clarity.
-
- [p_b,rotations] = adjoinPrism(p_i,tau_v,true,false);
-//  console.log("rotations, pre",rotations);
-
-  // I have to use this point instead of B because my
-  // rotations matrix is computed in world coordinates!!!
-  let Btrans = B.clone().applyMatrix4(GTRANS);
-  resM = computeThetaAxisFromMatrix4(L0,rotations,Btrans);
-  console.log("SHOULD MATCH");
-  console.log(resK);
-  console.log(resM);
 
   let Cp = resM[6];
   if (Cp) {
@@ -1367,10 +1399,8 @@ function RenderSegmentedHelix(solid,tau_v) {
     res = resK;
 
   r = res[0];
-  // NOTE!!!
   theta = res[1];
   d = res[2];
-  // NOTE!!!
   phi = res[4];
 
   console.log("da,chord",d,res[3]);
@@ -1527,6 +1557,9 @@ function RenderSegmentedHelix(solid,tau_v) {
 
   renderSprites();
 }
+
+
+
 
 function addDebugSphere(am,pos,color) {
   if (!color) {
@@ -1832,6 +1865,126 @@ function twistBaseIncrement(solid,face) {
   }
 }
 
+function registerHelix(name,number,solid_num,face,tau,radius,theta,travel,helix_angle,class_num) {
+  var table = document.getElementById("platonichelices");
+
+  var row = table.insertRow(-1);
+
+  var totalnum_c = row.insertCell(0);
+  var solidnum_c = row.insertCell(1);
+  var name_c = row.insertCell(2);
+  var face_c = row.insertCell(3);
+  var tau_c = row.insertCell(4);
+  var radius_c = row.insertCell(5);
+  var theta_c = row.insertCell(6);
+  var travel_c = row.insertCell(7);
+  var angle_c = row.insertCell(8);
+  var class_c = row.insertCell(9);
+
+  totalnum_c.innerHTML = number;
+  solidnum_c.innerHTML = solid_num;
+  name_c.innerHTML = name;
+  face_c.innerHTML = face;
+  tau_c.innerHTML = format_num(tau * 180/Math.PI,0);
+  radius_c.innerHTML = format_num(radius,3);
+  theta_c.innerHTML = format_num(theta * 180 / Math.PI,3);
+  travel_c.innerHTML = format_num(travel,3);
+  angle_c.innerHTML = format_num(helix_angle  * 180 / Math.PI,3);
+  class_c.innerHTML = class_num;
+}
+
+function addMeasures(measures,s,cnt,f,tau,r,theta,d,phi) {
+  var class_num = -1;
+  var max_class = -1;
+  for(var i = 0; i < measures.length; i++) {
+    if ((s == measures[i][0]) &&
+        (near(r,measures[i][4])) &&
+        (near(theta,measures[i][5])) &&
+        (near(Math.abs(d),Math.abs(measures[i][6])))
+       ) {
+      class_num = measures[i][8];
+    }
+    if ((measures[i][8] > max_class)) max_class = measures[i][8];
+  }
+  measures.push([s,cnt,f,tau,r,theta,d,phi,(class_num >= 0) ? class_num : max_class + 1 ]);
+}
+// Our goal here is to create a list of the classe, which
+// elements belongs to which, how many are in which, and wether they contain both chiralities
+// (I think they will have to.
+function analyzeClasses(mAndC) {
+  let analysis = [];
+  const len = mAndC.length;
+  for(var i = 0; i < len; i++) {
+    const c = mAndC[i][8];
+    const s = Math.sign(mAndC[i][6]);
+    if (analysis[c] != null) {
+      const v = analysis[c];
+      const h = (v[2] != s) ? "B" : s;
+      analysis[c] = [v[0]+1,[...v[1],i],h];
+    } else {
+      analysis[c] = [1,[i],s];
+    }
+  }
+  return analysis;
+}
+function populatePlatonicHelixTable() {
+  var cnt = 0;
+
+  for(var s of PLATONIC_SOLIDS) {
+    const n = numFaces(s);
+    let measuresAndClasses = [];
+    var scnt = 0;
+    // We don't operated on the zero face, which is technically a weakness on my part....
+    for(var f = 1; f < n; f++ ) {
+      [num_rotations,base,delta] = twistBaseIncrement(s,f);
+
+      let L0 = 1;
+      let B = new THREE.Vector3(0,0,-L0/2);
+      let C = new THREE.Vector3(0,0,L0/2);
+
+      [obj,Nb,Nc] = createZAlignedPlatonic(s,f,B,C);
+
+      // now we loop over num_rotations...
+      for(var j = 0; j < num_rotations; j++) {
+        const tau = (base + delta*j) * Math.PI / 180;
+
+        // unsure about this.....
+        var p_temp = CreatePrism(GLOBAL_P0,PRISM_FACE_RATIO_LENGTH);
+        [resK,resM,p_i,rt] = computeInternal(L0,B,C,tau,p_temp,Nb,Nc);
+        var USE_MATRIX = false;
+        var res = (USE_MATRIX) ? resM : resK;
+
+        const r = res[0];
+        const theta = res[1];
+        const d = res[2];
+        const phi = res[4];
+        addMeasures(measuresAndClasses,s,scnt,f,tau,r,theta,d,phi);
+        scnt++
+      }
+    }
+    var analysis = analyzeClasses(measuresAndClasses);
+    analysis.sort((a,b) =>
+                  {
+                    // We will look at exexmplary members of the classes
+                    [sa,cnta,fa,taua,ra,thetaa,da,phia,cna] = measuresAndClasses[a[1][0]];
+                    [sb,cntb,fb,taub,rb,thetab,db,phib,cnb] = measuresAndClasses[b[1][0]];
+                    return ra - rb;
+                  }
+                 );
+
+    for (var a of analysis) {
+      for (var idx of a[1]) {
+        [s,cnt,f,tau,r,theta,d,phi,cn] = measuresAndClasses[idx];
+        registerHelix(s,cnt,idx,f,tau,r,theta,d,phi,cn);
+      }
+      cnt++;
+    }
+
+    console.log(s);
+    console.log(analysis);
+  }
+}
+
 function createZAlignedPlatonic(solid,face,B,C) {
   let Bf = 0;
   // We disallow using face 0. Altought this is mathematically
@@ -2041,7 +2194,6 @@ function createZAlignedPlatonicAux(solid, B, C, Bf, Cf) {
   let rotation = new THREE.Matrix4().identity();
    let q = new THREE.Quaternion();
   q.setFromUnitVectors(d,Z);
-  console.log('quaternion',q);
 //   console.log(Z,d);
   rotation.makeRotationFromQuaternion(q);
   // Note: This is a local transformation!
@@ -2251,6 +2403,8 @@ $( document ).ready(function() {
   $(function () { main(); });
 
   onComputeDelix();
+
+  populatePlatonicHelixTable();
 
 //  testStupidObjectManipulation();
 
