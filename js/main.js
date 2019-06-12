@@ -1174,6 +1174,28 @@ function renderSprites() {
   LABEL_SPRITES.forEach(s => renderSprite(s));
 }
 
+function setPlatonicSolidInput(mode) {
+  var id;
+  switch(mode) {
+  case "TETRAHEDRON":
+    id = "radio-tet";
+    break;
+  case "CUBE":
+    id = "radio-cub";
+    break;
+  case "OCTAHEDRON":
+    id = "radio-oct";
+    break;
+  case "DODECAHEDRON":
+    id = "radio-dod";
+    break;
+  case "ICOSAHEDRON":
+    id = "radio-ico";
+    break;
+  }
+  $("#"+id).prop("checked", true).trigger("click").change();
+}
+
 function getPlatonicSolidInput() {
   var mode = $(":radio:checked").attr('id');
   console.log("MODE:",mode);
@@ -1865,22 +1887,33 @@ function twistBaseIncrement(solid,face) {
   }
 }
 
+function renderhelixrow(solid,tau) {
+  setPlatonicSolidInput(solid)
+  RenderSegmentedHelix(solid,tau);
+}
+
 function registerHelix(name,number,solid_num,face,tau,radius,theta,travel,helix_angle,class_num) {
   var table = document.getElementById("platonichelices");
 
   var row = table.insertRow(-1);
 
-  var totalnum_c = row.insertCell(0);
-  var solidnum_c = row.insertCell(1);
-  var name_c = row.insertCell(2);
-  var face_c = row.insertCell(3);
-  var tau_c = row.insertCell(4);
-  var radius_c = row.insertCell(5);
-  var theta_c = row.insertCell(6);
-  var travel_c = row.insertCell(7);
-  var angle_c = row.insertCell(8);
-  var class_c = row.insertCell(9);
+  var cnt = 0;
+  var button_c = row.insertCell(cnt++);
+  var totalnum_c = row.insertCell(cnt++);
+  var solidnum_c = row.insertCell(cnt++);
+  var name_c = row.insertCell(cnt++);
+  var face_c = row.insertCell(cnt++);
+  var tau_c = row.insertCell(cnt++);
+  var radius_c = row.insertCell(cnt++);
+  var theta_c = row.insertCell(cnt++);
+  var travel_c = row.insertCell(cnt++);
+  var angle_c = row.insertCell(cnt++);
+  var class_c = row.insertCell(cnt++);
 
+  button_c.innerHTML = "<button onclick='renderhelixrow(\""+
+    name+"\","+
+    tau+
+  ")'>Draw</button>";
   totalnum_c.innerHTML = number;
   solidnum_c.innerHTML = solid_num;
   name_c.innerHTML = name;
@@ -1929,7 +1962,7 @@ function analyzeClasses(mAndC) {
 }
 function populatePlatonicHelixTable() {
   var cnt = 0;
-
+  var rownum = 0;
   for(var s of PLATONIC_SOLIDS) {
     const n = numFaces(s);
     let measuresAndClasses = [];
@@ -1968,16 +2001,17 @@ function populatePlatonicHelixTable() {
                     // We will look at exexmplary members of the classes
                     [sa,cnta,fa,taua,ra,thetaa,da,phia,cna] = measuresAndClasses[a[1][0]];
                     [sb,cntb,fb,taub,rb,thetab,db,phib,cnb] = measuresAndClasses[b[1][0]];
-                    return ra - rb;
+
+                    return (ra == rb) ? fa - fb : ra - rb;
                   }
                  );
 
     for (var a of analysis) {
       for (var idx of a[1]) {
         [s,cnt,f,tau,r,theta,d,phi,cn] = measuresAndClasses[idx];
-        registerHelix(s,cnt,idx,f,tau,r,theta,d,phi,cn);
+        registerHelix(s,rownum,idx,f,tau,r,theta,d,phi,cn);
+        rownum++;
       }
-      cnt++;
     }
 
     console.log(s);
