@@ -1887,15 +1887,35 @@ function twistBaseIncrement(solid,face) {
   }
 }
 
-function renderhelixrow(solid,tau) {
+function renderhelixrow(solid,face,tau) {
   setPlatonicSolidInput(solid)
+  $( "#face-spinner" ).spinner( "value",face );
   RenderSegmentedHelix(solid,tau);
+}
+
+function hideClassNum(solid,cnum,visibility) {
+  var table = document.getElementById("platonichelices");
+  var cnt = 0;
+  for (var i = 0, row; row = table.rows[i]; i++) {
+    //iterate through rows
+    //rows would be accessed using the "row" variable assigned in the for loop
+    var class_num = row.getAttribute("class_num");
+    if (class_num == cnum) {
+      cnt++;
+    }
+    if ((class_num == cnum) && (cnt != 1)) {
+      row.style.display = visibility;
+    }
+  }
 }
 
 function registerHelix(name,number,solid_num,face,tau,radius,theta,travel,helix_angle,class_num) {
   var table = document.getElementById("platonichelices");
 
   var row = table.insertRow(-1);
+
+  row.id = number;
+  row.setAttribute("class_num", class_num);
 
   var cnt = 0;
   var button_c = row.insertCell(cnt++);
@@ -1911,7 +1931,7 @@ function registerHelix(name,number,solid_num,face,tau,radius,theta,travel,helix_
   var class_c = row.insertCell(cnt++);
 
   button_c.innerHTML = "<button onclick='renderhelixrow(\""+
-    name+"\","+
+    name+"\","+face+","+
     tau+
   ")'>Draw</button>";
   totalnum_c.innerHTML = number;
@@ -1923,7 +1943,10 @@ function registerHelix(name,number,solid_num,face,tau,radius,theta,travel,helix_
   theta_c.innerHTML = format_num(theta * 180 / Math.PI,3);
   travel_c.innerHTML = format_num(travel,3);
   angle_c.innerHTML = format_num(helix_angle  * 180 / Math.PI,3);
-  class_c.innerHTML = class_num;
+  var button1 = "<button onclick='hideClassNum(\""+name+"\","+class_num+",\"none\")'>Collapse "+class_num+"</button>";
+  var button2 = "<button onclick='hideClassNum(\""+name+"\","+class_num+",\"table-row\")'>Expand "+class_num+"</button>";
+  class_c.innerHTML = button1 + button2;
+  console.log(class_c.innerHTML);
 }
 
 function addMeasures(measures,s,cnt,f,tau,r,theta,d,phi) {
@@ -2426,11 +2449,8 @@ $( document ).ready(function() {
 
    $( function() {
      var spinner = $( "#face-spinner" ).spinner();
-//     $( "#face-spinner" ).on( "change",faceValueChanged);
      $( "#face-spinner" ).on( "spinchange",faceValueChanged);
      $( "#face-spinner" ).on( "spin",faceValueChanged);
-//     $( "#face-spinner" ).on( "change",faceValueChanged);
-
      var value = $( "#face-spinner" ).spinner( "value", 1 );
   } );
 
