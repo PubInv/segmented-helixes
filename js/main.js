@@ -1900,11 +1900,13 @@ function hideClassNum(solid,cnum,visibility) {
     //iterate through rows
     //rows would be accessed using the "row" variable assigned in the for loop
     var class_num = row.getAttribute("class_num");
-    if (class_num == cnum) {
+    var solid_name = row.getAttribute("solid_name");
+
+    if ((solid == solid_name) && (class_num == cnum)) {
+      if (cnt != 0) {
+        row.style.display = visibility;
+      }
       cnt++;
-    }
-    if ((class_num == cnum) && (cnt != 1)) {
-      row.style.display = visibility;
     }
   }
 }
@@ -1916,6 +1918,7 @@ function registerHelix(name,number,solid_num,face,tau,radius,theta,travel,helix_
 
   row.id = number;
   row.setAttribute("class_num", class_num);
+  row.setAttribute("solid_name", name);
 
   var cnt = 0;
   var button_c = row.insertCell(cnt++);
@@ -1943,10 +1946,9 @@ function registerHelix(name,number,solid_num,face,tau,radius,theta,travel,helix_
   theta_c.innerHTML = format_num(theta * 180 / Math.PI,3);
   travel_c.innerHTML = format_num(travel,3);
   angle_c.innerHTML = format_num(helix_angle  * 180 / Math.PI,3);
-  var button1 = "<button onclick='hideClassNum(\""+name+"\","+class_num+",\"none\")'>Collapse "+class_num+"</button>";
+  var button1 = "<button class='collapse' onclick='hideClassNum(\""+name+"\","+class_num+",\"none\")'>Collapse "+class_num+"</button>";
   var button2 = "<button onclick='hideClassNum(\""+name+"\","+class_num+",\"table-row\")'>Expand "+class_num+"</button>";
   class_c.innerHTML = button1 + button2;
-  console.log(class_c.innerHTML);
 }
 
 function addMeasures(measures,s,cnt,f,tau,r,theta,d,phi) {
@@ -2459,6 +2461,8 @@ $( document ).ready(function() {
   onComputeDelix();
 
   populatePlatonicHelixTable();
+
+  $('.collapse').trigger('click');
 
 //  testStupidObjectManipulation();
 
