@@ -43,7 +43,7 @@ var PHI_SPRITE;
 
 var bncG;
 
-function renderPrismInstance(p_i) {
+function renderPrismInstance(p_i,tau) {
   // now that we have the points, we can
   // construct the objects....
   var objects = [];
@@ -118,7 +118,7 @@ function renderPrismInstance(p_i) {
     return a2v;
   }
 
-  function positionSuperStructure(nu) {
+  function positionSuperStructure(nu,tau) {
     // First we point axis in bc direction....
     var bc = nu.c.clone().sub(nu.b);
     let bcn = bc.clone().normalize();
@@ -134,7 +134,7 @@ function renderPrismInstance(p_i) {
     // perpendicular to the BC axis.
     const prism_v = tm.clone().sub(m);
     const prism_up = rejection(prism_v,axis);
-//    console.log("V,UP",prism_v,prism_up);
+    //    console.log("V,UP",prism_v,prism_up);
 
     const q0 = new THREE.Quaternion();
 
@@ -166,28 +166,40 @@ function renderPrismInstance(p_i) {
 
       // I guess instead of using up, I must attach one to the object
       // or I must compute it from the centroid.
-      const cent = findCentroid(nu.sup.children[0].geometry);
-//      const super_up = nu.sup.up.clone();
-//      console.log("up --- before transformed :",super_up);
-      cent.normalize();
-      cent.applyMatrix4(rot0);
-      cent.normalize();
-      prism_up.normalize();
-//      console.log("CENT",cent);
-//      console.log("PRISM_UP",prism_up);
-      console.assert(near(axis.dot(cent),0));
-      if (!near(axis.dot(cent),0)) {
-        debugger;
-      }
-      const q1 = new THREE.Quaternion();
-      q1.setFromUnitVectors(cent,prism_up);
       var rot1 = new THREE.Matrix4().identity();
-      let theta = -prism_up.angleTo(cent);
 
-//      console.log("THETA :",theta * 180 / Math.PI);
+      var cent = findCentroid(nu.sup.children[0].geometry);
 
- //          rot1.makeRotationAxis(axis,theta);
-      rot1.makeRotationFromQuaternion(q1);
+      console.log("PRISM_UP",prism_up);
+      if (vnear(cent, new THREE.Vector3(0,0,0))) {
+        console.log("WARNING! Centroid near zero!");
+        // In this case (at least one of them), we are
+        // In the "straight line" case and the rotation is just a Z rotation
+        // We have to use a different up vector here!!
+      } else {
+        cent.normalize();
+        cent.applyMatrix4(rot0);
+        cent.normalize();
+        prism_up.normalize();
+        console.assert(near(axis.dot(cent),0));
+        if (!near(axis.dot(cent),0)) {
+          debugger;
+        }
+        const q1 = new THREE.Quaternion();
+        q1.setFromUnitVectors(cent,prism_up);
+
+        let theta = -prism_up.angleTo(cent);
+        console.log("COMPUTED THETA",theta * 180/Math.PI,q1);
+
+        // TODO: In our linear cases, try computing this
+        // a different way and see if it comes out.
+        // Test that this really does a 60 rotation.
+        rot1.makeRotationFromQuaternion(q1);
+        let x = new THREE.Vector3(1,0,0);
+        let y = x.clone();
+        x.applyMatrix4(rot1);
+        console.log("PRE, POST",y,x);
+      }
 
       // Now that we have a rotation axis, we will have
       // to translate a point on the axis to the origin, then
@@ -195,7 +207,6 @@ function renderPrismInstance(p_i) {
       var transm_i = new THREE.Matrix4();
       transm_i.getInverse(transm);
       var up_v_trans = new THREE.Matrix4().identity();
-      //     var up_v_trans = trans;
       up_v_trans.multiply(transm);
       up_v_trans.multiply(rot1);
       up_v_trans.multiply(transm_i);
@@ -203,10 +214,7 @@ function renderPrismInstance(p_i) {
       nu.sup.applyMatrix(up_v_trans);
       nu.sup.updateMatrix();
       const super_up2 = findCentroid(nu.sup.children[0].geometry);
-//      console.log("up 2 --- is this transformed :",super_up2);
       super_up2.applyMatrix4(up_v_trans);
-//      console.log("up 3--- is this transformed :",super_up2);
-
     }
   }
 
@@ -214,8 +222,14 @@ function renderPrismInstance(p_i) {
     p_i.sup =
       p_i.p.superstructure_prototype.GdeepCloneMaterials();
 
-    var unpositioned = p_i.p.superstructure_prototype.GdeepCloneMaterials();
-    positionSuperStructure(p_i);
+    console.log("p_i.sup.up",p_i.sup.up);
+
+//    var unpositioned = p_i.p.superstructure_prototype.GdeepCloneMaterials();
+
+    // Somehow or another here I must have an up vector.
+    positionSuperStructure(p_i,tau);
+
+    console.log("p_i.sup.up",p_i.sup.up);
     objects.push(p_i.sup);
   }
   return objects;
@@ -236,7 +250,7 @@ function testCreatePrism() {
 
   // We shall place this upward, for the purpose of
   // making it easier to see...
-  var TP = renderPrismInstance(p_i);
+  var TP = renderPrismInstance(p_i,0);
   console.log(TP);
   TP.forEach(o => { am.scene.add(o); });
 }
@@ -247,7 +261,7 @@ function testCreatePrism() {
 // symmetry of how they are created and makes it easy
 // to pick them out.
 function createAdjoinedPrisms(p_i,tau,num) {
-  var TP = renderPrismInstance(p_i);
+  var TP = renderPrismInstance(p_i,tau);
   TP.forEach(o => { am.scene.add(o); });
   // DANGER
 //  p_i.sup = null;
@@ -257,7 +271,7 @@ function createAdjoinedPrisms(p_i,tau,num) {
   var cur = p_i;
   for(let i = 0; i < num; i++) {
     var p_c = adjoinPrism(cur,tau,true)[0];
-    var TP = renderPrismInstance(p_c);
+    var TP = renderPrismInstance(p_c,tau);
     TP.forEach(o => { am.scene.add(o); });
     positives.push(TP);
     cur = p_c;
@@ -265,7 +279,7 @@ function createAdjoinedPrisms(p_i,tau,num) {
   var cur = p_i;
   for(let i = 0; i < num; i++) {
     var p_c = adjoinPrism(cur,tau,false,false)[0];
-    var TP = renderPrismInstance(p_c);
+    var TP = renderPrismInstance(p_c,tau);
     TP.forEach(o => { am.scene.add(o); });
     negatives.push(TP);
     cur = p_c;
@@ -878,6 +892,19 @@ function getSelectedTaus(taus) {
   }
   return taus[n];
 }
+function setSelectedTau(tau_radians) {
+
+  var f = format_num(tau_radians * 180/ Math.PI,0);
+  for(var i = 0; i < 5; i++) {
+    var id = "#radio-t"+i+"-l";
+    var html = $(id).html();
+    if (f == html) {
+      $(id).prop("checked", true).trigger("click").change();
+    }
+  }
+
+}
+
 function onComputeDelix() {
   const SOLID = getPlatonicSolidInput();
   const tau_v = TAU_d * Math.PI / 180;
@@ -1855,10 +1882,32 @@ function twistBaseIncrement(solid,face) {
     return [3,0,120];
   case "CUBE":
     return [4,0,90];
-  case "OCTAHEDRON":
-    return [3,0,120];
-  case "DODECAHEDRON":
-    return [5,0,72];
+  case "OCTAHEDRON": {
+    const map_face = [];
+    map_face[1] = 0;
+    map_face[2] = 0;
+    map_face[3] = 0;
+    map_face[4] = 0;
+    map_face[5] = 60;
+    map_face[6] = 0;
+    map_face[7] = 0;
+    return [3,map_face[face],120];
+  }
+  case "DODECAHEDRON": {
+    const map_face = [];
+    map_face[1] = 0;
+    map_face[2] = 0;
+    map_face[3] = 0;
+    map_face[4] = 0;
+    map_face[5] = 0;
+    map_face[6] = 0;
+    map_face[7] = 0;
+    map_face[8] = 36; // opposite face
+    map_face[9] = 0;
+    map_face[10] = 0;
+    map_face[11] = 0;
+    return [5,map_face[face],72];
+  }
   case "ICOSAHEDRON":
     // Thewe were developed by hand;
     // the represent the angles for
@@ -1876,7 +1925,7 @@ function twistBaseIncrement(solid,face) {
     map_face[10] = 45;
     map_face[11] = 45;
     map_face[12] = 120;
-    map_face[13] = 0;
+    map_face[13] = 60; // opposite face
     map_face[14] = 120;
     map_face[15] = 120;
     map_face[16] = 120;
@@ -1888,7 +1937,9 @@ function twistBaseIncrement(solid,face) {
 }
 
 function renderhelixrow(solid,face,tau) {
-  setPlatonicSolidInput(solid)
+  setPlatonicSolidInput(solid);
+  updateLegalTauValues(solid,face);
+  setSelectedTau(tau);
   $( "#face-spinner" ).spinner( "value",face );
   RenderSegmentedHelix(solid,tau);
 }
@@ -1994,7 +2045,7 @@ function populatePlatonicHelixTable() {
     var scnt = 0;
     // We don't operated on the zero face, which is technically a weakness on my part....
     for(var f = 1; f < n; f++ ) {
-      [num_rotations,base,delta] = twistBaseIncrement(s,f);
+      [numrots,base,delta] = twistBaseIncrement(s,f);
 
       let L0 = 1;
       let B = new THREE.Vector3(0,0,-L0/2);
@@ -2003,9 +2054,8 @@ function populatePlatonicHelixTable() {
       [obj,Nb,Nc] = createZAlignedPlatonic(s,f,B,C);
 
       // now we loop over num_rotations...
-      for(var j = 0; j < num_rotations; j++) {
-        const tau = (base + delta*j) * Math.PI / 180;
-
+      for(var j = 0; j < numrots; j++) {
+        const tau = (base + ((j - (Math.floor(numrots/2))))*delta) * Math.PI / 180;
         // unsure about this.....
         var p_temp = CreatePrism(GLOBAL_P0,PRISM_FACE_RATIO_LENGTH);
         [resK,resM,p_i,rt] = computeInternal(L0,B,C,tau,p_temp,Nb,Nc);
@@ -2071,11 +2121,65 @@ function createZAlignedPlatonic(solid,face,B,C) {
   }
 }
 
+// This is subtle and needs to be renamed.
+// Using the "centroid" as the "up" vector works well
+// except in some configurations when it is zero (that is,
+// the face are perfectly opposed and parallel.
+// In that case we need to choose the center of a DIFFERENT face.
+
 function findCentroid(geo) {
   var sum = new THREE.Vector3(0,0,0);
   var n = 0;
   geo.vertices.forEach(v => { sum.add(v); n++; });
-  return sum.multiplyScalar(1/n);
+  var cent = sum.multiplyScalar(1/n);
+  if (vnear(cent,new THREE.Vector3(0,0,0))) {
+    console.log("returning upvector!");
+    // HACK
+    console.log("Current upvector",geo["upvector"]);
+    // if (geo["upvector"]) {
+    //   return geo["upvector"];
+    // } else {
+    //   return new THREE.Vector3(0,1,0);
+    // }
+    //    return geo["upvector"];
+    //    return cent;
+    if (geo instanceof THREE.OctahedronGeometry) {
+      // console.log(findFaceCentroid(geo,geo.faces[0]));
+      // console.log(findFaceCentroid(geo,geo.faces[1]));
+      // console.log(findFaceCentroid(geo,geo.faces[2]));
+      // console.log(findFaceCentroid(geo,geo.faces[3]));
+      // console.log(findFaceCentroid(geo,geo.faces[4]));
+      // console.log(findFaceCentroid(geo,geo.faces[5]));
+      // console.log(findFaceCentroid(geo,geo.faces[6]));
+      // console.log(findFaceCentroid(geo,geo.faces[7]));
+      return new THREE.Vector3(0,1,0);
+      //      return findFaceCentroid(geo,geo.faces[6]);
+    } else {
+      return new THREE.Vector3(0,1,0);
+    }
+  } else {
+    return cent;
+  }
+}
+
+function findFaceCentroid(geo,face) {
+  var sum = new THREE.Vector3(0,0,0);
+  var n = 0;
+  sum.add(geo.vertices[face.a]);
+  sum.add(geo.vertices[face.b]);
+  sum.add(geo.vertices[face.c]);
+  var cent = sum.multiplyScalar(1/3);
+  return cent;
+}
+function averageVectors(vs) {
+  var sum = new THREE.Vector3(0,0,0);
+  const n = vs.length;
+  for(var i = 0; i < n; i++) {
+    sum.add(vs[i]);
+  }
+  var avg = sum.multiplyScalar(1/n);
+  return avg;
+
 }
 
 // This routine needs to return not only the object
@@ -2290,9 +2394,25 @@ function createZAlignedPlatonicAux(solid, B, C, Bf, Cf) {
   // However, we can at least try to compute the centroid and make the
   // vector from the Bc-Cc line point upwards (+Y).
   var cent = findCentroid(geo);
+  if ((cent == null) || vnear(cent,new THREE.Vector3(0,0,0))) {
+    switch(solid) {
+    case "CUBE":
+      cent = new THREE.Vector3(0,1,0);
+      break;
+    case "DODECAHEDRON":
+      cent = findFaceCentroid(geo,geo.faces[0]);
+      break;
+    case "ICOSAHEDRON":
+      cent = findFaceCentroid(geo,geo.faces[0]);
+      break;
+    default:
+      console.log("INTERNAL ERROR",solid);
+      break;
+  }
+
+  }
 
 //  console.log("centroid ",cent,O);
-
 
   var oxy = new THREE.Vector2(O.x-B.x,O.y-B.y);
 

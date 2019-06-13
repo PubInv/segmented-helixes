@@ -22,7 +22,12 @@ function near(x, y, e = 1e-5) {
 }
 
 function vnear(a, b, e = 1e-5) {
-  return near(a.x,b.x,e) && near(a.y,b.y,e) && near(a.z,b.z,e);
+  try {
+    return near(a.x,b.x,e) && near(a.y,b.y,e) && near(a.z,b.z,e);
+  } catch (e) {
+    debugger;
+    return new THREE.Vector3();
+  }
 }
 
 
@@ -1293,7 +1298,11 @@ function computePointIndependentParameters(L,R) {
 //  const da = compute_da(u,B,C);
   const da = compute_da_X(R,u,B,C);
 
-  [r,chord] = computeRChord(L,thetaP,da);
+  if (near(da,L)) {
+    [r,chord] = [0,0];
+  } else {
+    [r,chord] = computeRChord(L,thetaP,da);
+  }
   return [r,thetaP,da,chord,u];
 }
 
@@ -1306,7 +1315,8 @@ function computePhi(L,R,B) {
   if (!near(L,BC.length())) {
     debugger;
   }
-  let phi = (near(da,L)) ? 0 : Math.acos(da / L);
+  //  let phi = (near(da,L)) ? 0 : Math.acos(da / L);
+  let phi = (near(Math.abs(da),Math.abs(L))) ? 0 : Math.acos(da / L);
 
   if (isNaN(phi)) debugger;
   return phi;
