@@ -1962,6 +1962,7 @@ function renderhelixrow(solid,face,tau) {
   RenderSegmentedHelix(solid,tau);
 }
 
+
 function hideClassNum(solid,cnum,visibility) {
   var table = document.getElementById("platonichelices");
   var cnt = 0;
@@ -1980,7 +1981,7 @@ function hideClassNum(solid,cnum,visibility) {
   }
 }
 
-function registerHelix(name,number,solid_num,face,tau,radius,theta,travel,helix_angle,class_num) {
+function registerHelix(name,number,solid_num,analogs,face,tau,radius,theta,travel,helix_angle,class_num) {
   var table = document.getElementById("platonichelices");
 
   var row = table.insertRow(-1);
@@ -1994,6 +1995,7 @@ function registerHelix(name,number,solid_num,face,tau,radius,theta,travel,helix_
   var totalnum_c = row.insertCell(cnt++);
   var solidnum_c = row.insertCell(cnt++);
   var name_c = row.insertCell(cnt++);
+  var analogs_c = row.insertCell(cnt++);
   var face_c = row.insertCell(cnt++);
   var tau_c = row.insertCell(cnt++);
   var radius_c = row.insertCell(cnt++);
@@ -2009,6 +2011,8 @@ function registerHelix(name,number,solid_num,face,tau,radius,theta,travel,helix_
   totalnum_c.innerHTML = number;
   solidnum_c.innerHTML = solid_num;
   name_c.innerHTML = name;
+
+  analogs_c.innerHTML = analogs;
   face_c.innerHTML = face;
   tau_c.innerHTML = format_num(tau * 180/Math.PI,0);
   radius_c.innerHTML = format_num(radius,3);
@@ -2018,6 +2022,16 @@ function registerHelix(name,number,solid_num,face,tau,radius,theta,travel,helix_
   var button1 = "<button class='collapse' onclick='hideClassNum(\""+name+"\","+class_num+",\"none\")'>Collapse "+class_num+"</button>";
   var button2 = "<button onclick='hideClassNum(\""+name+"\","+class_num+",\"table-row\")'>Expand "+class_num+"</button>";
   class_c.innerHTML = button1 + button2;
+}
+
+function countClass(measures,solid,cnum) {
+  var cnt = 0;
+  for(var i = 0; i < measures.length; i++) {
+    if ((measures[i][8] == cnum) && (measures[i][0] == solid))  {
+      cnt++;
+    }
+  }
+  return cnt;
 }
 
 function addMeasures(measures,s,cnt,f,tau,r,theta,d,phi) {
@@ -2102,7 +2116,8 @@ function populatePlatonicHelixTable() {
     for (var a of analysis) {
       for (var idx of a[1]) {
         [s,cnt,f,tau,r,theta,d,phi,cn] = measuresAndClasses[idx];
-        registerHelix(s,rownum,idx,f,tau,r,theta,d,phi,cn);
+        var analogs = countClass(measuresAndClasses,s,cn);
+        registerHelix(s,rownum,idx,analogs,f,tau,r,theta,d,phi,cn);
         rownum++;
       }
     }
