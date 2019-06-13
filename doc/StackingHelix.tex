@@ -205,7 +205,7 @@ These quantities are related:
     \arctan{\frac{c}{d}}  &= \phi \\
     s &= \frac{2 \pi}{\theta} \\
     d &= L \cos{\phi} \\
-    p &= d \frac{2 \pi}{\theta} \\
+    p &= d s \\
 \end{align}
 
 Note: Measuring $\phi$ requires us to decide on the sign of the direction of the axis, which is aribtrary and not based on the
@@ -812,38 +812,44 @@ believe they will be.
 \section{ To Do}
 
 \begin{itemize}
-\item Clean up the code.
-\item Go through each reference
-\item Try to get list of references to the computation of a screw from an arbitrary matrix, and compare and contrast to our code.
+\item Clean up the code. 3 days
+\item Go through each reference 1 day
+\item Try to get list of references to the computation of a screw from an arbitrary matrix, and compare and contrast to our code. 1 day
 \item Need to understand what an ``alpha coil'' protein structure is. (Done: An alpha coil is one of the most common
 and studied protein forms, roughly providing distance in the protein, consisting of a helix formed by
-amino acids, which tend to be cross bonded.
+amino acids, which tend to be cross bonded. 1 hour
 \item Need to understand possibility of further simplifying specification of object.
-\item Need to understand if I can redefine things in terms of ``pitch''.
+\item Need to understand if I can redefine things in terms of ``pitch''. 2 hours
 \item Need to define and calculate analogs of curvature and torsion for the segmented helix, and make those part of
   the interactive software.
 \item Complete the table of platonic helices, including a count software to identify intrinsically symmetric cases.
-  That is, create software to create the ``zoo'' of platonic helices.
-
+  That is, create software to create the ``zoo'' of platonic helices. - almost done
 \item Note further that Equations 7 and 8 of this paper\cite{kahn1989defining} give BETTER equations for radius $r$ and the distance $d$ than what I have so far given.
-
 \item Need to get this paper, by hook or by crook, and probably cite:
-
   Note: An historical review of the theoretical development of rigid body displacements from Rodrigues parameters to the finite twist
-\url{https://www.sciencedirect.com/science/article/pii/S0094114X0500087X}
+  \url{https://www.sciencedirect.com/science/article/pii/S0094114X0500087X}
+  \item Add in Unit Edge Length conversions - 2 hours
+  \item Complete LaTeX table of Platonic Helices - 4 hours
+  \item Give mnemonic names to each Helix - 2 hours
+  \item Create a spinner for the number in the helix - 2 hours
+  \item Create screenshot figures of each helix - 8 hours
+  \item Improve qualitative section, talk about toruses - 8 hours
+  \item Talk about 0-face Platonic Degeneracies - 1 hour
+  \item Consider better naming mechanism for faces - 4 hours
+  \item Fix bug with phi in tau = 0 cases - 4 hours
+  \item Write all of the algorithms in mathematical notation
+  \item Explain the face-vertex match issues.
+  \item Consider assigning colors to faces, which would allow for more visibility
+
   \end{itemize}
 
 \section{References that need to be studied or reviewed}
-
-
 
 This is a long, expensive book, but it may be quite relevant\cite{hyde1996language}:
 \url{https://books.google.com/books?hl=en&lr=&id=1LZlSZ7ORrQC&oi=fnd&pg=PP1&ots=0hSEwJvlUB&sig=xNG9UWv_H1OXHwaOiOBJN7TW6xA#v=onepage&q&f=false}
 
 Note: There is another long, deep book that needs to be obtained and studied\cite{sadoc2006geometrical}.
 \url{https://books.google.com/books?hl=en&lr=&id=FHPlDWvz1bEC&oi=fnd&pg=PP1&ots=TsOnodavEZ&sig=HO86UUVlqRVWGqY-Tv02nb7x7NA#v=onepage&q&f=false}
-
-
 
 \url{https://www.researchgate.net/publication/236066626_Segmented_helical_structures_formed_by_ABC_star_copolymers_in_nanopores}
 

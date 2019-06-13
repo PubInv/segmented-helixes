@@ -989,6 +989,22 @@ function set_outputs(radius,theta,travel,phi) {
   $( "#theta_output" ).val( format_num(theta * 180 / Math.PI,2));
   $( "#travel_output" ).val( format_num(travel,2) );
   $( "#phi_output" ).val( format_num(phi * 180 / Math.PI,2) );
+  if (theta != 0) {
+    const s = (2 * Math.PI / theta);
+    const p = s * travel;
+    $( "#pitch_output" ).val( format_num(p,2) );
+    $( "#sidedness_output" ).val( format_num(s,2) );
+    const b = travel / theta;
+    const torsion = travel / (radius**2 + b**2);
+    const curvature = Math.abs(radius) / (radius**2 + b**2);
+    $( "#torsion_output" ).val( format_num(torsion,2) );
+    $( "#curvature_output" ).val( format_num(curvature,2) );
+  } else {
+    $( "#pitch_output" ).val( "NA" );
+    $( "#sidedness_output" ).val( "NA" );
+    $( "#torsion_output" ).val( "NA" );
+    $( "#curvature_output" ).val( "NA" );
+  }
 }
 
 
