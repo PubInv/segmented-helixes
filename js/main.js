@@ -21,9 +21,8 @@ var WINDOW_HEIGHT_FACTOR = 0.68;
 
 var TET_DISTANCE = 0.5;
 
-
-const NUM_PRISMS = 10;
-const NUM_SEGMENTS = (2 * NUM_PRISMS) + 1;
+var NUM_PRISMS = 10;
+var NUM_SEGMENTS = (2 * NUM_PRISMS) + 1;
 
 // Detects webgl
 if (!Detector.webgl) {
@@ -919,14 +918,20 @@ function main() {
     modex.button( "refresh" )
 
     var SOLID = getPlatonicSolidInput();
-    const face = $( "#face-spinner" ).spinner( "value" );
-    var taus = updateLegalTauValues(SOLID,face);
-    tau_v = getSelectedTaus(taus);
-    tau_v = tau_v * Math.PI / 180;
+    if (SOLID) {
+      const face = $( "#face-spinner" ).spinner( "value" );
+      var taus = updateLegalTauValues(SOLID,face);
+      tau_v = getSelectedTaus(taus);
+      tau_v = tau_v * Math.PI / 180;
+    }
     if (SOLID == null) {
       $("#tau-fieldset").hide();
+      $("#face-spinner-span").hide();
+      $("#platonic_parameters").hide();
     } else {
       $("#tau-fieldset").show();
+      $("#face-spinner-span").show();
+      $("#platonic_parameters").show();
     }
   });
 
@@ -984,31 +989,39 @@ function RenderHelix(l,r,d,theta,v,phi,wh,MAX_POINTS) {
 
 
 
-function set_outputs(radius,theta,travel,phi) {
-  $( "#radius_output" ).val( format_num(radius,2) );
-  $( "#theta_output" ).val( format_num(theta * 180 / Math.PI,2));
-  $( "#travel_output" ).val( format_num(travel,2) );
-  $( "#phi_output" ).val( format_num(phi * 180 / Math.PI,2) );
+function set_outputs(radius,theta,travel,phi,ScaleToUnitEdgeLength) {
+  $( "#radius_output" ).val( format_num(radius,4) );
+  $( "#theta_output" ).val( format_num(theta * 180 / Math.PI,4));
+  $( "#travel_output" ).val( format_num(travel,4) );
+  $( "#phi_output" ).val( format_num(phi * 180 / Math.PI,4) );
   if (theta != 0) {
-    const s = (2 * Math.PI / theta);
-    const p = s * travel;
-    $( "#pitch_output" ).val( format_num(p,2) );
-    $( "#sidedness_output" ).val( format_num(s,2) );
+    const sidedness = (2 * Math.PI / theta);
+    const p = sidedness * travel;
+    $( "#pitch_output" ).val( format_num(p,4) );
+    $( "#sidedness_output" ).val( format_num(sidedness,4) );
     const b = travel / theta;
     const torsion = travel / (radius**2 + b**2);
     const curvature = Math.abs(radius) / (radius**2 + b**2);
-    $( "#torsion_output" ).val( format_num(torsion,2) );
-    $( "#curvature_output" ).val( format_num(curvature,2) );
+    $( "#torsion_output" ).val( format_num(torsion,4) );
+    $( "#curvature_output" ).val( format_num(curvature,4) );
+
+    // If we are in the word of solids, we want
+    // to express these interms of unit length.
+    const s = ScaleToUnitEdgeLength;
+    $( "#radius_output_plato" ).val( format_num(radius * s,4) );
+    $( "#travel_output_plato" ).val( format_num(travel * s,4) );
+    $( "#pitch_output_plato" ).val( format_num(p * s,4) );
+    $( "#torsion_output_plato" ).val( format_num(torsion * s,4) );
+    $( "#curvature_output_plato" ).val( format_num(curvature * s,4) );
+
   } else {
     $( "#pitch_output" ).val( "NA" );
     $( "#sidedness_output" ).val( "NA" );
     $( "#torsion_output" ).val( "NA" );
     $( "#curvature_output" ).val( "NA" );
   }
+
 }
-
-
-
 
 // Here I will attempt to do several things:
 // First, to compute the 4 points corresponding to rho and omega.
@@ -1345,9 +1358,6 @@ function RenderSegmentedHelix(solid,tau_v) {
   var wf = wfgui ? wfgui.checked : true;
   var bc = bcgui ? bcgui.checked : false;
 
-//  var mode = $(":radio:checked").attr('id');
-//  console.log("MODE:",mode);
-//  var SOLID = getPlatonicSolidInput();
 
   var resK;
   var resM;
@@ -1364,11 +1374,13 @@ function RenderSegmentedHelix(solid,tau_v) {
   var Bn_solid;
   var Cn_solid;
   var Nb, Nc;
-//  var tau_v;
-//  var taus = [];
+
+  var  ScaleToUnitEdgeLength;
   if (solid) {
     const face = $( "#face-spinner" ).spinner( "value" );
-    [obj,Nb,Nc] = createZAlignedPlatonic(solid,face,B,C);
+
+    [obj,Nb,Nc,ScaleToUnitEdgeLength] =
+      createZAlignedPlatonic(solid,face,B,C);
 
     console.assert(Nb.length() > 0.01);
     console.assert(Nc.length() > 0.01);
@@ -1392,7 +1404,7 @@ function RenderSegmentedHelix(solid,tau_v) {
                               );
     Nb.normalize();
     Nc.normalize();
-//    tau_v = TAU_d * Math.PI / 180;
+    obj = null;
   }
 
 
@@ -1410,8 +1422,6 @@ function RenderSegmentedHelix(solid,tau_v) {
   console.log("SHOULD MATCH");
   console.log(resK);
   console.log(resM);
- // This should probably be added...
-  //  p_i.sup = obj;
 
   // We shall place this upward, for the purpose of
   // making it easier to see...
@@ -1468,12 +1478,7 @@ function RenderSegmentedHelix(solid,tau_v) {
   d = res[2];
   phi = res[4];
 
-  console.log("da,chord",d,res[3]);
-  console.log("theta,phi",theta* 180 / Math.PI,phi * 180/Math.PI);
-
-
-  console.log("tau_v :", tau_v);
-  var prisms = createAdjoinedPrisms(p_i,tau_v,NUM_PRISMS);
+  var prisms = createAdjoinedPrisms(p_i,tau_v,(NUM_SEGMENTS -1)/2);
 
   B = prisms[0][6].position;
 
@@ -1488,7 +1493,6 @@ function RenderSegmentedHelix(solid,tau_v) {
 
     // We'll put a Ball at Ba ...
     cSphere(am.JOINT_RADIUS/5,new THREE.Vector3(Ba.x,Ba.y,Ba.z),"red");
-    //    cSphere(am.JOINT_RADIUS/2,new THREE.Vector3(-Ba.x,Ba.y,-Ba.z),"red");
   }
 
   // Ba and Ca need to be on the axis, that is an assertion.
@@ -1512,9 +1516,7 @@ function RenderSegmentedHelix(solid,tau_v) {
   // theta = res[1];
   // d = res[2];
   // phi = res[4];
-  set_outputs(r,theta,d,phi);
-
-
+  set_outputs(r,theta,d,phi,ScaleToUnitEdgeLength);
 
   RenderHelix(L0,r,d,theta,new THREE.Vector3(0,0,1),phi,
               WORLD_HEIGHT,NUM_SEGMENTS);
@@ -2067,7 +2069,7 @@ function populatePlatonicHelixTable() {
       let B = new THREE.Vector3(0,0,-L0/2);
       let C = new THREE.Vector3(0,0,L0/2);
 
-      [obj,Nb,Nc] = createZAlignedPlatonic(s,f,B,C);
+      [obj,Nb,Nc,ScaleToUnitEdgeLength] = createZAlignedPlatonic(s,f,B,C);
 
       // now we loop over num_rotations...
       for(var j = 0; j < numrots; j++) {
@@ -2077,10 +2079,10 @@ function populatePlatonicHelixTable() {
         [resK,resM,p_i,rt] = computeInternal(L0,B,C,tau,p_temp,Nb,Nc);
         var USE_MATRIX = false;
         var res = (USE_MATRIX) ? resM : resK;
-
-        const r = res[0];
+// Note that here we apply the scaling factor...
+        const r = res[0] * ScaleToUnitEdgeLength;
         const theta = res[1];
-        const d = res[2];
+        const d = res[2] * ScaleToUnitEdgeLength;
         const phi = res[4];
         addMeasures(measuresAndClasses,s,scnt,f,tau,r,theta,d,phi);
         scnt++
@@ -2356,6 +2358,7 @@ function createZAlignedPlatonicAux(solid, B, C, Bf, Cf) {
   // we are attempting to build a locally aligned object...
   scale_m.makeScale(s,s,s);
   geo.scale(s,s,s);
+  const SCALE_TO_UNIT_EDGE = 1/s;
 
   Bc.applyMatrix4(scale_m);
   Cc.applyMatrix4(scale_m);
@@ -2466,15 +2469,6 @@ function createZAlignedPlatonicAux(solid, B, C, Bf, Cf) {
   Cc.applyMatrix4(trans_down);
   O.applyMatrix4(trans_down);
 
-
-  // var bsphere = createSphere(1/20, Bc, "yellow");
-  // var csphere = createSphere(1/20, Cc, "black");
-  // bsphere.position.copy(Bc);
-  // csphere.position.copy(Cc);
-
-  // am.scene.add(bsphere);
-  // am.scene.add(csphere);
-
   let Fx = Cc.clone();
   let Tx = Bc.clone();
   // I hate non-functional math....
@@ -2509,7 +2503,7 @@ function createZAlignedPlatonicAux(solid, B, C, Bf, Cf) {
   group.add(line);
   group.add(osphere);
 
-  return [group,Bnx,Cnx];
+  return [group,Bnx,Cnx,SCALE_TO_UNIT_EDGE];
 }
 
 function testStupidObjectManipulation() {
@@ -2580,17 +2574,33 @@ $( document ).ready(function() {
       var modex = $("input:radio[name=radio-2]:checked")
       modex.removeAttr('checked');
       modex.button( "refresh" )
-
     }
     onComputeDelix();
   }
 
+  function linkValueChanged( event, ui ) {
+    var links = $( "#link-spinner" ).spinner( "value" );
+    links = Math.min(links,100);
+    links = Math.max(links,1);
+    NUM_PRISMS = links;
+    NUM_SEGMENTS = (2 * NUM_PRISMS) + 1;
+    onComputeDelix();
+  }
+
    $( function() {
-     var spinner = $( "#face-spinner" ).spinner();
+     var face_spinner = $( "#face-spinner" ).spinner();
      $( "#face-spinner" ).on( "spinchange",faceValueChanged);
      $( "#face-spinner" ).on( "spin",faceValueChanged);
-     var value = $( "#face-spinner" ).spinner( "value", 1 );
-  } );
+     $( "#face-spinner" ).spinner( "value", 1 );
+     $("#face-spinner-span").hide();
+
+     var link_spinner = $( "#link-spinner" ).spinner();
+     $( "#link-spinner" ).on( "spinchange",linkValueChanged);
+     $( "#link-spinner" ).on( "spin",linkValueChanged);
+     $( "#link-spinner" ).spinner( "value", NUM_PRISMS );
+
+      $("#platonic_parameters").hide();
+} );
 
   $(function () { main(); });
 
