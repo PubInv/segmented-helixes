@@ -43,7 +43,7 @@
 
 % See the ``Article customise'' template for come common customisations
 
-\title{Calculation the Segmented Helix Formed by Repetitions of Identical Subunits}
+\title{Calculating the Segmented Helix Formed by Repetitions of Identical Subunits and a Zoo of Platonic Helices}
 \author{Robert L. Read
   \thanks{read.robert@gmail.com}
    email \href{mailto:read.robert@gmail.com}{read.robert@gmail.com}
@@ -75,7 +75,7 @@ Interactive software is provided which performs this computation for arbitray pr
 This allows either the deduction of intrinsic properties of a repeated subunit from known properties of a segmented helix, as a chemist might
 want to do, or the design of a segmented helix from known properties of a repeated subunit,
 as a mechanical engineer or robotocist might want.
-As a verification and demonstration, the software and paper compute, render, and catalog a ``zoo'' of stackings of platonic helices,
+As a verification and demonstration, the software and paper compute, render, and catalog a ``zoo'' of all platonic helices,
 such as Boerdijk-Coxeter tetrahelix and various
 species of helices formed from dodecahedra, for example.
 \tableofcontents
@@ -97,12 +97,12 @@ Although unknown to us at that time, we now call Lord's Observation:
 The purpose of this paper is to prove Lord's Observation and provide mathematical tools and software for studying arbitrary
 segmented helices generated in this way.
 
-Finding the properties of a segmented helix from four contiguous segments on the helix from screw theory\cite{abbasi2015review,wittenburg2016kinematics,wiki:screwaxis}, which we call Kahn's method\cite{kahn1989defining},
+Finding the properties of a segmented helix from four contiguous segments on the helix from screw theory\cite{abbasi2015review,wittenburg2016kinematics,wiki:screwaxis,kahn1989defining},
 is explained and reformulated and an interactive, 3D rendering website written in JavaScript which allows both calculation and
 interactive play and study, with an aim to allow a helix to be designed from an object or an object designed to produce a particular helix.
-Kahn's method is extended to cover some degenerate situations.
+Kahn's method \cite{kahn1989defining}is extended to cover some degenerate situations.
 
-We exploit Lord's Observation to discover symmetry which allows us to apply Kahn's method when subunits are joined face-to-face with
+We exploit Lord's Observation to discover symmetry which allows us to compute the helix when subunits are joined face-to-face with
 the same {\em twist.} Kahn was investigating proteins, which do not have faces, but geometric solids and other macroscopic solid objects do.
 This symmetry allows us compute the parameters of the segmente helix purely from
 properties intrinsic to a single object and the joining rule.
@@ -184,7 +184,11 @@ between adjacent points. $r$ is the radius of the segmented helix.  Note that if
 which is a zig-zag contained completely within a single plane.
 
 If we think of the segmented helix as describing a polyline in 3-space, we would like to investigate
-the properties of that polyline.
+the properties of that polyline. If we consider only the intrinsic shape of the segmented helix, there are three degrees
+of freedom: $r,d,\theta$. We call these the {\em intrinsic} propertiers of the segmented helix.
+
+A segemented helix located in space is completely determined by these parameters, a vector describing the axis
+of the helix, and the position of any one joint.
 
 Because the segmented helix is a discrete structure, we reframe the concept of {\em pitch} as {\em sidedness $s$}: how many segments (sides)
 make a complete rotation?
@@ -241,7 +245,7 @@ wish to learn about the subunits and the rule with which the subunits are combin
 For example, we may have microscopic objects such as proteins
 or atoms, and we know from crystallography something about the positioning of these objects, without
 knowing ahead of time the angles at which these objects would combine in their natural environment.
-In this case, we use a method we call Kahn's method\cite{kahn1989defining} for determining the radius, travel, and twist
+In this case, we use a method a variant of a linear algebra method\cite{kahn1989defining} for determining the radius, travel, and twist
 of the segmented helix (these terms will be defined precisely below.)
 
 In the other approach, we may know {\it a priori} exactly the
@@ -376,9 +380,9 @@ we do not concern ourself with the issue of self-collision of the objects,
 which would have to be considered if one attempted to make a period chain
 of sea urchins.
 
-Corollary \ref{cor:symmetric} will be used in our development of KahnAxis algorithm
+Corollary \ref{cor:symmetric} will be used in our development of PointAxis algorithm
 and in our computation of segmented helix properties and to justify balancing face normals
-to produce an intrinsic out-vector and to apply the KahnAxis algorithm
+to produce an intrinsic out-vector and to apply the PointAxis algorithm
 without actually assigning objects Cartesian coordinates.
 
 \section{Computing Screws and Segmented Helices from Transformation Matrices}
@@ -410,7 +414,8 @@ and the location of one joint, all of the properties of the segmented helix are 
 In our software, we have coded the calculation of the screw directly from a transformation matrix, and
 the additional routines which determine all intrinsic properties from a joint position.
 
-As is common in kinematics\cite{funda1990computational}, there are many ways to represent the same physcial or mathematical situation.
+As is common in kinematics\cite{funda1990computational}, there are many ways to represent
+the same physcial or mathematical situation.
 Four consecutive joint positions also completely determine a segmented helix.
 We present an approach to doing this in the code below.
 Because joints can be computed from transformation matrices and transformation matrices from joints,
@@ -423,7 +428,7 @@ transformation matrix more natural and convenient. A chemist or crystallographer
 have learned the position of four points and wish to compute from that. At one level, of course,
 either method can be used.
 
-\section{KahnAxis: Computing Segmented Helices from Joints}
+\section{PointAxis: Computing Segmented Helices from Joints}
 
 \begin{figure}
      \centering
@@ -434,34 +439,70 @@ either method can be used.
 
 Kahn\cite{kahn1989defining} has given a method for computing the axis of a helix in the context of chemistry.
 This method uses the observation that the angle bisectors of the segments on a segmented helix are perpendicular
-and intersect the axis of the helix. Kahn's method was a prelude to some error-tolerant methods applicable to
-the realm of organic chemistry. In this paper we are concerned with pure geometry. Also, Kahn was writing in 1989,
-and we now have more convenient computing tools. We give here a modification of Kahn's algorithm, called {\em KahnAxis},
+and intersect the axis of the helix.
+Because the helices may not be perfect and because the measurement of positions may not be perfectly accurate,
+it is common for chemists to use regression and fitting methods to fit helix parameters to observed positions
+on the helix.
+Kahn's method was a prelude to some error-tolerant methods applicable to
+the realm of organic chemistry.
+In this paper we are concerned with pure geometry. Also, Kahn was writing in 1989,
+and we now have more convenient computing tools. We give here a modification of Kahn's algorithm, called {\em PointAxis},
 which relies on our ability, working in the realm of pure geometry, to position the segments on the axes
 to simplify the derivation and computation.
 
-\subsection{The 4-Point Method}
+\subsection{A Sketch of the 4-Point Method}
+
+Using tools from linear algebra and well-documented algorithms, a sketch of the finding the segemented helix from
+four consecutive known points $A,B,C,D$ is:
+\begin{itemize}
+\item Compute the bisectors of the angle $B_b$ of $ \angle{ABC}$ and the angle $C_b$ of $\angle{BCD}$.
+  If the points are collinear, we have a special case.
+\item Because these angle bisectors point at the axis of the segmented helix, their cross product is a vector
+  in the direction of the axis. If $B_b$ and $C_b$ are parallel or anti-parallel the cross product is not defined
+  and we have special cases.
+\item  Otherwise the vectors $B_b$ and $C_b$ are skew, the algorithm for the closest points on two skew lines provides two points $B_a$ and $C_a$ on these vectors which
+  are the closest points on on those lines and are also points on the axis.
+\item The distance between $B_a$ and $B$ is the radius, and the distance between $B_a$ and $C_a$ is the travel $d$ along the axis.
+  \item The angle between $B - B_a$ and $C - C_a$ is $\theta$.
+  \end{itemize}
+
+\subsection{The 4-Point Test}
+
+It is useful to have a test if four proposed points really do lie on a segmented helix.
 
 \begin{theorem}[Segmented Helix Test]
-  Four arbitrary sequential points $A,B,C,D$ are consecutive joints of a segmented helix if and only
+  Four arbitrary sequential points $A,B,C,D$ are consecutive joints of a segmented helix if and only if
   they segments $\overline{AB},\overline{BC}$, and $\overline{CD}$ are equal length and the scalar projection
   of $\overline{CD}$ onto $\overline{BC}$ is equal to the negation of the scalar projection of $\overline{AB}$ onto $\overline{BC}$.
 \end{theorem}
 
 \begin{proof}
-  (Sketch) By Chasles' Theorem, there is a screw $S$ that takes $\overline{AB}$ into $\overline{BC}$, and a screw $R$ that
+  Case ($A,B,C,D$ on segemented helix implies negation of scalar projections):
+
+  By Chasles' Theorem, there is a screw $S$ that takes $\overline{AB}$ into $\overline{BC}$, and a screw $R$ that
   takes  $\overline{CD}$ into $\overline{BC}$. If $R$ is the negation of $S$, the projections will be the same.
 
   If the projections are the same, there is a midpoint. Without loss of generality, rotate around $\overline{BC}$ so that
-  the midpoiint points straight down. Now $A.x = -D.x$, if the projections have the same length. If this is is so, the
+  the midpoint points straight down. Now $A.x = -D.x$, if the projections have the same length. If this is is so, the
   screw that takes $\overline{CD}$ into $\overline{BC}$ ($R$) has the same magnitude of rotation as $S$.
   The direction vector of $S$ points in the opposite direction to $R$. The distance travelled is the same, therefore $R$
   is the negation of $S$.
+
+  Case (equality of scalar projection implies a segmented helix):
+
+  To Be Done
+
 \end{proof}
 
-Therefore four consecutive points completely determine a segmented helix. We provide a modification of the KahnAxis algorithm
-with takes four such points (without loss of generality B and C are assumed to be centered on the z-axis, and that a
-rotation has been performed to balance $A$ and $D$.
+\subsection{The 4-Point Method}
+
+Therefore four consecutive points completely determine at least one segmented helix. We will concern ourselves
+only with the helix that makes the least rotation between points.
+We provide a modification of the PointAxis algorithm
+with takes four such points (without loss of generality $B$ and $c$ are assumed to be centered on the $z$-axis, and that a
+rotation has been performed to balance $A$ and $D$ to that $A.x = -D.x, A.z = - D.z$, and $A.y = D.y$. Thus the input to
+PointsAxis in fact has three only three degrees of freedom, which determine the three intrinsic propoerties $r,d,\theta$
+which completely define the shape of a segments helix (but not its location in space.)
 
 
 In the derivations below, we rely on certain facts about
@@ -502,11 +543,10 @@ generally skew lines. In fact, by taking advantage of the fact that the
 generating rule for an object chain requires similarity in every joint,
 we can arrange the objects as in Figure \ref{fig:threemembersdiagram}.
 
-KahnAxis takes a length and a point $D$ known to be in
+PointAxis takes a length and a point $D$ known to be in
 a specific relation to $B$ and $C$.
-From there, he goes on to compute various parameters.
 
-We have modified this method by carefully arranging our axes
+We have carefully arranging our axes
 so that we can compute $\phi$, the angle between the helical axis
 and the $z$ axis. This, in combination with symmetry and the knowledge
 that the helical axis is in the $XZ$ plane, lets us compute the
@@ -546,7 +586,7 @@ to report here.
 \begin{lstlisting}
 ChordFromLDaxis[L_,Da_] := Sqrt[L^2 - Da^2]
 RotationFromRadiusChord[R_,C_] := 2 ArcSin[C/(2R)]
-KahnAxis[L_,{x_,y_,z_}] := Block[{A, B, C, D, Cb, Bb, H,
+PointAxis[L_,{x_,y_,z_}] := Block[{A, B, C, D, Cb, Bb, H,
                                   Bax, Bay, Baz, Ba,
                                   r, theta, da, c, phi},
   D = {x,y,z};
@@ -585,7 +625,7 @@ radius of one of the Platonic Dodecahelices of unit edge length. We have not und
 \subsection{The Face Normal Method}
 \label{sec:facenormal}
 
-KahnAxis takes a point $A$ known to be in a specific, balanced relation
+PointAxis takes a point $A$ known to be in a specific, balanced relation
 to $B$ and $C$. A chemist might know 4 such points from crystallography,
 and be able to move them into this symmetric position along the $z$-axis.
 
@@ -649,7 +689,7 @@ We can indentify intrinsic properties:
 
 \subsection{Rotating into balance from face normal vectors}
 
-In order to use the KahnAxis algorithm, we need a way
+In order to use the PointAxis algorithm, we need a way
 to compute points $A$ and $D$ in balance around the axis $BC$.
 From Lord's Observation, we know that after placing $BC$ along
 the $z$-axis, there is always an angle $\psi$ which will
@@ -696,9 +736,9 @@ Note: It is useful to compute $\psi$, the direction angle of
 the midpoint of the projections of the face normals.
 We also need to define the differences between these angles
 as well $\delta$.
-Choosing $\tau$ so taht the $\delta$ is zero produces a torus-like
+Choosing $\tau$ so that the $\delta$ is zero produces a torus-like
 structure. Choosing $\tau$ so that $\delta$ is 180$\degree$ produces
-the zig-zag case, which is of maximum length.
+the zig-zag case, which is of maximum travel.
 
 
 \subsection{Changing $\tau$ Smoothly Changes Tightness}
@@ -803,15 +843,19 @@ whose precise shape can be controlled by uniformly changing the shape of all of 
 \section{The Platonic Helices}
 
 In order to demonstrate the utility of the calculations explained in this paper, we have explored
-periodic chains of the five regular Platonic solids joined face-to-face so that their vertices coincide, which form {\em Platonic helices.}
+periodic chains of the five regular Platonic solids joined face-to-face so that their vertices coincide,
+which form {\em Platonic helices.}
 Such tetrahelices, icosahelices, octahelices and dodechelices
 have been mentioned in a number of papers\cite{elgersma2016quadrahelix,babiker2012combinatorial,lord2001sphere}, but not exhaustively studied in
 the purely helical form.
-We propose the name {\em cubahelix} for the helix made from cubes, as opposed to the equivalent but cumbersome {\em hexahedronahelix}.
-Because in some cases Platonic segmented helices may be found in nature or related to structures found in nature\cite{lord2004gamma,pearce1990structure},
+We propose the name {\em cubahelix} for the helix made from cubes, as opposed to the equivalent
+but cumbersome {\em hexahedronahelix}.
+Because in some cases Platonic segmented helices may be found in nature or
+related to structures found in nature\cite{lord2004gamma,pearce1990structure},
 it would be convenient to have a table, and images, of all such Platonic segmented helices for reference.
 
-To construct a periodic chain from a Platonic solid, one must decide which faces are joined by the rule. Additionally, one must determine a twist
+To construct a periodic chain from a Platonic solid, one must decide which faces are joined by the rule.
+Additionally, one must determine a twist
 $\tau$ as part of the rule, and this twist must be chosen from a small set if the vertices are to coincide.
 The set of vertex-matching twists differs slightly depending on the face chosen for octahedron, dodacahedron, and icosahedron
 (but not for the tetrahedron and the cube.) The of twists set will always be equal to the number of sides on a face.
@@ -821,14 +865,24 @@ $4 \cdot 3 + 6 \cdot 4 + 8 \cdot 3 + 12 \cdot 5 + 20 \cdot 3 = 12 + 24 + 24 + 60
 However, many of the possibly helices will be indistinguishable of we consider only the shapes produced. Furthermore,
 every non-toroidal helix will come in clockwise and counter-clockwise version.
 
-Using the math in this paper, it was easy to evaluate all 180 helices, place them in table, and group them by radius and travel (collapsing chirality).
-The result is 27 unique shapes. In this number, no provision was made to exclude self-intersection, which does occur, but might not matter to
-an aerospace engineer building a collapsible space frame of rods and joints. We did not, exclude rules of the form ``attach face zero to face zero''.
-Such rules always produce an object which is highly self-intersecting. Loosely speaking, it produces a diatomic molecule. Such shapes are
-uninteresting and require special-case handling mathematically (just as Chasle's theorem does not apply to pure translational straight-line motion.)
+Using the math in this paper, it was easy to evaluate all 180 helices, place them in table, and group them
+by radius and travel (collapsing chirality).
+The result is 27 unique shapes. In this number, no provision was made to exclude self-intersection,
+which does occur, but might not matter to
+an aerospace engineer building a collapsible space frame of rods and joints. We did not, exclude rules
+of the form ``attach face zero to face zero''.
+Such rules always produce an object which is highly self-intersecting. Loosely speaking, it produces a diatomic molecule.
+Such shapes are
+uninteresting and require special-case handling mathematically (just as Chasle's theorem does not apply to pure translational straight-line motion.) They have no definable radius or travel.
 
-With those caveats, the resulting table and accompanying figures thus represents an exhaustive catalog, commonly called a ``zoo'' today, of all Platonic
-helices. Many of the these helices have been previously mentioned and even rendered in the literature, but as far as we know have not been cataloged.
+With those caveats, the resulting table and accompanying figures thus represents an exhaustive catalog,
+commonly called a ``zoo'' today, of all Platonic
+helices in Table \ref{table:platonic}.
+Many of the these helices have been previously mentioned and even rendered in the literature,
+but as far as we know have not been cataloged. In this table, column {\em C-Face} refers to the
+face as numbered by the THREE.js software\cite{dirksen2013learning}, which is somewhat arbitrary. The {\em \# Analogs}
+column gives the number of Platonic Helices with the same shape, or the enantiomer of it, that is, the same
+shape in either the clockwise or anticlockwise direction. This list can be expanded completely in our interactive software.
 
 \section{Tables for the Platonic Helices}
 
@@ -842,15 +896,18 @@ helices. Many of the these helices have been previously mentioned and even rende
   \hline % inserts single horizontal line
 Tetrahelix & Tet &	6 &	1 &	-120 &	0.094 &	131.810	& -0.516 & 161.565 \\
 Tetratorus & Tet & 	3 &	1 &	0    &	0.471 &	70.529	& 0.000	& 90.000 \\
+\hline %inserts single line
 Boxbeam & Cub &	4 &	1 &	-180 &	0.000 &	0.000 &	1.000 &	0.000 \\
 Staircase & Cub &	4 & 	2 &	-180 &	0.000 &	0.000 &	0.707 &	0.000 \\
 Blockhelix & Cub & 	8 & 	2 & 	-90  &	0.236 &	120.000 & -0.577 & 144.736 \\
 Cubatorus & Cub &	4 &	2 &	0 &	0.500 &	90.000 & 0.000 & 90.000 \\
+\hline %inserts single line
 Octabeam & Oct &	3 &	5 &	-60 &	0.000 &	0.000 &	1.155 &	0.000 \\
 Octaspikey & Oct &	6 &	1 &	-120 &	0.148 &	146.443 & -0.603 & 154.761 \\
 Octamedium & Oct &	6 &	2 &	-120 &	0.163 &	131.810 & -0.894 & 161.565 \\
 Octagear & Oct &	3 &	1 &	0 &	0.408 &	109.471 & 0.000	& 90.000 \\
 Treestar & Oct &	3 &	2 &	0 &	0.816 &	70.529 & 0.000 & 90.000 \\
+\hline %inserts single line
 Dodecabeam & Dod &	5 &	8 &	-108 &	0.000 &	0.000 &	1.589 &	0.000 \\
 Dodecadoubler & Dod &	10 &	1 &	-144 &	0.113 &	161.301 &-0.805 & 164.550 \\
 The Alternater & Dod &	10 &	2 &	-144 &	0.118 &	149.520 &-1.333	& 170.306 \\
@@ -858,48 +915,47 @@ Dodecashaft & Dod &	10 &	1 &	-72 &	0.351 &	129.657	&-0.543 & 130.501 \\
 Dodecagear & Dod &	5 &	1 &	0 &	0.491 &	116.565	& 0.000	& 90.000 \\
 Dodecacorkscrew & Dod &	10 &	2 &	-72 &	0.546 &	93.026 & -1.095 & 144.110 \\
 Dodecadonut & Dod &	5 &	2 &	0 &	1.286 &	63.435 & 0.000 & 90.000 \\
+\hline %inserts single line
 Pearlshaft & Ico &	3 &	13 &	-60 &	0.000 &	0.000 &	1.589 & 0.000 \\
 Planar & Ico &	6 &	8 &	165 &	0.049 &	167.764 & 1.294 & 4.347 \\
 Two Strands & Ico &	6 &	1 &	120 &	0.137 &	159.446	& 0.499 & 28.340 \\
 Slow Twist & Ico &	6 &	12 &	120 &	0.169 &	124.309	& 1.454	& 11.641 \\
 Rock Candy & Ico &	12 &	2 &	120 &	0.204 &	146.443	& 0.830 & 25.239 \\
-Icosatreestar & Ico &	3 &	1 &	0 &	0.304 &	138.190	& 0.000	& 90.000 \\
+Icosa Tree Star & Ico &	3 &	1 &	0 &	0.304 &	138.190	& 0.000	& 90.000 \\
 Icosacorkscrew & Ico &	6 &	8 &	-75 &	0.512 &	99.253	& -1.037 & 143.042 \\
 Planar point cluster & Ico &	6 &	2 &	0 &	0.562 &	109.471 & 0.000 & 90.000 \\
-Icosacorkscrew Big & Ico &	6 &	8 &	45 &	0.803 &	82.064 & 0.756 & 54.343 \\
+Big Icosacorkscrew  & Ico &	6 &	8 &	45 &	0.803 &	82.064 & 0.756 & 54.343 \\
 The Wheel & Ico &	3 &	12 &	0 &	2.080 &	41.810 & 0.000 & 90.000 \\
 \hline %inserts single line
 \end{tabular}
 \label{table:platonic} % is used to refer this table in the text
 \end{table}
 
-
 \subsection{Qualitative Descriptions and Interesting Shapes}
 
-For fun and to facilitate conversation, we have given all 27 of these Platohelices nicknames that we find descriptive. A few of these are interesting enough
+For fun and to facilitate conversation, we have given all 27 of these Platohelices nicknames that we find descriptive.
+A few of these are interesting enough
 to be worthy of particular mention.
 
 \begin{itemize}
-\item ``The Shaft'' is a remarkably tight non-self-intersecting dodecahelix with very narrow gaps between objects.
-\item ``The Double'' is a self-intersecting icosahelix which looks like two icosaahelices forming a double helix.
-  \item ``
-  \end{itemize}
-
-
-
+\item ``The Dodecashaft'' is a remarkably tight non-self-intersecting dodecahelix with very narrow gaps between objects.
+\end{itemize}
 
 \section{Future Work}
 
-
 The algorithms and software described herein allow numerical calculation of the intrinsic properties of these
-Platonic helices, but it would be even better to describe them in with closed-form expressions, as Coxeter did for the Boerdijk-Coxeter tetrahelix.
-The math and the algoritms are simple enough that if coded in a symbolic algebra system like Mathemtica, or with careful work, closed-form
-expressions could be produced for all the regular Platonic helices.  These would be interesting if they happen to be short; we have no reason to
+Platonic helices, but it would be even better to describe them in with closed-form expressions,
+as Coxeter did for the Boerdijk-Coxeter tetrahelix.
+The math and the algoritms are simple enough that if coded in a symbolic algebra system like Mathemtica,
+or with careful work, closed-form
+expressions could be produced for all the regular Platonic helices.
+These would be interesting if they happen to be short; we have no reason to
 believe they will be.
 
 \section{ To Do}
 
 \begin{itemize}
+  \item{Improve the reference to my ASME paper to include page numbers, etc.}
 \item Clean up the code. 3 days
 \item Go through each reference 1 day
 \item Try to get list of references to the computation of a screw from an arbitrary matrix, and compare and contrast to our code. 1 day
@@ -908,21 +964,12 @@ and studied protein forms, roughly providing distance in the protein, consisting
 amino acids, which tend to be cross bonded. 1 hour
 \item Need to understand possibility of further simplifying specification of object.
 \item Need to understand if I can redefine things in terms of ``pitch''. 2 hours
-\item Need to define and calculate analogs of curvature and torsion for the segmented helix, and make those part of
-  the interactive software.
-\item Complete the table of platonic helices, including a count software to identify intrinsically symmetric cases.
-  That is, create software to create the ``zoo'' of platonic helices. - almost done
 \item Note further that Equations 7 and 8 of this paper\cite{kahn1989defining} give BETTER equations for radius $r$ and the distance $d$ than what I have so far given.
 \item Need to get this paper, by hook or by crook, and probably cite:
   Note: An historical review of the theoretical development of rigid body displacements from Rodrigues parameters to the finite twist
   \url{https://www.sciencedirect.com/science/article/pii/S0094114X0500087X}
-  \item Add in Unit Edge Length conversions - 2 hours
-  \item Complete LaTeX table of Platonic Helices - 4 hours
-  \item Give mnemonic names to each Helix - 2 hours
-  \item Create a spinner for the number in the helix - 2 hours
   \item Create screenshot figures of each helix - 8 hours
   \item Improve qualitative section, talk about toruses - 8 hours
-  \item Talk about 0-face Platonic Degeneracies - 1 hour
   \item Consider better naming mechanism for faces - 4 hours
   \item Fix bug with phi in tau = 0 cases - 4 hours
   \item Write all of the algorithms in mathematical notation
@@ -2124,7 +2171,7 @@ may have to do a quadrant test. *)
 
 ChordFromLDaxis[L_,Da_] := Sqrt[L^2 - Da^2]
 RotationFromRadiusChord[R_,C_] := 2 ArcSin[C/(2R)]
-KahnAxis[L_,{x_,y_,z_}] := Block[{A, B, C, D, Cb, Bb, H,
+PointAxis[L_,{x_,y_,z_}] := Block[{A, B, C, D, Cb, Bb, H,
                                   Bax, Bay, Baz, Ba,
                                   r, theta, da, c, phi},
   D = {x,y,z};
@@ -2514,7 +2561,7 @@ With[{
       With[{ B = {0,0,-L0/2},
           D = {-A[[1]],A[[2]],-A[[3]]}
         },
-        With[{res = KahnAxis[L0,D],
+        With[{res = PointAxis[L0,D],
             thetaExp = ArcCos[-2/3]},
             Block[{r,theta,da,c,phi,H},
             {r,theta,da,c,phi,H} = res;

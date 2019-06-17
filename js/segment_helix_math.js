@@ -104,7 +104,7 @@ function testAxis(B,Ba,H,da) {
 // H -- the vector of the axis of the helix
 // Ba -- the point on the axis closest to point B
 
-function KahnAxis(L,D) {
+function PointAxis(L,D) {
   let x = D.x;
   let y = D.y;
   let z = D.z;
@@ -140,10 +140,6 @@ function KahnAxis(L,D) {
     CmB.sub(B);
     CmB = new THREE.Vector3(0,0,L);
     if (near(y,0,1e-4)) { // flat case
-
-      // Note: I think at a minimum the compuation of Ba below is wrong.
-      // This case needs to be tested more extensively.
-      // This also should be integrated with the code below if possible.
 
       // If the flat case, the axis is parallel to the vector
       // AC or BD.
@@ -818,7 +814,7 @@ function testAfromLtauNbNnKeepsYPure() {
 // This tests the well known situation
 // of the Boerdijk-Coxeter tetrahelix.
 // This models a tetrahedron of side length 1.
-function testRegularTetsKahnAxis()
+function testRegularTetsPointAxis()
 {
   let L0 = 1/3;
   let tetAngle = Math.atan(Math.sqrt(2)/2);
@@ -828,7 +824,7 @@ function testRegularTetsKahnAxis()
   let A = AfromLtauNbNc(L0,tau,NB1,NC1)[0];
   let B = new THREE.Vector3(0,0,-L0/2);
   // let D = new THREE.Vector3(-A.x,A.y,-A.z);
-  // let res = KahnAxis(L0,D);
+  // let res = PointAxis(L0,D);
   let res = compareMethods(L0,tau,NB1,NC1);
   let r = res[0];
   let theta = res[1];
@@ -853,15 +849,15 @@ function testRegularTetsKahnAxis()
 // This tests a common special case: when the helix
 // is degenerate, forming a polygon (or a torus, if you
 // consider the object to have physical dimensions.)
-function testKahnAxisYTorus()
+function testPointAxisYTorus()
 {
   let N = 17;
   let angle = Math.PI/17;
   for(let a = angle; a < Math.PI*2; a += angle) {
-    testKahnAxisYTorusAux(angle);
+    testPointAxisYTorusAux(angle);
   }
 }
-function testKahnAxisYTorusAux(angle)
+function testPointAxisYTorusAux(angle)
 {
   let L0 = 2;
   let NB1 = new THREE.Vector3(0,-Math.sin(angle),-Math.cos(angle));
@@ -870,7 +866,7 @@ function testKahnAxisYTorusAux(angle)
   let A = AfromLtauNbNc(L0,tau,NB1,NC1)[0];
   let B = new THREE.Vector3(0,0,-L0/2);
   //  let D = new THREE.Vector3(-A.x,A.y,-A.z);
-  //  let res = KahnAxis(L0,D);
+  //  let res = PointAxis(L0,D);
   let res = compareMethods(L0,tau,NB1,NC1);
   let r = res[0];
   let theta = res[1];
@@ -889,7 +885,7 @@ function testKahnAxisYTorusAux(angle)
   testAxis(B,Ba,H,da);
 }
 // That that tau = 180 is not degenerate..
-function testKahnAxisTau180()
+function testPointAxisTau180()
 {
   let L0 = 2;
   let angle = Math.PI/7;
@@ -919,7 +915,7 @@ function testKahnAxisTau180()
   console.assert(phi >= 0);
 }
 
-function testKahnAxisTauNeg180()
+function testPointAxisTauNeg180()
 {
   let L0 = 2;
   let angle = Math.PI/7;
@@ -948,7 +944,7 @@ function testKahnAxisTauNeg180()
   console.assert(phi >= 0);
 }
 
-function testKahnAxisFull()
+function testPointAxisFull()
 {
   const N = 10;
   const J = 3;
@@ -961,18 +957,18 @@ function testKahnAxisFull()
         // tau is limited to within +- 180.
         let tau = -((Math.PI) * i) / (N-1)/10
         let NC1 = new THREE.Vector3(j,k,1).normalize();
-        testKahnAxisFullAux(tau, NB1, NC1);
+        testPointAxisFullAux(tau, NB1, NC1);
       }
     }
   }
 }
-function testKahnAxisFullAux(tau,NB1,NC1)
+function testPointAxisFullAux(tau,NB1,NC1)
 {
   let L0 = 2;
 //  let A = AfromLtauNbNc(L0,tau,NB1,NC1)[0];
 //  let B = new THREE.Vector3(0,0,-L0/2);
 //  let D = new THREE.Vector3(-A.x,A.y,-A.z);
-//  let res = KahnAxis(L0,D);
+//  let res = PointAxis(L0,D);
   let res = compareMethods(L0,tau,NB1,NC1);
   let r = res[0];
   let theta = res[1];
@@ -993,13 +989,13 @@ function testKahnAxisFullAux(tau,NB1,NC1)
 }
 
 // This is to test the Flat, Zig-Zag Case
-function testKahnAxisFlat()
+function testPointAxisFlat()
 {
   let base = Math.PI/7;
   const N = 10;
   for(let i = -(N-1); i < N; i++) {
     let angle = -((base) * i) / ((N-1)/N);
-    testKahnAxisFlatAux(angle);
+    testPointAxisFlatAux(angle);
   }
 }
 function compareMethods(L,tau,NB1,NC1) {
@@ -1009,12 +1005,12 @@ function compareMethods(L,tau,NB1,NC1) {
   let C = new THREE.Vector3(0,0,L/2);
   let D = new THREE.Vector3(-A.x,A.y,-A.z);
   let R = AR[2];
-  let res = KahnAxis(L,D);
+  let res = PointAxis(L,D);
   [r,thetaP,da,chord,phi,u,Ba] = computeThetaAxisFromMatrix4(L,R,B);
   const BC = new THREE.Vector3().subVectors(C,B);
 
   if (res[1] == null) {
-    // In this case, KahnAxis is undefined and we cannot compare!!!
+    // In this case, PointAxis is undefined and we cannot compare!!!
     return [r,thetaP,da,chord,phi,u,Ba,B];
   }
   console.assert(near(r,res[0]));
@@ -1051,7 +1047,7 @@ function compareMethods(L,tau,NB1,NC1) {
 
   return [r,thetaP,da,chord,phi,u,Ba,B];
 }
-function testKahnAxisFlatAux(angle)
+function testPointAxisFlatAux(angle)
 {
   let L0 = 2;
 
@@ -1062,7 +1058,7 @@ function testKahnAxisFlatAux(angle)
 //  let A = AfromLtauNbNc(L0,tau,NB1,NC1)[0];
 //  let B = new THREE.Vector3(0,0,-L0/2);
 //  let D = new THREE.Vector3(-A.x,A.y,-A.z);
-  //  let res = KahnAxis(L0,D);
+  //  let res = PointAxis(L0,D);
   let res = compareMethods(L0,tau,NB1,NC1);
   let r = res[0];
   let theta = res[1];
@@ -1444,12 +1440,12 @@ function runUnitTests() {
 
   testAfromLtauNbNnKeepsYPure();
   testAfromLtauNbNnContinuityOfTau();
-  testRegularTetsKahnAxis();
-  testKahnAxisYTorus();
-  testKahnAxisFull();
-  testKahnAxisFlat()
-  testKahnAxisTau180();
-  testKahnAxisTauNeg180();
+  testRegularTetsPointAxis();
+  testPointAxisYTorus();
+  testPointAxisFull();
+  testPointAxisFlat()
+  testPointAxisTau180();
+  testPointAxisTauNeg180();
   testAfromLfailureCase1();
   testAfromLtauMultiple();
 }

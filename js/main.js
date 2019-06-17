@@ -1304,32 +1304,9 @@ function computeInternal(L0,B,C,tau_v,p_i,Nb,Nc) {
 
   rt.makeRotationAxis(new THREE.Vector3(0,0,1),rotation);
 
-
-  // // This should probably be added...
-  // //  p_i.sup = obj;
-
-  // // We shall place this upward, for the purpose of
-  // // making it easier to see...
-
-  // // Take this out, and input an instance!
-  // applyMatrix4ToPrism(p_i,rt);
-
-  // // GTRANS sets us into position in the world
-  // applyMatrix4ToPrism(p_i,GTRANS);
-
-  // // if (p_i.sup) {
-  // //    p_i.sup.applyMatrix(GTRANS);
-  // // }
-  // p_i.p.Nb.applyMatrix4(rt);
-  // p_i.p.Nc.applyMatrix4(rt);
-
-  //  if (p_i.sup) {
-  //    p_i.sup.applyMatrix(rt);
-  //  }
-
   // Why wouldn't this be -A.x?
   let D = new THREE.Vector3(-A.x,A.y,-A.z);
-  resK = KahnAxis(L0,D);
+  resK = PointAxis(L0,D);
 
 
   // TODO: Phi is being miscalculated in the case of tau = 180 or -180!!!
@@ -1450,14 +1427,14 @@ function RenderSegmentedHelix(solid,tau_v) {
     console.assert(near(resK[1],resM[1]));
     if (!near(resK[1],resM[1])) {
       console.log("Kahn, Matrix",resK[1] * 180 / Math.PI, resM[1] * 180 / Math.PI);
-      debugger;
+//      debugger;
     }
     console.assert(near(resK[2],resM[2]));
     console.assert(near(resK[3],resM[3]));
     console.assert(near(resK[4],resM[4]));
     if (!(near(resK[4],resM[4]))) {
       console.log("Kahn Phi, Matrix Phi", resK[4] * 180 / Math.PI, resM[4] * 180 / Math.PI);
-      debugger;
+//      debugger;
     }
     console.assert(vnear(resK[5],resM[5]));
     if (!vnear(resK[5],resM[5])) {
@@ -1528,7 +1505,7 @@ function RenderSegmentedHelix(solid,tau_v) {
   create_vertex_mesh(new THREE.Vector3(0,0,1),d3.color("blue"));
 
   // now we would like to draw the axis of the helix...
-  // we have the vector H from the KahnAxis algorithm.
+  // we have the vector H from the PointAxi algorithm.
   // We have to find one point on the helix---
   // We know the helix intersects the y axis,
   // and we have the radius, which is the distance
@@ -2166,30 +2143,7 @@ function findCentroid(geo) {
   geo.vertices.forEach(v => { sum.add(v); n++; });
   var cent = sum.multiplyScalar(1/n);
   if (vnear(cent,new THREE.Vector3(0,0,0))) {
-    console.log("returning upvector!");
-    // HACK
-    console.log("Current upvector",geo["upvector"]);
-    // if (geo["upvector"]) {
-    //   return geo["upvector"];
-    // } else {
-    //   return new THREE.Vector3(0,1,0);
-    // }
-    //    return geo["upvector"];
-    //    return cent;
-    if (geo instanceof THREE.OctahedronGeometry) {
-      // console.log(findFaceCentroid(geo,geo.faces[0]));
-      // console.log(findFaceCentroid(geo,geo.faces[1]));
-      // console.log(findFaceCentroid(geo,geo.faces[2]));
-      // console.log(findFaceCentroid(geo,geo.faces[3]));
-      // console.log(findFaceCentroid(geo,geo.faces[4]));
-      // console.log(findFaceCentroid(geo,geo.faces[5]));
-      // console.log(findFaceCentroid(geo,geo.faces[6]));
-      // console.log(findFaceCentroid(geo,geo.faces[7]));
-      return new THREE.Vector3(0,1,0);
-      //      return findFaceCentroid(geo,geo.faces[6]);
-    } else {
-      return new THREE.Vector3(0,1,0);
-    }
+    return new THREE.Vector3(0,1,0);
   } else {
     return cent;
   }
@@ -2521,36 +2475,6 @@ function createZAlignedPlatonicAux(solid, B, C, Bf, Cf) {
   return [group,Bnx,Cnx,SCALE_TO_UNIT_EDGE];
 }
 
-function testStupidObjectManipulation() {
-
-  var geometry = new THREE.BoxGeometry( 1/2, 4/2, 9/2 );
-  var material = new THREE.MeshBasicMaterial( new THREE.MeshNormalMaterial(
-    { transparent: true,
-      opacity: 0.5 }));
-  var cube = new THREE.Mesh( geometry, material );
-  var origin = new THREE.Vector3(0,0,0);
-  var csphere = createSphere(1/20, origin, "red");
-  var group = new THREE.Group();
-  group.add(csphere);
-  group.add(cube);
-  group.translateX(-2);
-  group.translateZ(2);
-
-  // Note this is critical!
-  group.updateMatrix();
-
-  var q = new THREE.Quaternion();
-  q.setFromUnitVectors(new THREE.Vector3(0,0,1),new THREE.Vector3(0,1,0));
-  let transform = group.matrixWorld.clone();
-  var rotation =  new THREE.Matrix4();
-  rotation.makeRotationFromQuaternion(q);
-  transform.multiply(rotation);
-  group.applyMatrix(transform);
-  group.matrixWorldNeedsUpdate = true;
-
-  am.scene.add( group );
-}
-
 $( document ).ready(function() {
   runUnitTests();
 //  $("#construct_via_norms").prop('checked', true);
@@ -2624,8 +2548,6 @@ $( document ).ready(function() {
   populatePlatonicHelixTable();
 
   $('.collapse').trigger('click');
-
-//  testStupidObjectManipulation();
 
 
 });
