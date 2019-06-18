@@ -169,7 +169,7 @@ function renderPrismInstance(p_i,tau) {
 
       var cent = findCentroid(nu.sup.children[0].geometry);
 
-      console.log("PRISM_UP",prism_up);
+//      console.log("PRISM_UP",prism_up);
       if (vnear(cent, new THREE.Vector3(0,0,0))) {
         console.log("WARNING! Centroid near zero!");
         // In this case (at least one of them), we are
@@ -188,7 +188,7 @@ function renderPrismInstance(p_i,tau) {
         q1.setFromUnitVectors(cent,prism_up);
 
         let theta = -prism_up.angleTo(cent);
-        console.log("COMPUTED THETA",theta * 180/Math.PI,q1);
+//        console.log("COMPUTED THETA",theta * 180/Math.PI,q1);
 
         // TODO: In our linear cases, try computing this
         // a different way and see if it comes out.
@@ -197,7 +197,7 @@ function renderPrismInstance(p_i,tau) {
         let x = new THREE.Vector3(1,0,0);
         let y = x.clone();
         x.applyMatrix4(rot1);
-        console.log("PRE, POST",y,x);
+//        console.log("PRE, POST",y,x);
       }
 
       // Now that we have a rotation axis, we will have
@@ -220,15 +220,7 @@ function renderPrismInstance(p_i,tau) {
   if (p_i.p.superstructure_prototype) {
     p_i.sup =
       p_i.p.superstructure_prototype.GdeepCloneMaterials();
-
-    console.log("p_i.sup.up",p_i.sup.up);
-
-//    var unpositioned = p_i.p.superstructure_prototype.GdeepCloneMaterials();
-
-    // Somehow or another here I must have an up vector.
     positionSuperStructure(p_i,tau);
-
-    console.log("p_i.sup.up",p_i.sup.up);
     objects.push(p_i.sup);
   }
   return objects;
@@ -857,6 +849,7 @@ function getLegalTauValuesX(solid,face) {
 
 function updateLegalTauValues(solid,face) {
   var taus = getLegalTauValuesX(solid,face).map(r => r*180/Math.PI);
+  console.log("TAUS = ",taus);
   if (taus.length == 3) {
     $("#radio-t0-l").html("N/A");
     $("#radio-t1-l").html(format_num(taus[0],0));
@@ -898,7 +891,7 @@ function setSelectedTau(tau_radians) {
     var id = "#radio-t"+i+"-l";
     var html = $(id).html();
     if (f == html) {
-      $(id).prop("checked", true).trigger("click").change();
+      $(id).prop("checked", true).change();
     }
   }
 
@@ -968,7 +961,11 @@ function RenderHelix(l,r,d,theta,v,phi,wh,MAX_POINTS) {
   var points3D = new THREE.Geometry();
   // We'll tack on some extra segments to make it look better.
   let POINTS =  (2 + Math.floor(MAX_POINTS / 2)) * 2;
-  console.log("d,theta,phi",d,theta,phi);
+//  console.log("d,theta,phi",d,theta,phi);
+  const travel = d;
+  const sidedness = (2 * Math.PI / theta);
+  const pitch = sidedness * travel;
+//  console.log("TIGHTNESS: ",pitch/r);
   for (var i=0; i < POINTS; i++) {
     var n = i - (POINTS/2) + 0.5;
     var y = r * Math.cos(n*theta);
@@ -1396,9 +1393,9 @@ function RenderSegmentedHelix(solid,tau_v) {
 
   [resK,resM,p_i,rt] = computeInternal(L0,B,C,tau_v,p_temp,Nb,Nc);
 
-  console.log("SHOULD MATCH");
-  console.log(resK);
-  console.log(resM);
+//  console.log("SHOULD MATCH");
+//  console.log(resK);
+//  console.log(resM);
 
   // We shall place this upward, for the purpose of
   // making it easier to see...
@@ -1461,7 +1458,7 @@ function RenderSegmentedHelix(solid,tau_v) {
 
   // vector pointing from B to Ba
   var Ba = res[6];
-  console.log("BA ",Ba);
+  // console.log("BA ",Ba);
   // Ba may not be defined!
   if (Ba) {
     if (!USE_MATRIX) {

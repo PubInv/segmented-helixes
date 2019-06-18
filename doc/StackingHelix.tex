@@ -878,16 +878,19 @@ Therefore the number of Platonic helices is in principle a summation of a number
 $4 \cdot 3 + 6 \cdot 4 + 8 \cdot 3 + 12 \cdot 5 + 20 \cdot 3 = 12 + 24 + 24 + 60 + 60 = 180$.
 However, many of the possibly helices will be indistinguishable of we consider only the shapes produced. Furthermore,
 every non-toroidal helix will come in clockwise and counter-clockwise version.
+However, we do not consider rules such as ``attach face zero to face zero''.
+The transformation matrix for such a rule would be the identity matrix.
+It produces an object axis of zero length, a radius of zero, and
+a travel of zero. It produces perfect self-intersection; that is the entire
+degenerate helix would appear to be a simply a single Platonic solid.
 
-Using the math in this paper, it was easy to evaluate all 180 helices, place them in table, and group them
+Using the math in this paper, it was easy to evaluate all 180 helices,
+place them in table, and group them
 by radius and travel (collapsing chirality).
-The result is 27 unique shapes. In this number, no provision was made to exclude self-intersection,
+The result is 27 unique shapes. In this number, no provision was made to exclude
+self-intersection,
 which does occur, but might not matter to
-an aerospace engineer building a collapsible space frame of rods and joints. We did not, exclude rules
-of the form ``attach face zero to face zero''.
-Such rules always produce an object which is highly self-intersecting. Loosely speaking, it produces a diatomic molecule.
-Such shapes are
-uninteresting and require special-case handling mathematically (just as Chasle's theorem does not apply to pure translational straight-line motion.) They have no definable radius or travel.
+an aerospace engineer building a collapsible space frame of rods and joints.
 
 
 With those caveats, the resulting table and accompanying figures thus represents an exhaustive catalog,
@@ -1047,6 +1050,7 @@ believe they will be.
 \section{ To Do}
 
 \begin{itemize}
+  \item Add zero faces to the table.
 \item{add screenshots explaining concepts}
 \item Clean up the code. 3 days
 \item Go through each reference 1 day

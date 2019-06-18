@@ -981,7 +981,7 @@ function testPointAxisFullAux(tau,NB1,NC1)
   console.assert(" B = ", B);
   console.assert(!isNaN(theta));
   try {
-    console.log(B.x);
+//    console.log(B.x);
   } catch (e) {
     debugger;
   }
