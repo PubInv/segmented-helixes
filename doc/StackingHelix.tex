@@ -261,7 +261,7 @@ wish to learn about the subunits and the rule with which the subunits are combin
 For example, we may have microscopic objects such as proteins
 or atoms, and we know from crystallography something about the positioning of these objects, without
 knowing ahead of time the angles at which these objects would combine in their natural environment.
-In this case, we use a method a variant of a linear algebra method\cite{kahn1989defining} for determining the radius, travel, and twist
+In this case, we use a variant of a linear algebra method\cite{kahn1989defining} for determining the radius, travel, and twist
 of the segmented helix (these terms will be defined precisely below.)
 
 In the other approach, we may know {\it a priori} exactly the
@@ -272,7 +272,8 @@ is known before the first two objects are glued together. We call this the {\em 
 it can be simulated by joining two flat faces together with a specified twist, even if the objects in question
 do not actually have a physical face (such as molecules).
 
-In both cases, we would like to understand how a change in a face normal or a twist affects the parameters of the segmented helix,
+In both cases, we would like to understand how a change in a face normal or a twist affects the parameters
+of the segmented helix,
 and, conversely, we would like to be able to choose the construction of the subunits to achieve a particular segmented helix.
 
 In engineering, sometimes the term {\em special helix}\cite{gu2012research} is use for helical curves on non-cylindrical surfaces. This paper use the term {\em helix} only in the sense of {\em cylindrical helix}.
@@ -310,7 +311,7 @@ prove that such a segmented helix indeed exists.
 
   Base Case ($k == 3$):
 
-  Take an object $AB$. By Chasles' theorem  \url{https://en.wikipedia.org/wiki/Chasles%27_theorem_(kinematics)},
+  Take an object $AB$. By Chasles' theorem\cite{wiki:chasles}
     there is a screw axis $S$, a set of rotations,  and a transposition $d$ which moves the first object to
     position where the second object $BC$ is. Take one of the rotation angles of smallest value.
     Construct the points $A'$, $B'$ and $C'$ as the closest points
@@ -411,24 +412,25 @@ capture the idea of ``repetition''. Since by definition the objects in the chain
 moving one object into a new position and place an identical copy of that object in that position
 are practically the same.
 
-Using standard screw theory\cite{wittenburg2016kinematics}, a screw can be computed from such
+Using standard screw theory\cite{wittenburg2016kinematics,wiki:screwaxis}, a screw can be computed from such
 a transformation matrix. This consists of the axis of the screw $S$, a point on the screw axis $P$,
 the rotation $\theta$ around the axis, and the
 transposition, or travel, along the axis of one transformation.
 
-Neither a transforamtion matrix or its corresponding screw completely define all of the intrinsic
+Neither a transforamtion matrix or its corresponding screw
+completely define all of the intrinsic
 properties of a segmented helix. In particular, a matrix $M$ maps any point $p$ to a point $p'$.
 Since this applies to all points no matter how far from the screw axis or the axis of rotation and
 such transformation preserve distance to this axis (the radius), the radius is of a segmented helix
 is not determined by a transformation matrix or a screw. Since the helix angle $\phi$ changes
 with radius for a helix of a given pitch, $\phi$ is not determined.
 
-However, if we have transformation matrix and one joint position, all of the properties of segmented
-helix are determined. If we have a screw and one point on the axis of the screw fixing it in space
+However, if we have a screw and one point on the axis of the screw fixing it in space
 and the location of one joint, all of the properties of the segmented helix are completely determined.
 
 In our software, we have coded the calculation of the screw directly from a transformation matrix, and
-the additional routines which determine all intrinsic properties from a joint position.
+the additional routines which determine all intrinsic properties from a joint position (making
+certain arbitrary alignment choices without loss of generality.)
 
 As is common in kinematics\cite{funda1990computational}, there are many ways to represent
 the same physcial or mathematical situation.
@@ -707,14 +709,37 @@ We can indentify intrinsic properties:
 
 In order to use the PointAxis algorithm, we need a way
 to compute points $A$ and $D$ in balance around the axis $BC$.
-From Lord's Observation, we know that after placing $BC$ along
+A key insight is that Lord's Observation tells us that no matter how lopsided and different
+the normal vectors  $N_B$ and $N_C$ for the joint faces are and no matter what $\tau$ we choose,
+when we conjoin objects
+their relationship is always the same.
+After placing $BC$ along
 the $z$-axis, there is always an angle $\psi$ which will
-rotate the points $A$ and $D$ into balance.
+rotate the points $A$ and $D$ into balance (that is, $(A.x = -D.x) \wedge (A.z = -D.z) \wedge (A.y = D.y)$.
 
-It is relatively easy to work out the math to adjoin objects
-face-to-face baces on the face normals; we will assume this
+For computer programmers with a graphics library supporting transformation matrices such
+as THREE.js\cite{dirksen2013learning},
+it is relatively easy to code the math to adjoin objects
+face-to-face based on the face normals, simulating the physical act of
+matching flat faces between macroscopic objects.
+\begin{enumerate}
+  \item Create the transformation the aligns and centers $\overline{BC}$ on the $z$-axis.
+\item Create a translation of $B$ to $C$.
+\item Create a rotation of the $z$-axis to  $N_B$.
+\item Create a rotation of of $-N_c$ about $N_B$.
+  \item Create a rotation of $\tau$ around that axis.
+\end{enumerate}
+Composing these transformation matrices via multiplication creates a
+transformation matrix which takes $B$ to $C$ and $C$ to $D$.
+
+We will assume this
 as a subroutine called ``adjoinPrism'' which takes $\tau$
-(the rotation inside the plane of the joint).
+(the rotation inside the plane of the joint). A byproduct
+of balancing the points is the a transformation matrix
+that takes $C$ into $D$. Having done this, one can compute
+the screw axis, and hence all of the segmented helix properties,
+from either the transformation matrix or the four points. Our
+code does both and compares the result as a test.
 
 The key insight to finding $\psi$ to note that we
 can consider the projections of the $B$ and $C$ face normal vectors
@@ -723,8 +748,10 @@ are balanced around the negative $y$ unit vector. Even
 if the lengths of the projections of the face normals in $XY$
 are different, this mechanism works.
 
-TODO: Properly code in Mathematica and place code here.
-Figure out how to express this mathematically.
+By composing this balancing operation with the face-adjoining transformation
+matrix, $A$ and $D$ are placed in balance. The screw axis may now
+be computed from either the four points $A,B,C,D$ or from the transformation
+matrix created to balance them.
 
 \subsection{On the Choice of the Screw Axis Direction}
 
@@ -1050,8 +1077,7 @@ believe they will be.
 \section{ To Do}
 
 \begin{itemize}
-  \item Add zero faces to the table.
-\item{add screenshots explaining concepts}
+  \item Add citation to our own GitHub repo.
 \item Clean up the code. 3 days
 \item Go through each reference 1 day
 \item Try to get list of references to the computation of a screw from an arbitrary matrix, and compare and contrast to our code. 1 day
@@ -1059,14 +1085,12 @@ believe they will be.
 and studied protein forms, roughly providing distance in the protein, consisting of a helix formed by
 amino acids, which tend to be cross bonded. 1 hour
 \item Need to understand possibility of further simplifying specification of object.
-\item Need to understand if I can redefine things in terms of ``pitch''. 2 hours
 \item Note further that Equations 7 and 8 of this paper\cite{kahn1989defining} give BETTER equations for radius $r$ and the distance $d$ than what I have so far given.
 \item Need to get this paper, by hook or by crook, and probably cite:
   Note: An historical review of the theoretical development of rigid body displacements from Rodrigues parameters to the finite twist
   \url{https://www.sciencedirect.com/science/article/pii/S0094114X0500087X}
   \item Improve qualitative section, talk about toruses - 8 hours
   \item Consider better naming mechanism for faces - 4 hours
-  \item Fix bug with phi in tau = 0 cases - 4 hours
   \item Write all of the algorithms in mathematical notation
   \item Consider assigning colors to faces, which would allow for more visibility
   \end{itemize}
