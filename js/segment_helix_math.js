@@ -1211,7 +1211,7 @@ function computeThetaUDa(R) {
   const B = new THREE.Vector3(0,4,-4/2);
   const C = B.clone().applyMatrix4(R);
   let u = null;
-  if (thetaP == Math.PI) {
+  if (thetaP == Math.PI || thetaP == 0) {
     // In this case our normal method is numerically unstable
     // (it defines an axis vector of zero length.). However,
     // in this "zig-zag" case, u is easily computed as R^2(P) - P,
@@ -1275,12 +1275,16 @@ function computeThetaUDa(R) {
 // Note: This may solve my problem: https://en.wikipedia.org/wiki/Screw_axis#Computing_a_point_on_the_screw_axis
 function computeRChord(L,thetaP,da) {
   let chord = ChordFromLDaxis(L,da);
-  if (near(0,Math.sin(thetaP/2))) {
-    console.log("WARNING!!!");
-    debugger;
+  if (near(0,chord,1e-3)) {
+    return [0,0];
+  } else {
+    if (near(0,Math.sin(thetaP/2))) {
+      console.log("WARNING!!!");
+      debugger;
+    }
+    const r = chord / (2 * Math.sin(thetaP/2));
+    return [r,chord];
   }
-  const r = chord / (2 * Math.sin(thetaP/2));
-  return [r,chord];
 }
 
 function computePointIndependentParameters(L,R) {

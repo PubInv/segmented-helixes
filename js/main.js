@@ -595,8 +595,8 @@ function initGraphics() {
   am.scene.fog = new THREE.Fog(0x000000, 500, 10000);
 
   am.camera.position.x = -0.25;
-  am.camera.position.y = 1.5;
-  am.camera.position.z = 2;
+  am.camera.position.y = 2.5;
+  am.camera.position.z = 4;
 
   am.controls = new THREE.OrbitControls(am.camera, am.container);
   am.controls.target.set(0, 0, 0);
@@ -849,19 +849,31 @@ function getLegalTauValuesX(solid,face) {
 
 function updateLegalTauValues(solid,face) {
   var taus = getLegalTauValuesX(solid,face).map(r => r*180/Math.PI);
-  console.log("TAUS = ",taus);
   if (taus.length == 3) {
     $("#radio-t0-l").html("N/A");
     $("#radio-t1-l").html(format_num(taus[0],0));
     $("#radio-t2-l").html(format_num(taus[1],0));
     $("#radio-t3-l").html(format_num(taus[2],0));
     $("#radio-t4-l").html("N/A");
+
+    $("#radio-t4-l").hide();
+    $("#radio-t0-l").hide();
+  } else if (taus.length == 4) {
+    $("#radio-t0-l").html(format_num(taus[0],0));
+    $("#radio-t1-l").html(format_num(taus[1],0));
+    $("#radio-t2-l").html(format_num(taus[2],0));
+    $("#radio-t3-l").html(format_num(taus[3],0));
+    $("#radio-t4-l").html("N/A");
+    $("#radio-t4-l").hide();
   } else {
     $("#radio-t0-l").html(format_num(taus[0],0));
     $("#radio-t1-l").html(format_num(taus[1],0));
     $("#radio-t2-l").html(format_num(taus[2],0));
     $("#radio-t3-l").html(format_num(taus[3],0));
     $("#radio-t4-l").html(format_num(taus[4],0));
+
+    $("#radio-t4-l").show();
+    $("#radio-t0-l").show();
   }
   return taus;
 }
@@ -869,7 +881,6 @@ function updateLegalTauValues(solid,face) {
 
 function getSelectedTaus(taus) {
   var modex = $("input:radio[name=radio-2]:checked").attr('id');
-  console.log("modex",modex);
   if (!modex) {
     modex = "0";
   }
@@ -1251,7 +1262,6 @@ function setPlatonicSolidInput(mode) {
 
 function getPlatonicSolidInput() {
   var mode = $(":radio:checked").attr('id');
-  console.log("MODE:",mode);
   var SOLID;
   switch (mode) {
     case "radio-arb":
@@ -1273,7 +1283,6 @@ function getPlatonicSolidInput() {
     SOLID = "ICOSAHEDRON";
     break;
   }
-  console.log("SOLID :",SOLID);
   return SOLID;
 }
 
