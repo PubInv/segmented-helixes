@@ -1153,6 +1153,9 @@ function compute_da_X(R,u,B,C) {
   // Now BC.u sould give us da...
   const unorm = u.clone().normalize();
   const da_scalar_project = BC.dot(unorm);
+
+  // This is all test code.
+  {
   const ele = R.elements;
   const a = ele[0];
   const e = ele[1];
@@ -1178,15 +1181,50 @@ function compute_da_X(R,u,B,C) {
   console.assert(vnear(BC,BCp));
   const da = BCp.dot(unorm);
   console.assert(near(da,da_scalar_project));
-
+  }
   return da_scalar_project;
 }
 
-function computeThetaUDa(R) {
-  if (near(R.determinant(),-1)) {
-    console.log("R.det",R.determinant());
+// https://math.stackexchange.com/questions/1053105/know-if-a-4x4-matrix-is-a-composition-of-rotations-and-translations-quaternions
+function isRigidTransformation(R) {
+  const det = R.determinant()
+  if (near(det,-1)) {
+    console.log("R.det :",R.determinant());
+    return false;
+  }
+  if (det < 0) {
+    console.log("R is a reflection! :",det);
+    return false;
   }
   console.assert(checkNonScaling(R));
+  const s = R.elements[15];
+  console.assert(near(s,1));
+
+  let xA = new THREE.Vector3();
+  let yA = new THREE.Vector3();
+  let zA = new THREE.Vector3();
+  R.extractBasis(xA,yA,zA);
+  const A = new THREE.Matrix3();
+  A.setFromMatrix4(R);
+  const At = A.clone().transpose();
+  const T = new THREE.Matrix3().multiplyMatrices(A,At);
+  console.assert(near(T.elements[0],1));
+  console.assert(near(T.elements[1],0));
+  console.assert(near(T.elements[2],0));
+
+  console.assert(near(T.elements[3],0));
+  console.assert(near(T.elements[4],1));
+  console.assert(near(T.elements[5],0));
+
+  console.assert(near(T.elements[6],0));
+  console.assert(near(T.elements[7],0));
+  console.assert(near(T.elements[8],1));
+
+  return true;
+}
+
+function computeThetaU(R) {
+  console.assert(isRigidTransformation(R));
   // now attempt to recover parameters from the rotation matrix....
   const tr = TraceMatrix4(R);
   const val = (1/2) * (tr - 1);
@@ -1288,7 +1326,7 @@ function computeRChord(L,thetaP,da) {
 }
 
 function computePointIndependentParameters(L,R) {
-  [thetaP,u] = computeThetaUDa(R);
+  [thetaP,u] = computeThetaU(R);
 
   // We need an arbitray point.. technically we should check
   // this is not on the axis, but that is unlikely....
@@ -1357,6 +1395,7 @@ function computeAxisPoint(r,chord,u,R,B) {
 function computeThetaAxisFromMatrix4(L,R,B) {
   [r,thetaP,da,chord,u] = computePointIndependentParameters(L,R);
 
+  // Can we note compute \phi now that we know $r$?
   let phi = computePhi(L,R,B);
 
   let nBa = computeAxisPoint(r,chord,u,R,B);

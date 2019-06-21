@@ -16,6 +16,8 @@
 \usepackage[english]{babel}
 \usepackage{listings}
 \lstloadlanguages{Mathematica}
+\usepackage{mathtools}
+\DeclarePairedDelimiter{\norm}{\lVert}{\rVert}
 
 
 
@@ -231,6 +233,8 @@ joints {\em joint axis points}. Then $d$ is the distance along the axis between 
 We seek to relate these properties to properties intrinsic to the joint or interface between
 two segments or objects in the segmented helix. If given an object, the length between the joints $L$ is intrinsic.
 
+\label{sec:SegmentedHelix}
+
 \section{The Intrinsic Properties of Periodic Chains of Solids}
 
 If we have chains of repeated 3D units conjoined identically, they generate a segmented helix coincident on their joints.
@@ -417,6 +421,8 @@ a transformation matrix. This consists of the axis of the screw $S$, a point on 
 the rotation $\theta$ around the axis, and the
 transposition, or travel, along the axis of one transformation.
 
+
+
 Neither a transforamtion matrix or its corresponding screw
 completely define all of the intrinsic
 properties of a segmented helix. In particular, a matrix $M$ maps any point $p$ to a point $p'$.
@@ -431,6 +437,123 @@ and the location of one joint, all of the properties of the segmented helix are 
 In our software, we have coded the calculation of the screw directly from a transformation matrix, and
 the additional routines which determine all intrinsic properties from a joint position (making
 certain arbitrary alignment choices without loss of generality.)
+
+Although not original to this paper, the author found it
+difficult to find clear documentation on how to calculate the
+screw from the transformation matrix.
+We therefore include an exposition here, in hope it will be useful,
+and a valuable adjunct to the code to a programmer seeking to duplicate
+this functionality.
+
+\subsection{Computing the Screw Axis from a Transformation Matix}
+
+Our goal is to compute a normalized vector $\hat{u}$ aligned with the screw
+axis of the transformation effected by a transformation matrix $R$.
+
+In order to be robust, it is valuable to check that the tranformation
+matrix is a rigid transformation\cite{wiki:rigid},
+as Chasles' theorem applies only to rigid transformations.
+
+(TODO: Note that the wikipedia article on rotations tells
+us we must treat his as a special case, but does not give
+this ``zig zag'' treatment, instead saying we must ``it is necessary to diagonalize  R and find the eigenvector corresponding to an eigenvalue of 1.'' That seems more complicated than what
+I am doing there, though perhaps it is better. Probably
+it avoids the problem of accidentally guessing P to be
+on the axis.)
+
+The angle of rotation is computable from the trace of $R$, $Tr(R)$.
+\begin{align}
+  \theta =& \arccos{\frac{Tr(R) - 1}{2}}
+\end{align}
+Technically, $\arccos$ is a multi-valued, but we will take $\theta$
+to be in its principle range, $0 \leq \theta leq \pi$.
+If $\theta$ is $0$ or a multiple of $\pi$, then we the {\em zig-zag}
+degnenerate case, the method of compute $u$ from the rotation
+basis of $R$ is numerically unstable. However, in this case
+we can compute the direction vector $u$ as the difference vector
+between an aribtrary point $P$ and its transformation performed
+twice. Informally, this is a ``zig, then a zag''.
+\begin{align}
+  u =& (R ( R( P))) - P
+\end{align}
+(Note that in general $u$ is not normalized, $u \neq \hat{u}$.
+Also recall that multiplication by a transformation matrix
+produces a point that in a new position representing
+the transformation.)
+
+In other cases, $u$ can be computed from the direction
+cosines of $R$\cite{wiki:rotation}:
+\begin{align}
+  R =&     \begin{bmatrix} a & b & c & x \\ c & d & e & y\\ f & g & h & z\\ 0 &  0 & 0 & 1\end{bmatrix} \\
+    u =&  \begin{bmatrix} h - f \\ c - g \\ d - b  \end{bmatrix}
+\end{align}
+The magnitude of $\norm{u} = 2 \sin{\theta}$, which vansishes
+when $\theta$ is $0$ or multiple of $\pi$, hence our need
+to treat those cases differently.
+
+Although the matrix $R$ in general produces both a rotation
+and a transformation, distance betwen $P$ and $R(P)$
+in general depends on how far $P$ is from the axis of rotation.
+However, the travel $d$ along the axis of the rotation does
+not depend on $P$. It can be computed as a dot product:
+\begin{align}
+  d = \overline{BC} . \hat{u}
+\end{align}
+
+These are the only properties that can be computed from the
+matrix $R$ alone; but once we have the length along the
+object axis (not the helix axis!) $L$ of an object
+we can compute our computations, based on relations
+already given in Section\ref{sec:SegmentedHelix}.
+
+The chord of the segmented helix (that is, length of an object of
+axis length $L$
+projected along $u$) is:
+\begin{align}
+  c = \sqrt{L^2 - d^2}
+\end{align}
+Knowing the chord $c$ and the amount of rotation $\theta$
+allows us to compute the radius:
+\begin{align}
+  r = \frac{c}{2 \sin{\theta}}
+\end{align},
+unless the chord is $0$, in which case the radius is $0$.
+The helix angle $\phi$ is a a function of $c$ and $d$:
+\begin{align}
+    \phi &= \arctan{\frac{c}{d}}
+\end{align}
+
+Sidedndess and pitch ($s$ and $p$) follow directly.
+
+Finally, the vector $\hat{u}$ gives the direction of the
+axis of the helix, but does not give us a point which fixes
+it in space. It is most convenient to accept a point $B$
+which is a joint and produce the point $B_a$ which is the
+point on the helix axis closest to $B$.
+
+To do this, we conceptually construct the midpooint $M$
+of $\overline{BC}$ and utilize the fact that the vector $Q$
+from it to its closest point on the axis $M_a$ is perpendicular
+to the containing both $\overline{BC}$ and $u$. Therefore
+its direction is constructible via cross product, and
+its length $l$ is computable from the radius and chord. $M_a$
+is the midpoint of $B_a$ and $C_a$, so we can just move back
+half the travel $d$ along the vector $u$ to get $B_a$.
+
+\begin{align}
+  C =& R(B) \\
+  \overline{BC} =& C - B\\
+  M =& \frac{B + C}{2} \\
+  Q =& \overline{BC} \times u \\
+  l =& \sqrt{r^2 - \frac{c}{2}^2} \\
+  Q' =& -\frac{Q}{l} \\
+  B_a =& M + Q' - \frac{d}{2}\hat{u}
+\end{align}
+
+Thus given only the transformation $R$, the length $L$, and one
+joint $B$, we have compute all of the intrinsic properties
+($r,\theta,d,c,\phi$) of
+the segmented helix and positioned it in space via $u$ and $B_a$.
 
 As is common in kinematics\cite{funda1990computational}, there are many ways to represent
 the same physcial or mathematical situation.
