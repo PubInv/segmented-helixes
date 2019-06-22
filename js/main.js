@@ -1312,13 +1312,9 @@ function computeInternal(L0,B,C,tau_v,p_i,Nb,Nc) {
 
   // Why wouldn't this be -A.x?
   let D = new THREE.Vector3(-A.x,A.y,-A.z);
-  resK = PointAxis(L0,D);
+  resK = PointAxis(L0,A);
 
-
-  // TODO: Phi is being miscalculated in the case of tau = 180 or -180!!!
-
-
-  // NOTE: the rotations here is translated into world
+   // NOTE: the rotations here is translated into world
   // coordinates (+2 y upward.) This makes everything
   // terribly confusing. I need to rework this with clarity.
 

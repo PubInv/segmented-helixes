@@ -79,7 +79,7 @@ function testAxis(B,Ba,H,da) {
   Hc.multiplyScalar(da);
   X.add(Hc);
   if (!vnear(X,Ca)) {
-//    debugger;
+    debugger;
   }
   console.assert(vnear(X,Ca));
 
@@ -104,11 +104,11 @@ function testAxis(B,Ba,H,da) {
 // H -- the vector of the axis of the helix
 // Ba -- the point on the axis closest to point B
 
-function PointAxis(L,D) {
-  let x = D.x;
-  let y = D.y;
-  let z = D.z;
-  let A = new THREE.Vector3(-x,y,-z);
+function PointAxis(L,A) {
+  let x = A.x;
+  let y = A.y;
+  let z = A.z;
+//  let D = new THREE.Vector3(-x,y,-z);
   let B = new THREE.Vector3(0,0,-L/2);
   let C = new THREE.Vector3(0,0,L/2);
 
@@ -129,18 +129,13 @@ function PointAxis(L,D) {
     let da = L;
     let r = 0;
     let c = 0;
-    // I need to define this more clearly....
-    //    let phi = Math.PI;
     let phi = 0;
     // We don't have enough information to define theta!!!
     let theta = null;
-    return [r,null,da,c,phi,H,null];
+    return [r,null,da,c,phi,H,B];
   } else {
-    let CmB = C.clone();
-    CmB.sub(B);
-    CmB = new THREE.Vector3(0,0,L);
     if (near(y,0,1e-4)) { // flat case
-
+      let CmB = new THREE.Vector3(0,0,L);
       // If the flat case, the axis is parallel to the vector
       // AC or BD.
       let CmA = C.clone();
@@ -148,29 +143,35 @@ function PointAxis(L,D) {
       let H = CmA.clone();
       H.normalize();
       da = CmB.dot(H);
+      if (A.x > 0) {
+        H.multiplyScalar(-1);
+        da = -da;
+      }
       let r = Bb.length() / 2;
       let c = 2*r;
       // How do I know phi should be positive?
       let phix = Math.acos(da/L);
       // This seems a better alternative....
-      let phi = (Math.atan2(H.z,H.x) - Math.PI/2);
-      let theta = Math.PI;
-      // This is a similar choice when theta = PI made computeThetaUDa!!!
+      let phi = (Math.atan2(-H.z,-H.x) - Math.PI/2);
       if (A.x < 0) {
         phi = -phi;
       }
+      if (A.x > 0) {
+        phi = Math.PI - phi;
+      }
+      let theta = Math.PI;
+      // This is a similar choice when theta = PI made computeThetaUDa!!!
+      //      let Bax = Math.sqrt(1 - da**2/L**2) * Math.abs(da) /2;
       let Bax = Math.sqrt(1 - da**2/L**2) * Math.abs(da) /2;
       if (A.x < 0) { // this is becasue of da
         Bax = -Bax;
       }
       let Ba = new THREE.Vector3(Bax,0, -(da**2)/(2*L));
+      // What am I doing here?
+      // In fact whether we are clockwise or counterclockwise
+      // is not defined in the flat case, so it is okay
+      // that this is negated in test code.
       testAxis(B,Ba,H,da);
-      console.log("FLAT: ",A.x,[r,theta,da,c,phi,H,Ba]);
-      if (A.x > 0) {
-        da = -da;
-        phi = Math.PI - phi;
-        H.multiplyScalar(-1);
-      }
       return [r,theta,da,c,phi,H,Ba];
     } else {
       let Cb = new THREE.Vector3(-Bb.x,Bb.y,-Bb.z);
@@ -181,16 +182,15 @@ function PointAxis(L,D) {
       let H = new THREE.Vector3(-2 * Bb.y * Bb.z,0, 2 * Bb.y * Bb.x);
 //      console.assert(Hd.x == H.x && Hd.y == H.y && Hd.z == H.z);
 
-//      H = Hd.clone();
       H.normalize();
 
       // da is the length of the projection of BC onto H
       //      let dax = CmB.dot(H);
-      let da = L * Math.abs(Bb.x) / (Math.sqrt(Bb.x**2 + Bb.z**2));
-      // If the sense is CW, the travel is negative...
-      if (A.x > 0) {
-        da = -da;
-      }
+      //      let da = L * Math.abs(Bb.x) / (Math.sqrt(Bb.x**2 + Bb.z**2));
+      // This is negative due to our sign convention that
+      // counterclockwise motion is represented by negative da
+      let da = -L * Bb.x / (Math.sqrt(Bb.x**2 + Bb.z**2));
+
       // phi is now the angle of H with the z axis
       // phi loses information, is sometimes off by PI
       // let phix = Math.acos(da/L);
@@ -823,8 +823,6 @@ function testRegularTetsPointAxis()
   let tau = 2 * Math.PI /3;
   let A = AfromLtauNbNc(L0,tau,NB1,NC1)[0];
   let B = new THREE.Vector3(0,0,-L0/2);
-  // let D = new THREE.Vector3(-A.x,A.y,-A.z);
-  // let res = PointAxis(L0,D);
   let res = compareMethods(L0,tau,NB1,NC1);
   let r = res[0];
   let theta = res[1];
@@ -865,8 +863,6 @@ function testPointAxisYTorusAux(angle)
   let tau = 0;
   let A = AfromLtauNbNc(L0,tau,NB1,NC1)[0];
   let B = new THREE.Vector3(0,0,-L0/2);
-  //  let D = new THREE.Vector3(-A.x,A.y,-A.z);
-  //  let res = PointAxis(L0,D);
   let res = compareMethods(L0,tau,NB1,NC1);
   let r = res[0];
   let theta = res[1];
@@ -965,10 +961,6 @@ function testPointAxisFull()
 function testPointAxisFullAux(tau,NB1,NC1)
 {
   let L0 = 2;
-//  let A = AfromLtauNbNc(L0,tau,NB1,NC1)[0];
-//  let B = new THREE.Vector3(0,0,-L0/2);
-//  let D = new THREE.Vector3(-A.x,A.y,-A.z);
-//  let res = PointAxis(L0,D);
   let res = compareMethods(L0,tau,NB1,NC1);
   let r = res[0];
   let theta = res[1];
@@ -1005,7 +997,7 @@ function compareMethods(L,tau,NB1,NC1) {
   let C = new THREE.Vector3(0,0,L/2);
   let D = new THREE.Vector3(-A.x,A.y,-A.z);
   let R = AR[2];
-  let res = PointAxis(L,D);
+  let res = PointAxis(L,A);
   [r,thetaP,da,chord,phi,u,Ba] = computeThetaAxisFromMatrix4(L,R,B);
   const BC = new THREE.Vector3().subVectors(C,B);
 
@@ -1055,10 +1047,6 @@ function testPointAxisFlatAux(angle)
   // We add in a little here so we are not a torus
   let NC1 = new THREE.Vector3(Math.sin(angle),0,1);
   let tau = Math.PI;
-//  let A = AfromLtauNbNc(L0,tau,NB1,NC1)[0];
-//  let B = new THREE.Vector3(0,0,-L0/2);
-//  let D = new THREE.Vector3(-A.x,A.y,-A.z);
-  //  let res = PointAxis(L0,D);
   let res = compareMethods(L0,tau,NB1,NC1);
   let r = res[0];
   let theta = res[1];
