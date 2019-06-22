@@ -260,8 +260,8 @@ Therefore we elect the following convnetions:
   joint $n$ to joint $n+1$ appears counterclockwise when $\theta < \pi$,
   zero when toroidal, and
   positive when the helix is clockwise.
-  \item $\theta$ is never negative.
-\end{iteimze}
+\item $\theta$ is never negative.
+\end{itemize}
 
 \section{The Intrinsic Properties of Periodic Chains of Solids}
 
@@ -812,7 +812,7 @@ are easily computed from these values.
 \begin{align}
   H &=  \begin{bmatrix} -2 B_b.y B_b.z \\ 0 \\ 2 B_b.y B_b.x  \end{bmatrix} \\
   d &= \frac{L B_b.x}{\sqrt{B_b.x^2 + B_b.z^2}}  \\
-  \phi = \atantwo{(H.z,H.x)} - \pi/2  \\
+  \phi &= \atantwo{(H.z,H.x)} - \pi/2  \\
   c &= \sqrt{L^2 - d^2} \\
 \end{align}
 
@@ -820,9 +820,10 @@ In this approach to calculation, it is easiset for
 us to compute the axis point $B_a$ corresponding to $B$ and
 use it to complete our computations.
 
-The $x$ component of $B_a$ is:
+The $x$ components of $B_a$ are:
 \begin{align}
-  B_a.x &= \frac{d\sqrt{1 - (d/L)^2}}{2}
+  B_a.x &= \frac{d\sqrt{1 - (d/L)^2}}{2} \\
+  B_a.z &= -\frac{d^2}{2L}
 \end{align}
 
 However, this computation exposes another special case: when the
@@ -830,12 +831,17 @@ helix angle $\phi$ is $\pi /2$, the segmented helix is
 a torus. In this case the axis point $B_a$ is in fact
 on the $y$-axis, and we need only compute $B_a.y$:
 \begin{align}
-  B_a &= \begin{bmatrix} 0 \\ \frac{L B_b.y}{2 B_b.z} \\ 0  \end{bmatrix}
+  B_a.y &=  \frac{L B_b.y}{2 B_b.z}
+\end{align}
+When we are not toriodal, we must take $B_b.x$ into
+account, but it is non-zero, so we can divide by it:
+\begin{align}
+  B_a.y &=  \frac{ B_b.y B_a.x}{ B_b.x}
 \end{align}
 
 Otherwise (the general case):
 \begin{align}
-  B_a &= \begin{bmatrix} B_a.x \\ \frac{ B_b.y B_a.x}{ B_b.x} \\ -\frac{d^2}{2L}  \end{bmatrix}
+  B_a &= \begin{bmatrix} B_a.x \\ B_a.y \\ B_a.z  \end{bmatrix}
 \end{align}
 
 Having computed $B_a$, the remaining intrinsic properties are easily

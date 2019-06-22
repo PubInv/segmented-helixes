@@ -134,6 +134,7 @@ function PointAxis(L,A) {
     let theta = null;
     return [r,null,da,c,phi,H,B];
   } else {
+    let da = -L * Bb.x / (Math.sqrt(Bb.x**2 + Bb.z**2));
     if (near(y,0,1e-4)) { // flat case
       let CmB = new THREE.Vector3(0,0,L);
       // If the flat case, the axis is parallel to the vector
@@ -142,10 +143,10 @@ function PointAxis(L,A) {
       CmA.sub(A);
       let H = CmA.clone();
       H.normalize();
-      da = CmB.dot(H);
+//      da = CmB.dot(H);
       if (A.x > 0) {
         H.multiplyScalar(-1);
-        da = -da;
+//        da = -da;
       }
       let r = Bb.length() / 2;
       let c = 2*r;
@@ -156,40 +157,33 @@ function PointAxis(L,A) {
       if (A.x < 0) {
         phi = -phi;
       }
+      // We choose to measure phi so that it is positive
+      // against the z axis...
       if (A.x > 0) {
         phi = Math.PI - phi;
       }
       let theta = Math.PI;
       // This is a similar choice when theta = PI made computeThetaUDa!!!
-      //      let Bax = Math.sqrt(1 - da**2/L**2) * Math.abs(da) /2;
-      let Bax = Math.sqrt(1 - da**2/L**2) * Math.abs(da) /2;
-      if (A.x < 0) { // this is becasue of da
-        Bax = -Bax;
-      }
+      let Bax = -Math.sqrt(1 - da**2/L**2) * da /2;
+
       let Ba = new THREE.Vector3(Bax,0, -(da**2)/(2*L));
-      // What am I doing here?
-      // In fact whether we are clockwise or counterclockwise
-      // is not defined in the flat case, so it is okay
-      // that this is negated in test code.
       testAxis(B,Ba,H,da);
       return [r,theta,da,c,phi,H,Ba];
     } else {
-      let Cb = new THREE.Vector3(-Bb.x,Bb.y,-Bb.z);
+//      let Cb = new THREE.Vector3(-Bb.x,Bb.y,-Bb.z);
 //      let H = new THREE.Vector3(0,0,0);
       // H.crossVectors(Bb,Cb);
       // Hd is H computed direction....
       // This is optimization of that...
       let H = new THREE.Vector3(-2 * Bb.y * Bb.z,0, 2 * Bb.y * Bb.x);
-//      console.assert(Hd.x == H.x && Hd.y == H.y && Hd.z == H.z);
-
       H.normalize();
-
       // da is the length of the projection of BC onto H
       //      let dax = CmB.dot(H);
       //      let da = L * Math.abs(Bb.x) / (Math.sqrt(Bb.x**2 + Bb.z**2));
       // This is negative due to our sign convention that
       // counterclockwise motion is represented by negative da
-      let da = -L * Bb.x / (Math.sqrt(Bb.x**2 + Bb.z**2));
+      //      let da = -L * Bb.x / (Math.sqrt(Bb.x**2 + Bb.z**2));
+//      da = daq;
 
       // phi is now the angle of H with the z axis
       // phi loses information, is sometimes off by PI
@@ -211,11 +205,8 @@ function PointAxis(L,A) {
 
       // How do we determine the sign here?
       // If phi is > 180 (and less than 360), then Bax is negative.
-      let Bax = Math.sqrt(1 - da**2/L**2) * Math.abs(da) /2;
+      let Bax = - Math.sqrt(1 - da**2/L**2) * da /2;
 
-      if (A.x < 0) { // this is becasue of da
-        Bax = -Bax;
-      }
       if (!(Math.sign(Bax) == Math.sign(A.x))) {
         debugger;
       }
@@ -226,28 +217,18 @@ function PointAxis(L,A) {
       // if phi = PI/2, then B on the axis is
       // the intersection of the Bb and Cb,
       // which will also have x and z = 0.
-      var Ba;
-      if (near(Math.abs(phi),Math.PI/2,1e-4)) {
-        // let psi = Math.atan2(Bb.y,Bb.z);
-        Ba = new THREE.Vector3(0,
-                               // Math.tan(psi)* L/2,
-                               (Bb.y * L) / (Bb.z * 2),
-                               0);
-        console.assert(near(Math.tan(Math.atan2(Bb.y,Bb.z)),Bb.y/Bb.z));
-      } else {
-        Ba = new THREE.Vector3(Bax,
-                               Bb.y * ( Bax / Bb.x),
-                               // -Math.cos(phi) * da /2
-                               // Note: substitution here
-                               // of da will allows us to express better.
-                               // is this really always negative?
-                               // if the face angles are steep,
-                               // then Ba could be on the ohter side of Ca.
-                               // TODO: Investigate with steep angles and
-                               // create a test case later.
-                               -(da**2)/(2*L));
-      }
 
+      let Bay = (near(Bb.x,0)) ?
+      // When Bb.x is near zero, we have a torioidal
+      // case. Then Bb.y / Bb.z is proportional
+      // to the height from the axis.
+          (Bb.y * L) / (Bb.z * 2) :
+          Bb.y * ( Bax / Bb.x);
+
+      const  Ba = new THREE.Vector3(
+        Bax,
+        Bay,
+        -(da**2)/(2*L));
       // here we assert that Ba is on the axis...
       // To make sure we have the sign right, in our model
       // the y value of Ba must be below the y = 0 plane...
