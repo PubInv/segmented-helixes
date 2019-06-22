@@ -235,6 +235,34 @@ two segments or objects in the segmented helix. If given an object, the length b
 
 \label{sec:SegmentedHelix}
 
+\subsection{Sign Conventions for Spatially Located Segmented Helices}
+
+When thinking about the overall shape of a segmented helix, one is
+likely to be interested in the absolute magnitude of its intrinsic
+properties.
+
+However, when doing doing computer graphics work or kinematic
+calculations, the sign conventions are critical. Because this
+paper wishes to emphasize the continuum of shapes produced by
+changing an object used to generate the segmented helix, and
+in particular is interested in the degenerate helix which
+produces toroidal figures, we prefer to be able to discuss
+the axis of a segmented helix as a existing even when the
+figure has no travel along the axis (that is, when $d = 0$).
+
+Therefore we elect the following convnetions:
+\begin{itemize}
+\item A right-handed coordinate system.
+\item The helix as a normalized vector
+  which never vanishes.
+\item The travel along the axis ($d$) is negative when
+  the helix is counterclockwise (that is, when motion from
+  joint $n$ to joint $n+1$ appears counterclockwise when $\theta < \pi$,
+  zero when toroidal, and
+  positive when the helix is clockwise.
+  \item $\theta$ is never negative.
+\end{iteimze}
+
 \section{The Intrinsic Properties of Periodic Chains of Solids}
 
 If we have chains of repeated 3D units conjoined identically, they generate a segmented helix coincident on their joints.
@@ -291,7 +319,7 @@ prove that such a segmented helix indeed exists.
 \begin{theorem}[Segmented Helix]
   Consider $N$ identical objects which each have two points, $A$ and $B$, called {\em joints},
   and a vector $U$ not collinear with $A$ and $B$. Call
-  $\overline{AB}$ the {\em axis} of this object.
+  $\overrightarrow{AB}$ the {\em axis} of this object.
   Consider the frame of reference for this object to have
   its axis on the $z$-axis with $B$ in the positive direction, the
   midpoint of the at the origin, and the up-vector pointing in the positive $y$ direction.
@@ -463,20 +491,20 @@ on the axis.)
 
 The angle of rotation is computable from the trace of $R$, $Tr(R)$.
 \begin{align}
-  \theta =& \arccos{\frac{Tr(R) - 1}{2}}
+  \theta &= \arccos{\frac{Tr(R) - 1}{2}}
 \end{align}
 Technically, $\arccos$ is a multi-valued, but we will take $\theta$
 to be in its principle range, $0 \leq \theta leq \pi$.
 If $\theta$ is $0$ or a multiple of $\pi$, then we the {\em zig-zag}
-degnenerate case, the method of compute $u$ from the rotation
+degnenerate case, the method of compute $H$ from the rotation
 basis of $R$ is numerically unstable. However, in this case
-we can compute the direction vector $u$ as the difference vector
+we can compute the direction vector $H$ as the difference vector
 between an aribtrary point $P$ and its transformation performed
 twice. Informally, this is a ``zig, then a zag''.
 \begin{align}
-  u =& (R ( R( P))) - P
+  H &= (R ( R( P))) - P
 \end{align}
-(Note that in general $u$ is not normalized, $u \neq \hat{u}$.
+(Note that in general $H$ is not normalized, $H \neq \hat{H}$.
 Also recall that multiplication by a transformation matrix
 produces a point that in a new position representing
 the transformation.)
@@ -484,10 +512,12 @@ the transformation.)
 In other cases, $u$ can be computed from the direction
 cosines of $R$\cite{wiki:rotation}:
 \begin{align}
-  R =&     \begin{bmatrix} a & b & c & x \\ c & d & e & y\\ f & g & h & z\\ 0 &  0 & 0 & 1\end{bmatrix} \\
-    u =&  \begin{bmatrix} h - f \\ c - g \\ d - b  \end{bmatrix}
+  R &=     \begin{bmatrix} a & b & c' & x \\ d' & e & f & y\\ g & h & i & z\\ 0 &  0 & 0 & 1\end{bmatrix} \\
+    H &=  \begin{bmatrix} h - f \\ c' - g \\ d' - b  \end{bmatrix}
 \end{align}
-The magnitude of $\norm{u} = 2 \sin{\theta}$, which vansishes
+(The variables $c'$ and $d'$ are marked to distinguish them from
+the symbols for the chord $c$ and the travel along the axis $d$.)
+The magnitude of $\norm{H} = 2 \sin{\theta}$, which vansishes
 when $\theta$ is $0$ or multiple of $\pi$, hence our need
 to treat those cases differently.
 
@@ -497,7 +527,7 @@ in general depends on how far $P$ is from the axis of rotation.
 However, the travel $d$ along the axis of the rotation does
 not depend on $P$. It can be computed as a dot product:
 \begin{align}
-  d = \overline{BC} . \hat{u}
+  d = \overrightarrow{BC} . \hat{H}
 \end{align}
 
 These are the only properties that can be computed from the
@@ -508,7 +538,7 @@ already given in Section\ref{sec:SegmentedHelix}.
 
 The chord of the segmented helix (that is, length of an object of
 axis length $L$
-projected along $u$) is:
+projected along $H$) is:
 \begin{align}
   c = \sqrt{L^2 - d^2}
 \end{align}
@@ -523,51 +553,55 @@ The helix angle $\phi$ is a a function of $c$ and $d$:
     \phi &= \arctan{\frac{c}{d}}
 \end{align}
 
-Sidedndess and pitch ($s$ and $p$) follow directly.
+Sidedness and pitch ($s$ and $p$) follow directly.
 
-Finally, the vector $\hat{u}$ gives the direction of the
+Finally, the vector $\hat{H}$ gives the direction of the
 axis of the helix, but does not give us a point which fixes
 it in space. It is most convenient to accept a point $B$
 which is a joint and produce the point $B_a$ which is the
 point on the helix axis closest to $B$.
 
 To do this, we conceptually construct the midpooint $M$
-of $\overline{BC}$ and utilize the fact that the vector $Q$
+of $\overrightarrow{BC}$ and utilize the fact that the vector $Q$
 from it to its closest point on the axis $M_a$ is perpendicular
-to the containing both $\overline{BC}$ and $u$. Therefore
+to the containing both $\overrightarrow{BC}$ and $H$. Therefore
 its direction is constructible via cross product, and
 its length $l$ is computable from the radius and chord. $M_a$
 is the midpoint of $B_a$ and $C_a$, so we can just move back
 half the travel $d$ along the vector $u$ to get $B_a$.
 
 \begin{align}
-  C =& R(B) \\
-  \overline{BC} =& C - B\\
-  M =& \frac{B + C}{2} \\
-  Q =& \overline{BC} \times u \\
-  l =& \sqrt{r^2 - \frac{c}{2}^2} \\
-  Q' =& -\frac{Q}{l} \\
-  B_a =& M + Q' - \frac{d}{2}\hat{u}
+  C &= R(B) \\
+  \overrightarrow{BC} &= C - B\\
+  M &= \frac{B + C}{2} \\
+  Q &= \overrightarrow{BC} \times u \\
+  l &= \sqrt{r^2 - \frac{c}{2}^2} \\
+  Q' &= -\frac{Q}{l} \\
+  B_a &= M + Q' - \frac{d}{2}\hat{H}
 \end{align}
 
 Thus given only the transformation $R$, the length $L$, and one
 joint $B$, we have compute all of the intrinsic properties
 ($r,\theta,d,c,\phi$) of
-the segmented helix and positioned it in space via $u$ and $B_a$.
+the segmented helix and positioned it in space via $H$ and $B_a$.
 
 As is common in kinematics\cite{funda1990computational}, there are many ways to represent
 the same physcial or mathematical situation.
 Four consecutive joint positions also completely determine a segmented helix.
 We present an approach to doing this in the code below.
-Because joints can be computed from transformation matrices and transformation matrices from joints,
-which method of calculation is preferable would be a matter of choice and clarity. We have
-in fact coded both and used the comparison as automated tests in our software to ensure
+Because joints can be computed from transformation
+matrices and transformation matrices from joints,
+which method of calculation is preferable would be
+a matter of choice and clarity. We have
+in fact coded both and used the comparison as automated tests in
+our software to ensure
 the correctness of our coding.
 
-A mechanical engineer, robotocist, or computer graphics expert is likely to find the computation from the
-transformation matrix more natural and convenient. A chemist or crystallographer is more likely to
-have learned the position of four points and wish to compute from that. At one level, of course,
-either method can be used.
+A mechanical engineer, robotocist, or computer graphics expert is
+likely to find the computation from the
+transformation matrix more natural and convenient.
+A chemist or crystallographer is more likely to
+have learned the position of four points and wish to compute from that.
 
 \section{PointAxis: Computing Segmented Helices from Joints}
 
@@ -578,8 +612,10 @@ either method can be used.
   \label{fig:threemembersdiagram}
 \end{figure}
 
-Kahn\cite{kahn1989defining} has given a method for computing the axis of a helix in the context of chemistry.
-This method uses the observation that the angle bisectors of the segments on a segmented helix are perpendicular
+Kahn\cite{kahn1989defining} has given a method for computing
+the axis of a helix in the context of chemistry.
+This method uses the observation that the angle bisectors
+of the segments on a segmented helix are perpendicular
 and intersect the axis of the helix.
 Because the helices may not be perfect and because the measurement of positions may not be perfectly accurate,
 it is common for chemists to use regression and fitting methods to fit helix parameters to observed positions
@@ -604,7 +640,7 @@ four consecutive known points $A,B,C,D$ is:
 \item  Otherwise the vectors $B_b$ and $C_b$ are skew, the algorithm for the closest points on two skew lines provides two points $B_a$ and $C_a$ on these vectors which
   are the closest points on on those lines and are also points on the axis.
 \item The distance between $B_a$ and $B$ is the radius, and the distance between $B_a$ and $C_a$ is the travel $d$ along the axis.
-  \item The angle between $B - B_a$ and $C - C_a$ is $\theta$.
+  \item The angle between $\overrightarrow{B - B_a}$ and $\overrightarrow{C - C_a}$ is $\theta$.
   \end{itemize}
 
 \subsection{The 4-Point Test}
@@ -643,7 +679,10 @@ We provide a modification of the PointAxis algorithm
 with takes four such points (without loss of generality $B$ and $c$ are assumed to be centered on the $z$-axis, and that a
 rotation has been performed to balance $A$ and $D$ to that $A.x = -D.x, A.z = - D.z$, and $A.y = D.y$. Thus the input to
 PointsAxis in fact has three only three degrees of freedom, which determine the three intrinsic propoerties $r,d,\theta$
-which completely define the shape of a segments helix (but not its location in space.)
+which completely define the shape of a segments helix (but not its location in space.) A practitioner may be able to set up
+the coordinate system such that the four points are in balance;
+if not, Section \ref{sec:balance} discuss how to transform them
+into balance.
 
 
 In the derivations below, we rely on certain facts about
@@ -666,10 +705,10 @@ of which is key:
   $\overline{Mm} < \overline{Bb}$.
 \item The points ($A_a,B_a,C_a,D_a$) on the axis closest to the joints ($A,B,C,D$)
   are equidistant about the axis and centered about the $y$-axis. In
-  particular, $\| \overline{B - B_a} \| = \| \overline{C - C_a} \|$.
+  particular, $\| \overline{B - B_a} \| = \| \overrightarrow{C - C_a} \|$.
 \end{itemize}
 
-From the observations that $\| \overline{B - B_a} \| = \| \overline{C - C_a} \|$
+From the observations that $\| \overrightarrow{B - B_a} \| = \| \overrightarrow{C - C_a} \|$
 we concluded that the helix axis is in a plane
 parallel to the $XZ$-plane, it intersects the $y$-axis, but in general is
 not parallel to the $z$-axis.
@@ -702,15 +741,65 @@ the change in $r$ with a change in $D$ could be calculated.
 
 \subsection{Degenerate Cases}
 
+Define the angle bisector vectors:
+\begin{align}
+  B_b &= B - (A + C)/2 \\
+  C_b &= C - (B + D)/2 \\
+  \end{align}
 The fundamental insight that the axis of the helix $H$ can be
 computed by a cross product of the angle bisector
-vectors ($Bb$ and $Cb$) applies only
+vectors ($B_b$ and $C_c$) applies only
 when the angle-bisectors have a non-zero length and when
 they are not anti-parallel. When the are of zero length, this is
 the degnerate case of a straight line coinciding with all segments.
-This occurs only when $z = L$.
-When $Bb$ and $Cb$ are parallel (pointing in opposite directions),
-the zig-zag degeneracy occurs. This occurs only when $y = 0$.
+In this case the segmented helix has
+This occurs only when $A.x = 0 \wedge A.y = 0 \wedge A.z = -3L/2$.
+In this case:
+\begin{align}
+  r &= 0 \\
+  \theta &= \text{undefined}\\
+  d &= L \\
+  c &= 0 \\
+  \phi &= 0 \\
+  H &=  \begin{bmatrix} 0 \\ 0 \\ L  \end{bmatrix} \\
+  B_a &= B = \begin{bmatrix} 0 \\ 0 \\ -L/2  \end{bmatrix}
+\end{align}
+$H$ is the direction vector of the helix axis.
+In this case we do not have enough information to define $\theta$,
+unless it is through other information. For example, when using
+the joint-face normal method which specifies
+the twist $\tau$ at the faces, then $\theta = \tau$.
+
+When $B_b$ and $C_b$ are parallel (pointing in opposite directions),
+the zig-zag degeneracy occurs. Since we are assuming
+the balance of $A$ and $D$, this occurs only when $A.y = 0$.
+In this case:
+\begin{align}
+  H &=  C - A \\
+  d &= (C - B) \times H \\
+  r &= \norm{B_b} / 2 \\
+  c &= 2 r\\
+  \phi &= \atantwo{(H.z,H.x)} - \pi/2 \\
+  c &= 0 \\
+  \theta &= \pi \\
+  B_a.x &= \frac{d\sqrt{1 - (d/L)^2}}{2} \\
+  B_a.y &= 0 \\
+  B_a.z &= -\frac{d^2}{2L} \\
+  B_a &= \begin{bmatrix} B_a.x \\ B_a.y \\ B_a.z  \end{bmatrix} \\
+\end{align}
+(TODO: My code is modifying signs without stated reasons;
+I need to figure that out)
+
+However, the most general case is simpler, and can be worked
+out with standard linear algebra operations. In the math below
+which is a direct analog of our coded solution, we have
+utilized the tremendous symmetry of the ``balance'' condition
+to use mostly scalar operations. There is some hope that
+this would allow closed-form expressions to be produced, perhaps
+with the aid of a symbolic computation systme such as
+Mathematica\cite{mathematica}. If completed, this would
+allow us to give closed-form solution to the intrinsich properties
+of all the 27 Platonic helices enumerated in Sec\ref{sec:platonic}.
 
 Once $H$ has been calculated, the signed travel along the axis $da$ is
 the scalar projection of a segment $(C - B)$ onto $H$.
@@ -720,41 +809,43 @@ point $Ba$ on the axis pointed to by $Bb$.
 $r$ is the distance between $Ba$ and $B$. $c$ and $\theta$
 are easily computed from these values.
 
-TODO: Move the tests that I have coded in JavaScript into
-Mathematica, handle special cases as separate math routines
-to report here.
+\begin{align}
+  H &=  \begin{bmatrix} -2 B_b.y B_b.z \\ 0 \\ 2 B_b.y B_b.x  \end{bmatrix} \\
+  d &= \frac{L B_b.x}{\sqrt{B_b.x^2 + B_b.z^2}}  \\
+  \phi = \atantwo{(H.z,H.x)} - \pi/2  \\
+  c &= \sqrt{L^2 - d^2} \\
+\end{align}
 
-\begin{lstlisting}
-ChordFromLDaxis[L_,Da_] := Sqrt[L^2 - Da^2]
-RotationFromRadiusChord[R_,C_] := 2 ArcSin[C/(2R)]
-PointAxis[L_,{x_,y_,z_}] := Block[{A, B, C, D, Cb, Bb, H,
-                                  Bax, Bay, Baz, Ba,
-                                  r, theta, da, c, phi},
-  D = {x,y,z};
-  A = {-x, y, -z};
-  B = {0, 0, -L/2};
-  C = {0, 0, L/2};
-  Cb = (B+D)/2 - C;
-  Bb = (A+C)/2 - B;
-  H = Normalize[Cross[Bb,Cb]]; // Why am I calling Normalize twice?
-  da = (C - B) . Normalize[H];
-  phi = ArcCos[da/L];
-  Bax = Sin[phi] da / 2;
-  Baz = -Cos[phi] da / 2;
-  Bay = Bb[[2]] (Bax / Bb[[1]]);
-  Ba = {Bax,Bay,Baz};
-  r = Norm[Ba - B];
-  c = ChordFromLDaxis[L,da];
-  theta = RotationFromRadiusChord[r,c];
-  {r,theta,da,c,phi,H}
-]
-\end{lstlisting}
+In this approach to calculation, it is easiset for
+us to compute the axis point $B_a$ corresponding to $B$ and
+use it to complete our computations.
 
-Note that in Figure \ref{fig:threemembersdiagram} there is great
-room for confusion in terms of plane $\omega$ is actually
-measured against. The three triangles $\triangle BB_aC$, $\triangle BM_aC$, and $\triangle BM_aC$
-are all in general not co-planar, that is, they are all at
-slight angles to each other.
+The $x$ component of $B_a$ is:
+\begin{align}
+  B_a.x &= \frac{d\sqrt{1 - (d/L)^2}}{2}
+\end{align}
+
+However, this computation exposes another special case: when the
+helix angle $\phi$ is $\pi /2$, the segmented helix is
+a torus. In this case the axis point $B_a$ is in fact
+on the $y$-axis, and we need only compute $B_a.y$:
+\begin{align}
+  B_a &= \begin{bmatrix} 0 \\ \frac{L B_b.y}{2 B_b.z} \\ 0  \end{bmatrix}
+\end{align}
+
+Otherwise (the general case):
+\begin{align}
+  B_a &= \begin{bmatrix} B_a.x \\ \frac{ B_b.y B_a.x}{ B_b.x} \\ -\frac{d^2}{2L}  \end{bmatrix}
+\end{align}
+
+Having computed $B_a$, the remaining intrinsic properties are easily
+calculated:
+
+\begin{align}
+  r &= \norm{B - B_a}  \\
+  \theta &= 2 \arcsin{\frac{c}{2r}} \\
+\end{align}
+
 
 There is one reason one might prefer the transformation matrix method or the point method over the other: with modern
 computer algebra systems such as Mathematica it might be possible to use these ``algorithms'' to produce closed-form
@@ -778,15 +869,8 @@ and $D$ are.
 \begin{figure}
      \centering
      \includegraphics[width=0.80\textwidth]{figures/ObjectForStackingSetup.png}
-     \caption{The rotatable prism of three objects}
+     \caption{An Example Object placed in Balance}
   \label{fig:intrinsicdiagram}
-\end{figure}
-
-\begin{figure}
-     \centering
-     \includegraphics[width=0.80\textwidth]{figures/JointGeometry.png}
-     \caption{Joint Geometry}
-  \label{fig:jointdiagram}
 \end{figure}
 
 
@@ -830,6 +914,8 @@ We can indentify intrinsic properties:
 
 \subsection{Rotating into balance from face normal vectors}
 
+\label{sec:balance}
+
 In order to use the PointAxis algorithm, we need a way
 to compute points $A$ and $D$ in balance around the axis $BC$.
 A key insight is that Lord's Observation tells us that no matter how lopsided and different
@@ -846,7 +932,7 @@ it is relatively easy to code the math to adjoin objects
 face-to-face based on the face normals, simulating the physical act of
 matching flat faces between macroscopic objects.
 \begin{enumerate}
-  \item Create the transformation the aligns and centers $\overline{BC}$ on the $z$-axis.
+  \item Create the transformation the aligns and centers $\overrightarrow{BC}$ on the $z$-axis.
 \item Create a translation of $B$ to $C$.
 \item Create a rotation of the $z$-axis to  $N_B$.
 \item Create a rotation of of $-N_c$ about $N_B$.
@@ -2877,7 +2963,7 @@ between the joints, the two members form an angle between 0 and $\pi /2$.
     C &= P(1)
 \end{align*}
 
-$A,B,C$ form an isoceles triangle that contains $\overline{AB}$ and $\overline{BC}$, and therefore the angle $\alpha$ is in
+$A,B,C$ form an isoceles triangle that contains $\overrightarrow{AB}$ and $\overrightarrow{BC}$, and therefore the angle $\alpha$ is in
 this plane. Forming the kite $ABCO$, we see that one diagonal is $r$ and the other diagonal is $2 r \sin{\theta}$, where
 $y = r \sin{\theta}$ is half of this diagonal.
 
