@@ -404,6 +404,17 @@ function adjoinPrism(old,tau,joinToC,debug = false) {
   // for sure!
   console.assert(!vnear(new THREE.Vector3(0,0,0),(joinToC ? nu.p.Nc : nu.p.Nb)));
   var rt = new THREE.Matrix4();
+
+  // I believe this is the "interception point" where we could compute
+  // the tau need to make A.x = D.x in our standard model. Instead of
+  // calling makeRotationAxis(v,a) with a known angle, we would set up
+  // the linear algebra equations with "a" treated as the unknown,
+  // and equation A.x and D.x.  That might be clearer in the matrix
+  // operations below. We will have to "analyze" the transformation
+  // matrix of course by taking it apart. However, we have nicely
+  // functioning code up to this point, so it should be possible
+  // to do a copypasta and produce a unit test around it; then
+  // we ought to be able to work out the linear algebra with assurety.
   rt.makeRotationAxis(joinToC ? nu.p.Nc : nu.p.Nb,tau);
 
   applyMatrix4ToPrism(nu,rt);

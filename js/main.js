@@ -1009,7 +1009,9 @@ function set_outputs(radius,theta,travel,phi,ScaleToUnitEdgeLength) {
     $( "#sidedness_output" ).val( format_num(sidedness,4) );
     const b = travel / theta;
     const torsion = travel / (radius**2 + b**2);
+    const tightness = travel / radius;
     const curvature = Math.abs(radius) / (radius**2 + b**2);
+    $( "#tightness_output" ).val( format_num(tightness,4) );
     $( "#torsion_output" ).val( format_num(torsion,4) );
     $( "#curvature_output" ).val( format_num(curvature,4) );
 
@@ -1020,6 +1022,7 @@ function set_outputs(radius,theta,travel,phi,ScaleToUnitEdgeLength) {
     $( "#travel_output_plato" ).val( format_num(travel * s,4) );
     $( "#pitch_output_plato" ).val( format_num(p * s,4) );
     $( "#torsion_output_plato" ).val( format_num(torsion * s,4) );
+    $( "#tightness_output_plato" ).val( format_num(tightness * s,4) );
     $( "#curvature_output_plato" ).val( format_num(curvature * s,4) );
 
   } else {
@@ -1326,6 +1329,10 @@ function computeInternal(L0,B,C,tau_v,p_i,Nb,Nc) {
 //  let Btrans = B.clone().applyMatrix4(GTRANS);
   let Btrans = B.clone();
   resM = computeThetaAxisFromMatrix4(L0,rotations,Btrans);
+  let psi = Math.PI - Math.atan2(A.x,A.y);
+  if (psi > Math.PI) psi = 2*Math.PI - psi;
+  let ratio = psi/tau_v;
+  console.log(ratio,psi * 180/Math.PI,tau_v * 180/Math.PI);
   return [resK,resM,p_i,rt];
 }
 

@@ -205,6 +205,7 @@ of the helix, and the position of any one joint.
 Because the segmented helix is a discrete structure, we reframe the concept of {\em pitch} as {\em sidedness $s$}: how many segments (sides)
 make a complete rotation?
 
+
 \begin{itemize}
 \item $L$ is the distance between any two adjacent points.
   \item $\theta$ rotation about the axis between two joints.
@@ -213,6 +214,12 @@ make a complete rotation?
 \item $\phi$ is the angle between any vector between two adjacent joints and the axis of the helix. In physical screws used in mechanical engineering, this is analogous to the {\em helix angle} \cite{wiki:helixangle}.
   \item $p$ is the pitch of the helix, the distance travelled in one complete rotation.
   \item $s$ is the number of segments in a complete rotation (in general not rational.)
+\item $t$ is the {\em tightness}. Finally, we find it usefull to define the {\em tightness} of a segmented helix
+as travel divided by radius, a number
+analogous to the extension of a coil spring or slinky.
+A torus has zero tightness and a zig-zag has
+maximum tightness.
+
   \end{itemize}
 These quantities are related:
 \begin{align}
@@ -222,6 +229,7 @@ These quantities are related:
     s &= \frac{2 \pi}{\theta} \\
     d &= L \cos{\phi} \\
     p &= d s \\
+    t &= d / r \\
 \end{align}
 
 Measuring $\phi$ requires us to decide on the sign of the direction of the axis, which is aribtrary and not based on the
@@ -429,9 +437,9 @@ we do not concern ourself with the issue of self-collision of the objects,
 which would have to be considered if one attempted to make a period chain
 of sea urchins.
 
-Corollary \ref{cor:symmetric} will be used in our development of PointAxis algorithm
+Corollary \ref{cor:symmetric} will be used in our development of {\em PointAxis} algorithm
 and in our computation of segmented helix properties and to justify balancing face normals
-to produce an intrinsic out-vector and to apply the PointAxis algorithm
+to produce an intrinsic out-vector and to apply the {\em PointAxis} algorithm
 without actually assigning objects Cartesian coordinates.
 
 \section{Computing Screws and Segmented Helices from Transformation Matrices}
@@ -527,7 +535,7 @@ in general depends on how far $P$ is from the axis of rotation.
 However, the travel $d$ along the axis of the rotation does
 not depend on $P$. It can be computed as a dot product:
 \begin{align}
-  d = \overrightarrow{BC} . \hat{H}
+  d = \overrightarrow{BC} \cdot \hat{H}
 \end{align}
 
 These are the only properties that can be computed from the
@@ -603,7 +611,7 @@ transformation matrix more natural and convenient.
 A chemist or crystallographer is more likely to
 have learned the position of four points and wish to compute from that.
 
-\section{PointAxis: Computing Segmented Helices from Joints}
+\section{{\em PointAxis}: Computing Segmented Helices from Joints}
 
 \begin{figure}
      \centering
@@ -675,7 +683,7 @@ It is useful to have a test if four proposed points really do lie on a segmented
 
 Therefore four consecutive points completely determine at least one segmented helix. We will concern ourselves
 only with the helix that makes the least rotation between points.
-We provide a modification of the PointAxis algorithm
+We provide a modification of the {\em PointAxis} algorithm
 with takes four such points (without loss of generality $B$ and $c$ are assumed to be centered on the $z$-axis, and that a
 rotation has been performed to balance $A$ and $D$ to that $A.x = -D.x, A.z = - D.z$, and $A.y = D.y$. Thus the input to
 PointsAxis in fact has three only three degrees of freedom, which determine the three intrinsic propoerties $r,d,\theta$
@@ -723,7 +731,7 @@ generally skew lines. In fact, by taking advantage of the fact that the
 generating rule for an object chain requires similarity in every joint,
 we can arrange the objects as in Figure \ref{fig:threemembersdiagram}.
 
-PointAxis takes a length and a point $D$ known to be in
+{\em PointAxis} takes a length and a point $D$ known to be in
 a specific relation to $B$ and $C$.
 
 We have carefully arranging our axes
@@ -862,10 +870,10 @@ can be specificed exactly in closed (thought irrational) form. Thus it might be 
 radius of one of the Platonic Dodecahelices of unit edge length. We have not understaken this work.
 
 
-\section{The Face Normal Method}
+\section{The Joint Face Normal Method}
 \label{sec:facenormal}
 
-PointAxis takes a point $A$ known to be in a specific, balanced relation
+{\em PointAxis} takes a point $A$ known to be in a specific, balanced relation
 to $B$ and $C$. A chemist might know 4 such points from crystallography,
 and be able to move them into this symmetric position along the $z$-axis.
 
@@ -924,7 +932,7 @@ We can indentify intrinsic properties:
 
 \label{sec:balance}
 
-In order to use the PointAxis algorithm, we need a way
+In order to use the {\em PointAxis} algorithm, we need a way
 to compute points $A$ and $D$ in balance around the axis $BC$.
 A key insight is that Lord's Observation tells us that no matter how lopsided and different
 the normal vectors  $N_B$ and $N_C$ for the joint faces are and no matter what $\tau$ we choose,
@@ -963,7 +971,8 @@ can consider the projections of the $B$ and $C$ face normal vectors
 projected into the $XY$ plane, and rotate these so that they
 are balanced around the negative $y$ unit vector. Even
 if the lengths of the projections of the face normals in $XY$
-are different, this mechanism works.
+are different, this mechanism works, because by Lord's Observation
+the points $A$ and $D$ must be symmetric about the segement $\overline{BC}$.
 
 By composing this balancing operation with the face-adjoining transformation
 matrix, $A$ and $D$ are placed in balance. The screw axis may now
@@ -1009,7 +1018,14 @@ the zig-zag case, which is of maximum travel.
   \end{theorem}
 
 \begin{proof}
-  By interactively manipulating the software it is apparent.
+  Define $\alpha$ to be the angle of the project of the point $A$ into the $XY$-plane
+  in our standard positioning. Define $\beta$ to be the angle of the $D$ projection.
+  Define $\psi$ to be the angle between these: $\psi = \alpha - \beta$.
+  By the continuity of mechanical processes, there can be not discontinuity
+  in the shape as $\tau$ is minutely varied. Rotating the twist $\tau$ through
+  an entire revolution returns us to the starting configuration. Therefore
+  such a revolution must achieve all values of $\psi$ between $0$ and $\pi$.
+  One of these values is torus, and one is a zig-zag.
   \end{proof}
 
 \begin{theorem}[Torus Corollary]
@@ -1018,11 +1034,21 @@ the zig-zag case, which is of maximum travel.
   \end{theorem}
 
 \begin{proof}
-  By interactively manipulating the software it is apparent.
-  \end{proof}
+  Define $\alpha$ to be the angle of the project of the point $A$ into the $XY$-plane
+  in our standard positioning. Define $\beta$ to be the angle of the $D$ projection.
+  Define $\psi$ to be the angle between these: $\psi = \alpha - \beta$.
+  By Lord's Observation, any change
+  to $\tau$ still produces a segmented helix, therefore a balancable configuration.
+  by Lord's Observation,
+  $\frac{\partial \alpha}{\partial \tau} = -\frac{\partial \beta}{\partial \tau}$.
+  Therefore $\frac{\partial \psi}{\partial \tau} = 2\frac{\partial \alpha}{\partial \tau}$. By observation and the continuity of mechanical proceses, $\alpha(\tau)$ is a monotone function. Therefore it is always
+  possibly to continuously change $\tau$ to either increase or decrease $\psi$.
+  The $\tau$ that makes $\psi = 0$ produces a torus.
+\end{proof}
 
-TODO: Can we calculate the $\tau$ value as a function of the face normals? That would make a nice little constructive theorem.
-
+It would be more useful and comparing to have a formula for the $\tau$ that produces
+a torus as a funciton of the joint face normals; the authors have not been able
+to produce such a formula.
 
 In this section add graphs. Also, a check against the BC helix.
 Possibly software should be used to produce a 3D simulation
