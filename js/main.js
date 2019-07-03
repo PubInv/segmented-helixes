@@ -35,8 +35,8 @@ const PLATONIC_SOLIDS = ["TETRAHEDRON","CUBE","OCTAHEDRON","DODECAHEDRON","ICOSA
 
 // Here I attempt to create an abstract prism object.
 
-
 const PRISM_FACE_RATIO_LENGTH = 1/2;
+
 
 var PHI_SPRITE;
 
@@ -47,8 +47,6 @@ function renderPrismInstance(p_i,tau) {
   // construct the objects....
   var objects = [];
   let colors = [d3.color("DarkRed"), d3.color("DarkOrange"), d3.color("Blue")];
-
-
 
   let L = p_i.p.L;
   let PRISM_FACE_LENGTH = L * PRISM_FACE_RATIO_LENGTH;
@@ -997,11 +995,15 @@ function RenderHelix(l,r,d,theta,v,phi,wh,MAX_POINTS) {
 
 
 
-function set_outputs(radius,theta,travel,phi,ScaleToUnitEdgeLength) {
+function set_outputs(radius,theta,travel,phi,ScaleToUnitEdgeLength,tightness_stats) {
   $( "#radius_output" ).val( format_num(radius,4) );
   $( "#theta_output" ).val( format_num(theta * 180 / Math.PI,4));
   $( "#travel_output" ).val( format_num(travel,4) );
   $( "#phi_output" ).val( format_num(phi * 180 / Math.PI,4) );
+
+  const [[max_tightness,max_tightness_tau],
+         [min_tightness,min_tightness_tau]] = tightness_stats;
+
   if (theta != 0) {
     const sidedness = (2 * Math.PI / theta);
     const p = sidedness * travel;
@@ -1015,6 +1017,12 @@ function set_outputs(radius,theta,travel,phi,ScaleToUnitEdgeLength) {
     $( "#torsion_output" ).val( format_num(torsion,4) );
     $( "#curvature_output" ).val( format_num(curvature,4) );
 
+    $( "#max_tightness_output" ).val( format_num(max_tightness,4) );
+    $( "#max_tightness_tau_output" ).val( format_num(max_tightness_tau * 180 / Math.PI,4) );
+
+    $( "#min_tightness_output" ).val( format_num(min_tightness,4) );
+    $( "#min_tightness_tau_output" ).val( format_num(min_tightness_tau * 180 / Math.PI,4) );
+
     // If we are in the word of solids, we want
     // to express these interms of unit length.
     const s = ScaleToUnitEdgeLength;
@@ -1024,6 +1032,7 @@ function set_outputs(radius,theta,travel,phi,ScaleToUnitEdgeLength) {
     $( "#torsion_output_plato" ).val( format_num(torsion * s,4) );
     $( "#tightness_output_plato" ).val( format_num(tightness * s,4) );
     $( "#curvature_output_plato" ).val( format_num(curvature * s,4) );
+
 
   } else {
     $( "#pitch_output" ).val( "NA" );
@@ -1332,7 +1341,7 @@ function computeInternal(L0,B,C,tau_v,p_i,Nb,Nc) {
   let psi = Math.PI - Math.atan2(A.x,A.y);
   if (psi > Math.PI) psi = 2*Math.PI - psi;
   let ratio = psi/tau_v;
-  console.log(ratio,psi * 180/Math.PI,tau_v * 180/Math.PI);
+//  console.log(ratio,psi * 180/Math.PI,tau_v * 180/Math.PI);
   return [resK,resM,p_i,rt];
 }
 
@@ -1404,6 +1413,17 @@ function RenderSegmentedHelix(solid,tau_v) {
   var p_temp = CreatePrism(GLOBAL_P0,PRISM_FACE_RATIO_LENGTH);
 
   [resK,resM,p_i,rt] = computeInternal(L0,B,C,tau_v,p_temp,Nb,Nc);
+
+  const [[max_tightness,max_tightness_tau],
+          [min_tightness,min_tightness_tau]]
+        = bruteForceTauComputation(Nb.clone(),Nc.clone());
+
+  console.log("normals",Nb,Nc);
+
+  console.log("MAX_TIGHTNESS:",max_tightness_tau * 180 / Math.PI,max_tightness);
+  console.log("MIN_TIGHTNESS:",min_tightness_tau * 180 / Math.PI,min_tightness);
+
+  // console.log("computed_tau,tau",computed_tau*180/Math.PI, tau_v*180/Math.PI);
 
 //  console.log("SHOULD MATCH");
 //  console.log(resK);
@@ -1502,7 +1522,12 @@ function RenderSegmentedHelix(solid,tau_v) {
   // theta = res[1];
   // d = res[2];
   // phi = res[4];
-  set_outputs(r,theta,d,phi,ScaleToUnitEdgeLength);
+  const tightness_stats = [[max_tightness,max_tightness_tau],
+                           [min_tightness,min_tightness_tau]];
+  set_outputs(r,theta,d,phi,ScaleToUnitEdgeLength,tightness_stats);
+
+
+
 
   RenderHelix(L0,r,d,theta,new THREE.Vector3(0,0,1),phi,
               WORLD_HEIGHT,NUM_SEGMENTS);

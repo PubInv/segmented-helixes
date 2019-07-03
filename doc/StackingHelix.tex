@@ -458,7 +458,6 @@ the rotation $\theta$ around the axis, and the
 transposition, or travel, along the axis of one transformation.
 
 
-
 Neither a transforamtion matrix or its corresponding screw
 completely define all of the intrinsic
 properties of a segmented helix. In particular, a matrix $M$ maps any point $p$ to a point $p'$.
@@ -1066,6 +1065,20 @@ we could pack them into a conveneient space by computing the $\tau$ of the tight
 If we had a means to change $\tau$, perhaps via motors in a robot arm, we would have a smoothly telescoping and contracting
 robot arm.
 
+\subsection{An Algorithm for Finding $\tau$ to match $\psi$}
+
+Our software provides a subroutine to iterative find a $\tau$ to produce
+a torus. The basic approach is to compute an angle of rotation from a
+balanced configuration to move point $A$ into the $YZ$-plane.
+Because the balance depends upon $\tau$ itself, this routine requires
+iteration. However, it convergeses rapidly. We leave it to future
+work to find a constant-time algorithm or even a closed-form expression
+producing $\tau$ as a function of a desired $\psi$.
+
+This algorithm allows us to experimentally make the observations
+noted above; that is, that starting from a torus, changing tau allows
+smooth extension of tightness in either direction.
+
 
 \section{Applying to The Boerdijk-Coxeter Tetrahelix}
 
@@ -1317,9 +1330,14 @@ expressions could be produced for all the regular Platonic helices.
 These would be interesting if they happen to be short; we have no reason to
 believe they will be.
 
+There may exist a closed-form expression for twist $\tau$ which produces a desired helix angle $\psi$; we have provided an iterative algorithm for it.
+
+
 \section{ To Do}
 
 \begin{itemize}
+\item produce an iterative version of ``computeTauToAchievePsi''
+  \item Modify that so that it truly respects $\psi$ as an input.
 \item Add citation to our own GitHub repo.
 \item Provide explanation, graphically, if need be, for
   the computation of Ba.x, Ba.y, Ba.z in the general cases.

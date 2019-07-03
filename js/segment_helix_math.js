@@ -78,10 +78,10 @@ function testAxis(B,Ba,H,da) {
   // The only way this makes sense is if I have da reversed EVERYWHERE.
   Hc.multiplyScalar(da);
   X.add(Hc);
-  if (!vnear(X,Ca)) {
+  if (!vnear(X,Ca,1e-3)) {
     debugger;
   }
-  console.assert(vnear(X,Ca));
+  console.assert(vnear(X,Ca,1e-3));
 
   var Ba_m_B = Ba.clone();
   // Ba_minus_B
@@ -135,7 +135,8 @@ function PointAxis(L,A) {
     return [r,null,da,c,phi,H,B];
   } else {
     let da = -L * Bb.x / (Math.sqrt(Bb.x**2 + Bb.z**2));
-    if (near(y,0,1e-4)) { // flat case
+    // I wish this were tighter, but there is a bit of trouble...
+    if (near(y,0,1e-3)) { // flat case
       let CmB = new THREE.Vector3(0,0,L);
       // If the flat case, the axis is parallel to the vector
       // AC or BD.
@@ -233,6 +234,9 @@ function PointAxis(L,A) {
       // To make sure we have the sign right, in our model
       // the y value of Ba must be below the y = 0 plane...
       console.assert(Ba.y <= 0);
+      if (Ba.y > 0) {
+        debugger;
+      }
       var Ba_m_B = Ba.clone();
       // Ba_minus_B
       Ba_m_B.sub(B);
@@ -415,6 +419,9 @@ function adjoinPrism(old,tau,joinToC,debug = false) {
   // functioning code up to this point, so it should be possible
   // to do a copypasta and produce a unit test around it; then
   // we ought to be able to work out the linear algebra with assurety.
+  // Note that in principle, we could create a formula for tau as a function of psi.
+  // This would allow us to enter psi = PI for example, in order for us
+  // to learn the ways of wisdom.
   rt.makeRotationAxis(joinToC ? nu.p.Nc : nu.p.Nb,tau);
 
   applyMatrix4ToPrism(nu,rt);
@@ -481,6 +488,734 @@ function adjoinPrism(old,tau,joinToC,debug = false) {
   }
   // So that the normal of the C face is the opposite of the B face.
   return [nu,finalMatrix];
+}
+
+// Find the point ont the line l0l1 closest to point p
+function closestPoint(P,A,B) {
+  var D = B.clone().sub( A ).normalize();
+  var d = P.clone().sub( A ).dot( D );
+  var X = A.clone().add( D.clone().multiplyScalar( d ) );
+  return X;
+}
+
+
+
+// http://mathworld.wolfram.com/Point-LineDistance3-Dimensional.html
+// x0 is the point, x1 and x2 are points on the line
+function pointToLineDist(x0,x1,x2) {
+  const denom = new THREE.Vector3().subVectors(x2,x1);
+  const x0mx1 = new THREE.Vector3().subVectors(x0,x1);
+  const x0mx2 = new THREE.Vector3().subVectors(x0,x2);
+  const numercross = new THREE.Vector3().crossVectors(x0mx1,x0mx2);
+  return numercross.length()/denom.length();
+}
+
+function testClosestPoint()
+{
+  var A = new THREE.Vector3( 1, 1, 1 );
+  var B = new THREE.Vector3( 2, 2, 2 );
+  for(var i = 0; i < 10; i++) {
+    var P = new THREE.Vector3( i, 0, 0 );
+    var X = closestPoint(P,A,B);
+    console.log(P,X);
+    console.assert(near(pointToLineDist(P,A,B),X.distanceTo(P)));
+  }
+}
+
+
+// compute the rejection of a onto b
+function scalarProjectionOnto(a,b) {
+  const nb = b.length();
+  const dp = a.dot(b);
+  return dp/nb;
+}
+function vectorProjectionOnto(a,b) {
+  const bu = b.clone().normalize();
+  const sp = scalarProjectionOnto(a,b);
+  return bu.multiplyScalar(sp);
+}
+function vectorRejectionOnto(a,b) {
+  var diff = new THREE.Vector3();
+  const ap = vectorProjectionOnto(a,b);
+  diff.subVectors(a,ap);
+  console.assert(near(diff.dot(b),0));
+  return diff;
+}
+
+// compute the signed distance between a point x
+// and a plane with norm pn containing the origin.
+// Note this is only correct for planes through the
+// origin.
+function distancePointToPlaneThroughOrigin(pn,x) {
+  const numer = pn.dot(x);
+  const denom = pn.length();
+  return numer/denom;
+}
+function testDistancePointToPlane() {
+  const pn = new THREE.Vector3(0,0,1);
+  const p0 = new THREE.Vector3(0,0,0);
+  const x = new THREE.Vector3(10,100,37);
+  const d = distancePointToPlaneThroughOrigin(pn,x);
+  console.assert(near(d,37));
+}
+
+// Compute the points where a circle
+// centered at c with normal cn of radius r
+// intersects a plane of norma pn containing point p
+// http://mathforum.org/library/drmath/view/69136.html
+// (This appears to be missing an oppportunity!
+function computeRotationIntoPlane(A,c,cn,r,pn,p) {
+  console.assert(vnear(p,new THREE.Vector3(0,0,0)));
+  // First we need to construct a vector perpendicular to cn
+  // of length r...we will take the cross product with a unit vector...
+//  const A = new THREE.Vector3(0,3/5 ,2);
+  U = new THREE.Vector3().crossVectors(cn,A);
+  if (vnear(U,new THREE.Vector3(0,0,0))) {
+    conosole.log("failed to produce a good vector!",cn,A,U);
+    debugger;
+  }
+  // Check that we got something...
+  console.assert(!vnear(U,new THREE.Vector3(0,0,0)));
+  V = new THREE.Vector3().crossVectors(cn,U);
+  // Now U and V are perpendicular in the plane of the ring...
+  // Set their length to r....
+  U.normalize().multiplyScalar(r);
+  V.normalize().multiplyScalar(r);
+  const UdotN = U.dot(pn);
+  const VdotN = V.dot(pn);
+  const Q = Math.sqrt(UdotN**2 + VdotN**2);
+  if (near(Q,0)) {
+    console.log("Q is near 0, a numerical instability!");
+    // This means that U and V are both perpendicular to the plane,
+    // so any angle keeps us in the plane I guess
+    debugger;
+  }
+
+  // It is very unclear what the signs of this should be...
+  const pndc_q = Math.max(-1,Math.min(1,pn.dot(c)/Q));
+  const t = Math.asin(-pndc_q) - Math.asin(UdotN/Q);
+  if (isNaN(t)) {
+    debugger;
+  }
+
+  var C = c.clone();
+  const Cprime = C.clone();
+
+//  console.log("t ",t * 180 / Math.PI);
+
+  C.add(U.clone().multiplyScalar(Math.cos(t)));
+  Cprime.add(U.clone().multiplyScalar(Math.cos(-t)));
+
+  // I am worried about the sign of this coefficient;
+  // I do not know how to assure it.
+
+  C.add(V.clone().multiplyScalar(Math.sin(-t)));
+  Cprime.add(V.clone().multiplyScalar(Math.sin(t)));
+
+  var Cf;
+  var tf;
+  if (near(pn.dot(C),0)) {
+    Cf = C;
+    tf = t;
+  } else if (near(pn.dot(Cprime),0)) {
+    Cf = Cprime;
+    tf = -t;
+  } else {
+    console.log("Catastrophe---we couldn't get to the plane!");
+    console.log("C,Cprime",C,Cprime);
+    console.log("t",t * 180/Math.PI);
+//    debugger;
+    // Possibly do to the "balance" problem we can't
+    // actually reach the plane. We should return
+    // the value that is closest?
+    const d = distancePointToPlaneThroughOrigin(pn,C);
+    const dprime = distancePointToPlaneThroughOrigin(pn,Cprime);
+    if (Math.abs(d) < Math.abs(dprime)) {
+      Cf = C;
+      tf = t;
+    } else {
+      Cf = Cprime;
+      tf = -t;
+    }
+  }
+
+  // What we really want to do here is to assert that
+  // C truly is in the plane <pn,p>
+
+//  console.assert(near(pn.dot(Cf),0));
+//   if (!near(pn.dot(Cf),0)) {
+//     console.log(" xxx ", pn.dot(c)/Q);
+//     console.log("angle ",tf * 180/Math.PI);
+//     console.log("pn,Cf",pn,Cf);
+// //    debugger;
+//     return null;
+
+//   }
+  return [Cf,tf];
+}
+
+
+function computeRotationAngleIntoPlane(A,c,cn,r,pn,p) {
+  if (near(r,0)) {
+    return 0;
+  }
+  const [P,t] = computeRotationIntoPlane(A,c,cn,r,pn,p);
+  if (!P) return null;
+  // now we want to copute the angle between cP and cA.
+  const Ac = new THREE.Vector3().subVectors(A,c);
+  console.assert(near(r,Ac.length()));
+  if (!near(r,Ac.length())) {
+    debugger;
+  }
+  const Pc = new THREE.Vector3().subVectors(P,c);
+  const angle = Ac.angleTo(Pc);
+  // Now would should be able to rotate about cn move A into P.
+  // If not, we are doing something wrong!
+  // now we will check that the rotation about the axis really
+  // places A in the plane
+  var trans = new THREE.Matrix4();
+  trans.makeTranslation(-c.x,-c.y,-c.z);
+  var trans_i = new THREE.Matrix4();
+  trans_i.makeTranslation(c.x,c.y,c.z);
+  var rt = new THREE.Matrix4();
+  // Now here is a problem....what should the sign of this angle
+  // be?  I am sure it is not computed as a singed angle!
+
+  rt.makeRotationAxis(cn,angle);
+
+  var finalMatrix = new THREE.Matrix4().identity();
+  finalMatrix.premultiply(trans);
+  finalMatrix.premultiply(rt);
+  finalMatrix.premultiply(trans_i);
+  const Aprime = A.clone().applyMatrix4(finalMatrix);
+
+  const nangle = -angle;
+
+  var nrt = new THREE.Matrix4();
+  nrt.makeRotationAxis(cn,nangle);
+
+  var nfinalMatrix = new THREE.Matrix4().identity();
+  nfinalMatrix.premultiply(trans);
+  nfinalMatrix.premultiply(nrt);
+  nfinalMatrix.premultiply(trans_i);
+  const nAprime = A.clone().applyMatrix4(nfinalMatrix);
+
+//  console.assert(near(nAprime.x,0));
+//  console.log("A,Aprime,nAprime",A,Aprime,nAprime);
+  if (near(pn.dot(nAprime),0)) {
+    return nangle;
+  } else {
+    return angle;
+  }
+
+}
+
+// At present this seems to be rotating
+// completely around the z axis (not taking the first
+// opportunity reach the first YZ plane
+function testComputeRotationAngleIntoPlane() {
+  const NUMTEST = 5;
+  // We will places the axis in the Z direction,
+  // at a point a little to the left and above
+  const axis = new THREE.Vector3(0,0,1);
+  const c = new THREE.Vector3(1,1,1);
+  const c2 = new THREE.Vector3().addVectors(c,axis);
+
+  // We will use the Y-Z plane
+  const pn = new THREE.Vector3(1,0,0);
+  const p = new THREE.Vector3(0,0,0);
+  // Now we will var y the points in the Y direction
+  for(var i = 0; i < NUMTEST; i++) {
+    const A = new THREE.Vector3(1,i+2,1);
+    const r = pointToLineDist(A,c,c2);
+    console.log("i,r",i,r);
+    console.log("A",A);
+    console.log("c,c2",c,c2);
+    var angle = computeRotationAngleIntoPlane(A,c,axis,r,pn,p);
+    if (angle > Math.PI/2) {
+      angle = Math.PI - angle;
+    }
+    console.log("angle ", angle * 180 / Math.PI);
+    // now we will check that the rotation about the axis really
+    // places A in the plane
+    var trans = new THREE.Matrix4();
+    trans.makeTranslation(-c.x,-c.y,-c.z);
+    var trans_i = new THREE.Matrix4();
+    trans_i.makeTranslation(c.x,c.y,c.z);
+    var rt = new THREE.Matrix4();
+    rt.makeRotationAxis(axis,angle);
+
+    var finalMatrix = new THREE.Matrix4().identity();
+    finalMatrix.premultiply(trans);
+    finalMatrix.premultiply(rt);
+    finalMatrix.premultiply(trans_i);
+    const Aprime = A.clone().applyMatrix4(finalMatrix);
+
+    console.assert(near(Aprime.x,0));
+    console.log("A,Aprime",A,Aprime);
+  }
+}
+
+function testComputeRotationAngleIntoPlaneSpecific() {
+  const axis = new THREE.Vector3(-0.2817571131513068,-0.7663416965396759,-0.5773502691896258);
+
+  const c = new THREE.Vector3(-0.19923236535683433,-0.5418854103292079,-0.4082482904638629);
+
+//  const c = new THREE.Vector3(1,1,1);
+  const c2 = new THREE.Vector3().addVectors(c,axis);
+
+  // We will use the Y-Z plane
+  const pn = new THREE.Vector3(1,0,0);
+  const p = new THREE.Vector3(0,0,0);
+  // Now we will var y the points in the Y direction
+
+  const A = new THREE.Vector3(0.1704379832499971,-0.9853684051488933,2.220446049250313e-16);
+
+  const r = pointToLineDist(A,c,c2);
+  console.assert(near(r,0.7071067811865477));
+  console.log("A",A);
+  console.log("c,c2",c,c2);
+  var angle = computeRotationAngleIntoPlane(A,c,axis,r,pn,p);
+  // This is likely to be wrong half the time, I guess.
+//  if (angle > Math.PI/2) {
+//    angle = Math.PI - angle;
+  //  }
+  console.log("angle ", angle * 180 / Math.PI);
+  // now we will check that the rotation about the axis really
+  // places A in the plane
+  var trans = new THREE.Matrix4();
+  trans.makeTranslation(-c.x,-c.y,-c.z);
+  var trans_i = new THREE.Matrix4();
+  trans_i.makeTranslation(c.x,c.y,c.z);
+  var rt = new THREE.Matrix4();
+  rt.makeRotationAxis(axis,angle);
+
+  var finalMatrix = new THREE.Matrix4().identity();
+  finalMatrix.premultiply(trans);
+  finalMatrix.premultiply(rt);
+  finalMatrix.premultiply(trans_i);
+  const Aprime = A.clone().applyMatrix4(finalMatrix);
+
+//  console.assert(near(Aprime.x,0));
+//  console.log("A,Aprime",A,Aprime);
+}
+function testComputeRotationIntoPlane() {
+  const c = new THREE.Vector3(1,1,1);
+  const cn = new THREE.Vector3(0,0,1).normalize();
+  const r = 3;
+  const p = new THREE.Vector3(0,0,0);
+  const pn = new THREE.Vector3(0,1,0).normalize();
+  const A = new THREE.Vector3(1,2,3);
+
+  var [pnt,t] = computeRotationIntoPlane(A,c,cn,r,pn,p);
+  console.log("Point: ",pnt);
+  // The should be two points...
+//  console.assert(pnts.length == 2);
+  // The points are in the plane...
+  console.assert(near(pnt.z,1));
+//  console.assert(near(pnts[1].y,0));
+  // the points have x values of 1/2
+//  console.assert(near(Math.abs(pnt.x),1));
+  console.assert(near(Math.abs(pnt.y),0));
+
+}
+
+function testComputeRotationIntoPlane2() {
+  const c = new THREE.Vector3(0.2763168314822806,
+                              -0.7646590249937488,
+                              -0.5749149571305298);
+  const cn = new THREE.Vector3(0.2774872962675397,
+                               -0.7678980837824754,
+                               -0.5773502691896258).normalize();
+  const r = 3;
+  const p = new THREE.Vector3(0,0,0);
+  const pn = new THREE.Vector3(0,1,0).normalize();
+  const A = new THREE.Vector3(1,2,3);
+  var [pnt,t] = computeRotationIntoPlane(A,c,cn,r,pn,p);
+
+  console.assert(near(pnt.dot(pn),0));
+}
+
+// compute the angle of rotation needed to move the from vector
+// to the to vector by rotating about the axis.
+// Assume the axis is specified by a vector from the origin,
+// as are from and to.
+function computeRotation(axis,from,to) {
+  // My plan is to use "angleBetween" on the rejections...
+  const an = axis.clone().normalize();
+  const rfrom = vectorRejectionOnto(from,axis);
+  const rto = vectorRejectionOnto(to,axis);
+  // hear I want to make sure the cross product of from and to is parallel to axis.
+  const c = new THREE.Vector3().crossVectors(rto,rfrom).normalize();
+  console.log("axis, cross",an,c);
+  return rfrom.angleTo(rto);
+}
+
+function testComputeRotation() {
+  const axis = new THREE.Vector3(1,0,1).normalize();
+  const from = new THREE.Vector3(2,0,1).normalize();
+  const to = new THREE.Vector3(1,0,2).normalize();
+  const theta = computeRotation(axis,from,to);
+  console.log("theta = ", theta * 180/Math.PI);
+  const rt = new THREE.Matrix4();
+  rt.makeRotationAxis(axis,theta);
+  const fc = from.normalize().clone().applyMatrix4(rt);
+  console.assert(vnear(fc,to.clone().normalize()));
+}
+function testComputeRotationFull() {
+  const NUMTEST = 5;
+  const DELTA = Math.PI / 13;
+  const axis = new THREE.Vector3(1,2,3).normalize();
+  for(var i = 0; i < NUMTEST; i++) {
+    const from = new THREE.Vector3(2,1,i).normalize();
+    const theta = DELTA * i;
+    const rt = new THREE.Matrix4();
+    rt.makeRotationAxis(axis,theta);
+    const to = from.clone().applyMatrix4(rt);
+    const theta_test = computeRotation(axis,from,to);
+    console.assert(near(theta,theta_test));
+  }
+}
+
+// Return tau to achieve this psi
+//
+function computeTauToAchievePsi(NBu,NCu,psi,initTau = 0,L = 1,debug = false) {
+  // First, we copy the old prism in exactly the same position
+
+  var abs = new AbstractPrism(L,NBu,NCu);
+  if (!abs) {
+    debugger;
+  }
+  // In fact this algorithm more or less assumes these are in balance...
+
+  const old = CreatePrism(abs,PRISM_FACE_RATIO_LENGTH);
+
+  // By setting tau = 0 here, I am doing something weird....
+  // I'm not sure this is legitimate. My purpose is
+  // really to put the thing in balance...I might need a special
+  // routine for that...
+  const [A,psi_balance,D] = AfromLtauNbNc(L,initTau,NBu,NCu);
+  if (debug) console.log("INIT_TAU",initTau);
+
+  const rbal = new THREE.Matrix4();
+  rbal.makeRotationAxis(new THREE.Vector3(0,0,1),psi_balance);
+
+  applyMatrix4ToPrism(old,rbal);
+  old.p.Nb.applyMatrix4(rbal);
+  old.p.Nc.applyMatrix4(rbal);
+
+  // I was using clone here, but it seems to be unreliable!!!
+  var nu = Object.assign({},old);
+  nu.p = Object.assign({}, old.p);
+  nu.b = new THREE.Vector3(old.b.x,old.b.y,old.b.z);
+  nu.c = new THREE.Vector3(old.c.x,old.c.y,old.c.z);
+
+  nu.tb = new THREE.Vector3(old.tb.x,old.tb.y,old.tb.z);
+  nu.lb = new THREE.Vector3(old.lb.x,old.lb.y,old.lb.z);
+  nu.rb = new THREE.Vector3(old.rb.x,old.rb.y,old.rb.z);
+
+  nu.tc = new THREE.Vector3(old.tc.x,old.tc.y,old.tc.z);
+  nu.lc = new THREE.Vector3(old.lc.x,old.lc.y,old.lc.z);
+  nu.rc = new THREE.Vector3(old.rc.x,old.rc.y,old.rc.z);
+
+  let joinToC = false;
+
+  console.assert(!vnear(new THREE.Vector3(0,0,0),
+                        (joinToC ? nu.p.Nc : nu.p.Nb)));
+
+  // Then we translate along the axis of the old prism
+  var av;
+
+  if (joinToC)
+  {
+    var temp = old.c.clone();
+    temp.sub(nu.b);
+    av = temp;
+  }
+  else {
+    var temp = old.b.clone();
+    temp.sub(nu.c);
+    av = temp;
+  }
+  var trans = new THREE.Matrix4();
+  trans.makeTranslation(av.x,av.y,av.z);
+
+  applyMatrix4ToPrism(nu,trans);
+
+  var p_trans = new THREE.Matrix4();
+  (joinToC) ?
+    p_trans.makeTranslation(-nu.b.x,-nu.b.y,-nu.b.z):
+    p_trans.makeTranslation(-nu.c.x,-nu.c.y,-nu.c.z);
+  var p_trans_r = new THREE.Matrix4();
+  (joinToC) ?
+    p_trans_r.makeTranslation(nu.b.x,nu.b.y,nu.b.z) :
+    p_trans_r.makeTranslation(nu.c.x,nu.c.y,nu.c.z);
+
+  applyMatrix4ToPrism(nu,p_trans);
+
+  var av =
+      (joinToC) ?
+      new THREE.Vector3(0,0,0).subVectors(nu.c,nu.b):
+      new THREE.Vector3(0,0,0).subVectors(nu.b,nu.c);
+
+  // At this, point b had better be at the origin...
+  if (joinToC) {
+    console.assert(near(nu.b.length(),0,1e-4));
+  } else {
+    console.assert(near(nu.c.length(),0,1e-4));
+  }
+
+  // At this point I may be making an incorrect assumptiong that
+  // the up vectors are the same. It is not clear to me what
+  // the quaternion is doing with the up vectors. The basic goal
+  // here is to rotate the new prism so that it is face-to-face
+  // with the old one.
+
+  // Then we rotate about the joint (we may actually do this first)
+  var Q_to_Nb = new THREE.Quaternion();
+  var Q_to_Nc = new THREE.Quaternion();
+  if (joinToC) {
+    Q_to_Nb.setFromUnitVectors(nu.p.Nb,
+                               new THREE.Vector3(0,0,-1));
+    Q_to_Nc.setFromUnitVectors(new THREE.Vector3(0,0,1),
+                               nu.p.Nc);
+  } else {
+    Q_to_Nc.setFromUnitVectors(nu.p.Nc,
+                               new THREE.Vector3(0,0,1));
+    Q_to_Nb.setFromUnitVectors(new THREE.Vector3(0,0,-1),
+                               nu.p.Nb);
+  }
+  console.assert(!vnear(new THREE.Vector3(0,0,0),(joinToC ? nu.p.Nc : nu.p.Nb)));
+
+  var Rqb = new THREE.Matrix4().makeRotationFromQuaternion(Q_to_Nb);
+  var Rqc = new THREE.Matrix4().makeRotationFromQuaternion(Q_to_Nc);
+  var Unknown = new THREE.Matrix4().identity();
+  if (joinToC) {
+    applyQuaternionToPrism(nu,Q_to_Nb);
+    applyQuaternionToPrism(nu,Q_to_Nc);
+    Unknown.multiplyMatrices(Rqc,Rqb);
+  } else {
+    applyQuaternionToPrism(nu,Q_to_Nc);
+    applyQuaternionToPrism(nu,Q_to_Nb);
+    Unknown.multiplyMatrices(Rqb,Rqc);
+  }
+
+  console.assert(!vnear(new THREE.Vector3(0,0,0),(joinToC ? nu.p.Nc : nu.p.Nb)));
+
+
+  // http://mathforum.org/library/drmath/view/69136.html
+
+  // Now to use this we need parameters.
+  // The axis is the norm of circle, cn.
+  const axis = nu.p.Nb;
+//  axis = NBu; // ???
+  const cn = axis;
+  // The plane we want to rotate into the is X-Z plane (for psi = 0)
+  const pn = new THREE.Vector3(1,0,0);
+  const p = new THREE.Vector3(0,0,0);
+  // What is the center of the circle?
+  // We can pick any point on the axis...
+  const c = axis.clone().normalize();
+  // Now how do we find the radius?
+  const p1 = p;
+  const p2 = axis;
+  const P = nu.b.clone(); // or A?
+  const r = pointToLineDist(P,p1,p2);
+  const M = closestPoint(P,p1,p2);
+
+  var compensationAngle = computeRotationAngleIntoPlane(P,M,cn,r,pn,p);
+
+  if (debug) {
+    console.log("axis",axis);
+    console.log("P ",P);
+    console.log("M ",M);
+    console.log("r ",r);
+    console.log("cn,r,pn,p ",cn,r,pn,p);
+    console.log("compensationAngle", compensationAngle * 180/Math.PI);
+  }
+
+  if (compensationAngle === null) {
+    return [null,null];
+  }
+
+  const rt = new THREE.Matrix4();
+  rt.makeRotationAxis(nu.p.Nb,compensationAngle);
+
+  const [computedTau,u] = computeThetaU(rt);
+  if (debug) {
+    console.assert(near(computedTau,compensationAngle));
+    console.log("computedTau, compensationAngle",computedTau * 180/Math.PI,compensationAngle * 180/Math.PI);
+  }
+
+  applyMatrix4ToPrism(nu,rt);
+
+  applyMatrix4ToPrism(nu,p_trans_r);
+
+  var finalMatrix = new THREE.Matrix4().identity();
+  var rotations = new THREE.Matrix4().identity();
+  // Question: Does this work if we take out the translational
+  // elements? YES IT DOES.
+  finalMatrix.premultiply(trans);
+  finalMatrix.premultiply(p_trans);
+  rotations.premultiply(Unknown);
+  rotations.premultiply(rt);
+  finalMatrix.premultiply(rotations);
+  finalMatrix.premultiply(p_trans_r);
+  return [computedTau,finalMatrix]
+}
+
+function iterativeComputeTauToAchievePsi(NBu,NCu,psi,initTau = 0,L = 1,MAX_ITERS = 10,debug = false) {
+
+  var tau = initTau;
+  for(var i = 0; i < MAX_ITERS; i++) {
+    var [tau,rt] = computeTauToAchievePsi(NBu,NCu,psi,tau,L,debug);
+  }
+  return tau;
+}
+
+function bruteForceTauComputation(Nb,Nc) {
+  const NUM = 360;
+  const DELTA = (2 * Math.PI) / 360;
+  const L0 = 1;
+  const P0 = new AbstractPrism(
+    L0,
+    Nb,
+    Nc,
+    null);
+
+  const PRISM_FACE_RATIO_LENGTH = 1/2;
+  var p_temp = CreatePrism(P0,PRISM_FACE_RATIO_LENGTH);
+
+  let B = new THREE.Vector3(0,0,-L0/2);
+  let C = new THREE.Vector3(0,0,L0/2);
+
+  var min_tightness_tau = -1;
+  var max_tightness_tau = -1;
+  var min_tightness = 99999;
+  var max_tightness = -1;
+
+  for(var tau = 0; tau < 2 * Math.PI; tau += DELTA) {
+//    console.log("TAU",tau * 180 / Math.PI);
+
+    var [resK,resM,local_p_i,rt] =
+      computeInternal(L0,B,C,tau,p_temp,Nb,Nc);
+
+    const r = resM[0];
+    const d = resM[2];
+    const tightness = Math.abs(d / r);
+
+    if (tightness > max_tightness) {
+      max_tightness = tightness;
+      max_tightness_tau = tau;
+    }
+    if (tightness < min_tightness) {
+      min_tightness = tightness;
+      min_tightness_tau = tau;
+    }
+  }
+  return [[max_tightness,max_tightness_tau],
+          [min_tightness,min_tightness_tau]];
+}
+
+function testBruteForceTauComputation() {
+  const NUM_TEST = 4;
+  for(var i = 0; i < NUM_TEST; i++) {
+    var Nbx = -1 + i*(2/NUM_TEST);
+    for(var j = 0; j < NUM_TEST; j++) {
+      var Nby = -1 + j*(2/NUM_TEST);
+      for(var k = 0; k < NUM_TEST; k++) {
+        var Ncx = -1 + k*(2/NUM_TEST);
+        for(var l = 0; l < NUM_TEST; l++) {
+          var Ncy = -1 + l*(2/NUM_TEST);
+          if ((Nbx != Ncx) || (Nby != Ncy)) {
+            let Nb = new THREE.Vector3(Nbx,Nby,-1);
+            let Nc = new THREE.Vector3(Ncx,Ncy,1);
+            Nb.normalize();
+            Nc.normalize();
+            const [[max_tightness,max_tightness_tau],
+                   [min_tightness,min_tightness_tau]]
+                  = bruteForceTauComputation(Nb,Nc);
+            console.assert(max_tightness > 1);
+            // because we are using only degree resolution, this is a bit course
+            console.assert(near(min_tightness,0,0.10));
+          }
+        }
+      }
+    }
+  }
+}
+
+function testIterativeComputeTauToAchievePsi() {
+
+  {
+    const NBu = new THREE.Vector3(-1/2,-1/2,-1).normalize();
+    const NCu = new THREE.Vector3(0,0,1).normalize();
+
+    const tau = iterativeComputeTauToAchievePsi(NBu,NCu,0,0,1,10,false);
+    console.assert(near(tau,0));
+  }
+
+  {
+    const NBu = new THREE.Vector3(-1/2,-1/2,-1).normalize();
+    const NCu = new THREE.Vector3(1,0,1).normalize();
+
+    const tau = iterativeComputeTauToAchievePsi(NBu,NCu,0,0,1,10,false);
+    const tau_d = tau * 180 / Math.PI;
+    console.assert(tau_d > 11.7);
+    console.assert(tau_d < 11.8);
+  }
+
+}
+
+function testComputeTauToAchievePsi() {
+
+  const NUM_TEST = 2;
+  const L = 1;
+  B = new THREE.Vector3(0,0,-1/2);
+  C = new THREE.Vector3(0,0,1/2);
+  var n = 0;
+  var e = 0;
+
+  for(var i = 0; i < NUM_TEST; i++) {
+    var Nbx = -1 + i*(2/NUM_TEST);
+    for(var j = 0; j < NUM_TEST; j++) {
+      var Nby = -1 + j*(2/NUM_TEST);
+      for(var k = 0; k < NUM_TEST; k++) {
+        var Ncx = -1 + k*(2/NUM_TEST);
+        for(var l = 0; l < NUM_TEST; l++) {
+          var Ncy = -1 + l*(2/NUM_TEST);
+          if (!((Nbx == 0) && (Nby == 0) && (Ncx == 0) && (Ncy ==0))) {
+            let Nb = new THREE.Vector3(Nbx,Nby,-1);
+            let Nc = new THREE.Vector3(Ncx,Ncy,1);
+            Nb.normalize();
+            Nc.normalize();
+            if (!vnear(Nb,Nc.clone().multiplyScalar(-1))) {
+              const initTau = Math.PI/36;
+              const [tau,rt] = computeTauToAchievePsi(Nb,Nc,0,initTau);
+              if (near(tau, Math.PI/2)) {
+//                                debugger;
+              }
+              if (tau === null) {
+                console.log("FAILED: ",Nb,Nc);
+                e++;
+              } else {
+                n++;
+
+                console.log(" computed tau for 0:",Nb,Nc,tau*180/Math.PI);
+                // now test that rt (being a rotation of Tau)
+                // produces a toriod: rt(C) = D, rt(D.x,D.y,-D.z) = B
+                let D = C.clone().applyMatrix4(rt);
+                let A = new THREE.Vector3(-D.x,D.y,-D.z);
+                let Ap = A.clone().applyMatrix4(rt);
+                console.assert(vnear(Ap,B));
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+  console.log("ERRORS : ",e,n);
 }
 
 // TODO--I think this function needs to apply
@@ -1177,6 +1912,10 @@ function isRigidTransformation(R) {
     return false;
   }
   console.assert(checkNonScaling(R));
+  if (!checkNonScaling(R)) {
+    debugger;
+    return false;
+  }
   const s = R.elements[15];
   console.assert(near(s,1));
 
@@ -1199,6 +1938,33 @@ function isRigidTransformation(R) {
   console.assert(near(T.elements[6],0));
   console.assert(near(T.elements[7],0));
   console.assert(near(T.elements[8],1));
+  if (!near(T.elements[0],1)) {
+    return false;
+  }
+  if (!near(T.elements[1],0)) {
+    return false;
+  }
+  if (!near(T.elements[2],0)) {
+    return false;
+  }
+  if (!near(T.elements[3],0)) {
+    return false;
+  }
+  if (!near(T.elements[4],1)) {
+    return false;
+  }
+  if (!near(T.elements[5],0)) {
+    return false;
+  }
+  if (!near(T.elements[6],0)) {
+    return false;
+  }
+  if (!near(T.elements[7],0)) {
+    return false;
+  }
+  if (!near(T.elements[8],1)) {
+    return false;
+  }
 
   return true;
 }
@@ -1216,11 +1982,12 @@ function computeThetaU(R) {
   // else we compute (A.x) when val = -1.
   const thetaP = (near(val,-1)) ? Math.PI :  Math.acos(val);
 
-  var PROBLEM = false;
-  if (near(val,-1)) {
-    console.log("WARNING!!! TRACE DEGENERATE");
-    PROBLEM = true;
-  }
+  // var PROBLEM = false;
+  // if (near(val,-1)) {
+  //   console.log("WARNING!!! TRACE DEGENERATE");
+  //   PROBLEM = true;
+  //   debugger;
+  // }
 
   console.assert(!isNaN(thetaP));
 
@@ -1334,8 +2101,14 @@ function computePhi(L,R,B) {
     debugger;
   }
   //  let phi = (near(da,L)) ? 0 : Math.acos(da / L);
-  let phi = (near(Math.abs(da),Math.abs(L))) ? 0 : Math.acos(da / L);
-
+  let phi;
+  if (da/L < -1) {
+    phi = -Math.PI;
+  } else if (da/L > 1) {
+    phi = 0;
+  } else {
+    phi = (near(Math.abs(da),Math.abs(L))) ? 0 : Math.acos(da / L);
+  }
   if (isNaN(phi)) debugger;
   return phi;
 }
@@ -1457,6 +2230,13 @@ function runChaslesTests() {
 }
 
 function runUnitTests() {
+  testClosestPoint();
+  testComputeRotation();
+  testComputeRotationFull();
+
+  testComputeRotationIntoPlane();
+  testComputeRotationIntoPlane2();
+
   runChaslesTests();
   testThreeIsRightHanded();
   testPointOnAxisRotationMatrix();
@@ -1471,4 +2251,13 @@ function runUnitTests() {
   testPointAxisTauNeg180();
   testAfromLfailureCase1();
   testAfromLtauMultiple();
+  testComputeTauToAchievePsi();
+
+  testComputeRotationAngleIntoPlane();
+  testComputeRotationAngleIntoPlaneSpecific();
+  testIterativeComputeTauToAchievePsi();
+
+  testDistancePointToPlane();
+
+  testBruteForceTauComputation();
 }
