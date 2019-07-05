@@ -1599,15 +1599,26 @@ function RenderSegmentedHelix(solid,tau_v) {
     // direction to place it in a circle at Ba, then
     // add a protractor between them.p
     var Cpara = C.clone();
-    var Hdir = H.clone().clampLength(d,d);
+    var Hdir = Hnmlzd.clone().clampLength(d,d);
     Cpara.sub(Hdir);
 
     cSphere(am.JOINT_RADIUS/5,Cpara,"green");
     // a nice greenline parallel to the helix axis should help..
 
-    lineBetwixt(C,Cpara,"green");
+    lineBetwixt(C,Cpara,"back");
     // here I attempt to create the visually important
     // theta protractor
+    // A test here is that the cross of the vectors
+    // should be equal axis vector...
+    {
+      // This is just a test....
+      const BBa = new THREE.Vector3().subVectors(B,Ba);
+      const CparaBa = new THREE.Vector3().subVectors(Cpara,Ba);
+      const perpToProtractor = new THREE.Vector3().crossVectors(BBa,CparaBa);
+      const crossPerpVH = new THREE.Vector3().crossVectors(perpToProtractor,Hdir);
+      console.assert(vnear(crossPerpVH,new THREE.Vector3()));
+    }
+
     {
       createProtractor(THETA_SPRITE,"theta = ","black",B,Ba,Cpara);
     }

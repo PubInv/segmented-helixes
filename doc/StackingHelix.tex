@@ -1065,6 +1065,7 @@ we could pack them into a conveneient space by computing the $\tau$ of the tight
 If we had a means to change $\tau$, perhaps via motors in a robot arm, we would have a smoothly telescoping and contracting
 robot arm.
 
+
 \subsection{An Algorithm for Finding $\tau$ to match $\psi$}
 
 Our software provides a subroutine to iterative find a $\tau$ to produce
@@ -1078,6 +1079,17 @@ producing $\tau$ as a function of a desired $\psi$.
 This algorithm allows us to experimentally make the observations
 noted above; that is, that starting from a torus, changing tau allows
 smooth extension of tightness in either direction.
+
+It is interesting to note that the maximum tightness is when the normals are symmetric is always acheived when $\tau = \pi$.
+However, in general this is not so; randomly chosen normals will tend to have the maximum extent (tightness) when $\tau$ is
+close to but not quite 180$\degree$. Similarly, for symmetric normals $\tau = 0$ produces a torus, but in general to produce
+a torus a $\tau$ close to but not exactly equal to $0$ is required.
+
+For any chosen set of normals, our software computes the twist $\tau$ which maximizes tightness and the twist which minimizes it (producing a torus.)
+The interactive software convincing demonstrates that such values always exist; however we do not know how to calculate them except by
+simple search. Since the conputation of the the tightness is essentially constant time, this works well enough, though we make hope
+a formula or algorithm could be given in th future.
+
 
 
 \section{Applying to The Boerdijk-Coxeter Tetrahelix}
