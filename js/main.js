@@ -2003,6 +2003,97 @@ function hideClassNum(solid,cnum,visibility) {
   }
 }
 
+
+// Note: This is an attempt to match the LaTeX paper and
+// to make these fascinating shapes more accessible by giving them
+// nicknames. The order here is odd, but that because I render the
+// order in terms of the order of the travel
+function RowToNickName(solid,num) {
+  switch(solid) {
+  case "TETRAHEDRON":
+    switch(num) {
+    case 0:
+      return "Tetrahelix";
+    case 1:
+      return "Tetratorus";
+      break;
+    }
+    break;
+  case "CUBE":
+    switch(num) {
+    case 0:
+      return "Boxbeam";
+    case 4:
+      return "Staircase";
+    case 5:
+      return "Blockhelix";
+    case 6:
+      return "Cubatorus";
+      break;
+    }
+    break;
+  case "OCTAHEDRON":
+    switch(num) {
+    case 0:
+      return "Octabeam";
+    case 1:
+      return "Octaspikey";
+    case 3:
+      return "Octamedium";
+    case 4:
+      return "Octagear";
+    case 12:
+      return "Treestar";
+      break;
+    }
+    break;
+  case "DODECAHEDRON":
+    switch(num) {
+    case 0:
+      return "Dodecadoubler";
+    case 1:
+      return "Dodecasshaft" ;
+    case 2:
+      return "Dodecagear";
+    case 5:
+      return "The Alternater";
+    case 6:
+      return "Dodecacorkscrew";
+    case 7:
+      return "Dodecadonut";
+    case 35:
+      return "Dodecabeam";
+    }
+    break;
+  case "ICOSAHEDRON":
+    switch(num) {
+    case 36:
+      return "Pearlshaft";
+    case 23:
+      return "Quasi-planar";
+    case 1:
+      return "Two Strands";
+    case 34:
+      return "Slow Twist";
+    case 4:
+      return "Rock Candy";
+    case 0:
+      return "Icosa Tree Star";
+    case 21:
+      return "Icosacorkscrew";
+    case 3:
+      return "Planar point cluster";
+    case 22:
+      return "Big Icosacorkscrew";
+    case 33:
+      return "The Wheel";
+      break;
+    }
+    break;
+  }
+  return null;
+}
+
 function registerHelix(name,number,solid_num,analogs,face,tau,radius,theta,travel,helix_angle,class_num) {
   var table = document.getElementById("platonichelices");
 
@@ -2014,6 +2105,7 @@ function registerHelix(name,number,solid_num,analogs,face,tau,radius,theta,trave
 
   var cnt = 0;
   var button_c = row.insertCell(cnt++);
+  var nickname_c = row.insertCell(cnt++);
   var totalnum_c = row.insertCell(cnt++);
   var solidnum_c = row.insertCell(cnt++);
   var name_c = row.insertCell(cnt++);
@@ -2029,7 +2121,9 @@ function registerHelix(name,number,solid_num,analogs,face,tau,radius,theta,trave
   button_c.innerHTML = "<button onclick='renderhelixrow(\""+
     name+"\","+face+","+
     tau+
-  ")'>Draw</button>";
+    ")'>Draw</button>";
+  const r_to_nn = RowToNickName(name,solid_num);
+  nickname_c.innerHTML = r_to_nn ? r_to_nn : "";
   totalnum_c.innerHTML = number;
   solidnum_c.innerHTML = solid_num;
   name_c.innerHTML = name;
