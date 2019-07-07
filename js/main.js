@@ -587,8 +587,6 @@ function initGraphics() {
   var origin = new THREE.Vector3(0, 0, 0);
   am.camera.lookAt(origin);
 
-  //    am.camera.quaternion.setFromAxisAngle(new THREE.Vector3(0,1,0), (Math.PI/2));
-
   am.scene = new THREE.Scene();
   am.scene.fog = new THREE.Fog(0x000000, 500, 10000);
 
@@ -637,9 +635,32 @@ function initGraphics() {
 
   ground.receiveShadow = true;
 
-
   // HACK:  These diemensions are probably not right here!
   gridInit(am.grid_scene, am.playgroundDimensions);
+
+  {
+    var xdir = new THREE.Vector3( 1, 0, 0 );
+    var ydir = new THREE.Vector3( 0, 1, 0 );
+    var zdir = new THREE.Vector3( 0, 0, 1 );
+
+    // a good idea
+    xdir.normalize();
+    ydir.normalize();
+    zdir.normalize();
+
+    var origin = new THREE.Vector3( 0, 0, 0 );
+    var length = 1.5;
+    var hex = 0xffff00;
+
+    var xarrowHelper = new THREE.ArrowHelper( xdir, origin, length, 0xff0000 );
+    var yarrowHelper = new THREE.ArrowHelper( ydir, origin, length, 0x00ff00 );
+    var zarrowHelper = new THREE.ArrowHelper( zdir, origin, length, 0x0000ff );
+
+    am.scene.add( xarrowHelper );
+    am.scene.add( yarrowHelper );
+    am.scene.add( zarrowHelper );
+  }
+
 
   am.container.innerHTML = "";
 
@@ -648,6 +669,9 @@ function initGraphics() {
   am.sceneOrtho = new THREE.Scene();
 
   window.addEventListener('resize', onWindowResize, false);
+
+
+
 
 }
 
@@ -1059,16 +1083,16 @@ function format_num(num,digits) {
 // I'm treating a label spreat as an object having postion p,
 // color c, and text t.
 var A_SPRITE = { p: new THREE.Vector3(0,0,0),
-                 c: "green",
+                 c: "red",
                  t: "A"};
 var B_SPRITE = { p: new THREE.Vector3(0,0,0),
-                 c: "green",
+                 c: "blue",
                  t: "B"};
 var C_SPRITE = { p: new THREE.Vector3(0,0,0),
                  c: "green",
                  t: "C"};
 var D_SPRITE = { p: new THREE.Vector3(0,0,0),
-                 c: "green",
+                 c: "purple",
                  t: "D"};
 var PHI_SPRITE = { p: new THREE.Vector3(0,0,0),
                  c: "green",
@@ -1342,7 +1366,7 @@ function computeInternal(L0,B,C,tau_v,p_i,Nb,Nc) {
   if (psi > Math.PI) psi = 2*Math.PI - psi;
   let ratio = psi/tau_v;
 //  console.log(ratio,psi * 180/Math.PI,tau_v * 180/Math.PI);
-  return [resK,resM,p_i,rt];
+  return [resK,resM,p_i,rt,A,D];
 }
 
 function RenderSegmentedHelix(solid,tau_v) {
@@ -1412,7 +1436,7 @@ function RenderSegmentedHelix(solid,tau_v) {
 
   var p_temp = CreatePrism(GLOBAL_P0,PRISM_FACE_RATIO_LENGTH);
 
-  [resK,resM,p_i,rt] = computeInternal(L0,B,C,tau_v,p_temp,Nb,Nc);
+  [resK,resM,p_i,rt,A,D] = computeInternal(L0,B,C,tau_v,p_temp,Nb,Nc);
 
   const [[max_tightness,max_tightness_tau],
           [min_tightness,min_tightness_tau]]
@@ -1510,6 +1534,14 @@ function RenderSegmentedHelix(solid,tau_v) {
   D_SPRITE.p = prisms[1][0][7].position.clone();
   A_SPRITE.p = prisms[2][0][6].position.clone();
 
+  // Here we add some larger balls for the purpose of making
+  // the position of A,B,C, and D more clear.
+
+  cSphere(am.JOINT_RADIUS/3,A_SPRITE.p,A_SPRITE.c);
+  cSphere(am.JOINT_RADIUS/3,B_SPRITE.p,B_SPRITE.c);
+  cSphere(am.JOINT_RADIUS/3,C_SPRITE.p,C_SPRITE.c);
+  cSphere(am.JOINT_RADIUS/3,D_SPRITE.p,D_SPRITE.c);
+
 
   if (Ba) {
     // Since we've set the first prism up symmetrically, Ca
@@ -1534,9 +1566,6 @@ function RenderSegmentedHelix(solid,tau_v) {
 
   // These are the "axes" markers...
   create_vertex_mesh(new THREE.Vector3(0,0,0),d3.color("white"));
-  create_vertex_mesh(new THREE.Vector3(1,0,0),d3.color("red"));
-  create_vertex_mesh(new THREE.Vector3(0,1,0),d3.color("green"));
-  create_vertex_mesh(new THREE.Vector3(0,0,1),d3.color("blue"));
 
   // now we would like to draw the axis of the helix...
   // we have the vector H from the PointAxi algorithm.
