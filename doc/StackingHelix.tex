@@ -203,6 +203,40 @@ If we think of the segmented helix as describing a polyline in 3-space, we would
 the properties of that polyline. If we consider only the intrinsic shape of the segmented helix, there are three degrees
 of freedom: $r,d,\theta$. We call these the {\em intrinsic} propertiers of the segmented helix.
 
+\begin{figure}
+     \centering
+     \includegraphics[width=0.80\textwidth]{figures/ABCDFigure.png}
+     \caption{Naming of measures}
+  \label{fig:naming}
+\end{figure}
+
+Figure \ref{fig:naming} demonstrates our conventional concepts. It is a screen shot taken from our interactive software. The
+software allows parallax by supporting interactive rotation, which makes the 3D structure easier to understand; we encourage
+the reader to visit our interactive page as we discuss our naming conventions.
+
+In Figure \ref{fig:naming} and our software, we represent the object as a prism with triangular cross-section, because this is
+the simplest physically realizable macroscopic object that supports a face-to-face connection. In this diagram, the
+points $A,B,C,D$ are represented by the sphere of the same color as the label. The view is roughly in the direction of
+the axis of the sgemented helix, which is drawn as a dark green arrow, pointing in the positve $z$ and positive $x$ direction,
+parallel to the $xz$ plane. For ease of viewing, the entire segmented helix has been raised by two units on the $y$ axis.
+The segment $\overline{BC}$ has coordinate $y = 2$, and is aligned with the $z$-axis, and centered in $z$ direction.
+
+The positive axes $x,y$ and $z$ axes are shown by the red, green and blue axes, respectively.
+Following computer graphics convention, the $y$ axis is oriented vertiacally.
+The points $A,B,C,D$ correspond to $P(0), P(1), P(2)$, and $ P(3)$ for a segmented helix aligned
+to this axis (not the $z$-axis.)
+A thin green polyline represents the segmented helix, and thus connects the joints $A,B,C$, and $D$.
+The points are wrapping around the axis clockwise, with an angle of $\theta = 56.6 \degree$ as
+show by the on-scrreen protractor as the rotation from one point to the next. As will be explained in Section \ref{sec:joint}, $\tau$
+is the face-on-face joint rotation of $45 \degree$.
+The helix angle $\phi = 39.7 \degree$ is rendered by a protractor on the $y = 0$ plane; this the angle between the axis
+and of the helix and the $z$ axis, and therefore the angle of any one segment against the helix angle.
+
+A line is drawn from the blue point $B$ to an black sphere on the helix axis. The point on the helix axis is unlabelled
+in our software, which renders it as a black sphere, but is denoted $B_a$ in this paper. Analogously, $C_a$ is the point
+on the axis closest ot he green point $C$.
+
+
 A segemented helix located in space is completely determined by these parameters, a vector describing the axis
 of the helix, and the position of any one joint.
 
@@ -211,10 +245,12 @@ make a complete rotation?
 
 The following concepts and conventional variable names for them will be related:
 \begin{itemize}
-\item $L$ is the distance between any two adjacent points.
+\item $L$ is the distance between any two adjacent points (that is, between $B$ and $C$, for example.)
+  \item $r$ is the distance between a point and the helix axis (that is, $B$ and $B_a$ for example.)
   \item $\theta$ rotation about the axis between two joints.
   \item $c$ is the length of a chord formed by the projection of the segment between two points projected along the axis of the segmented helix.
-\item $d$ is the distance along the axis of the helix between any two joints.
+  \item $d$ is the distance along the axis of the helix between any two joints ($B_a$ and $C_a$, for example, rendered as a small black and blue
+    sphere, respectively in Figure \ref{fig:naming}.
 \item $\phi$ is the angle between any vector between two adjacent joints and the axis of the helix. In physical screws used in mechanical engineering, this is analogous to the {\em helix angle} \cite{wiki:helixangle}.
   \item $p$ is the pitch of the helix, the distance travelled in one complete rotation.
   \item $s$ is the number of segments in a complete rotation (in general not rational.)
@@ -736,7 +772,7 @@ when the angle-bisectors have a non-zero length and when
 they are not anti-parallel. When the are of zero length, this is
 the degnerate case of a straight line coinciding with all segments.
 In this case the segmented helix has
-This occurs only when $A.x = 0 \wedge A.y = 0 \wedge A.z = -3L/2$.
+This occurs only when $A_x = 0 \wedge A_y = 0 \wedge A_z = -3L/2$.
 In this case:
 \begin{align}
   r &= 0 \\
@@ -755,23 +791,21 @@ the twist $\tau$ at the faces, then $\theta = \tau$.
 
 When $B_b$ and $C_b$ are parallel (pointing in opposite directions),
 the zig-zag degeneracy occurs. Since we are assuming
-the balance of $A$ and $D$, this occurs only when $A.y = 0$.
-In this case:
+the balance of $A$ and $D$, this occurs only when $A_y = 0$.
+In this case (denoting the $x$ component of the $B_a$ vector as $B_{a[x]}$):
 \begin{align}
+  B_{a} &= \begin{bmatrix} B_{a[x]} \\ B_{a[y]} \\ B_{a[z]}  \end{bmatrix} \\
   H &=  C - A \\
   d &= (C - B) \times H \\
   r &= \norm{B_b} / 2 \\
   c &= 2 r\\
-  \phi &= \atantwo{(H.z,H.x)} - \pi/2 \\
+  \phi &= \atantwo{(H_z,H_x)} - \pi/2 \\
   c &= 0 \\
   \theta &= \pi \\
-  B_a.x &= \frac{d\sqrt{1 - (d/L)^2}}{2} \\
-  B_a.y &= 0 \\
-  B_a.z &= -\frac{d^2}{2L} \\
-  B_a &= \begin{bmatrix} B_a.x \\ B_a.y \\ B_a.z  \end{bmatrix} \\
+  B_{a[x]} &= \frac{d\sqrt{1 - (d/L)^2}}{2} \\
+  B_{a[y]} &= 0 \\
+  B_{a[z]} &= -\frac{d^2}{2L} \\
 \end{align}
-(TODO: My code is modifying signs without stated reasons;
-I need to figure that out)
 
 However, the most general case is simpler, and can be worked
 out with standard linear algebra operations. In the math below
@@ -788,14 +822,14 @@ Once $H$ has been calculated, the signed travel along the axis $da$ is
 the scalar projection of a segment $(C - B)$ onto $H$.
 From this $\phi$ is directly calculatable. $\phi$ allows
 a direct calculation of the $x,y$ and $z$ components of the
-point $Ba$ on the axis pointed to by $Bb$.
+point $B_a$ on the axis pointed to by $B_b$.
 $r$ is the distance between $Ba$ and $B$. $c$ and $\theta$
 are easily computed from these values.
 
 \begin{align}
-  H &=  \begin{bmatrix} -2 B_b.y B_b.z \\ 0 \\ 2 B_b.y B_b.x  \end{bmatrix} \\
-  d &= \frac{L B_b.x}{\sqrt{B_b.x^2 + B_b.z^2}}  \\
-  \phi &= \atantwo{(H.z,H.x)} - \pi/2  \\
+  H &=  \begin{bmatrix} -2 B_{b[y]} B_{b[z]} \\ 0 \\ 2 B_{b[y]} B_{b[x]}  \end{bmatrix} \\
+  d &= \frac{L B_{b[x]}}{\sqrt{B_{b[x]}^2 + B_{b[z]}^2}}  \\
+  \phi &= \atantwo{(H_z,H_x)} - \pi/2  \\
   c &= \sqrt{L^2 - d^2} \\
 \end{align}
 
@@ -808,8 +842,8 @@ and that $\sin{\arccos{x}} = \sqrt{1 - x^2}$ it
 can be shown that
 the $x$ and $z$ component of $B_a$ are:
 \begin{align}
-  B_a.x &= \frac{d\sqrt{1 - (d/L)^2}}{2} \\
-  B_a.z &= -\frac{d^2}{2L}
+  B_{a[x]} &= \frac{d\sqrt{1 - (d/L)^2}}{2} \\
+  B_{a[z]} &= -\frac{d^2}{2L}
 \end{align}
 
 However, this computation exposes another special case: when the
@@ -817,16 +851,16 @@ helix angle $\phi$ is $\pi /2$, the segmented helix is
 a torus. In this case the axis point $B_a$ is in fact
 on the $y$-axis, and we need only compute $B_a.y$:
 \begin{align}
-  B_a.y &=  \frac{L B_b.y}{2 B_b.z}
+  B_{a[y]} &=  \frac{L B_{b[y]}}{2 B_{b[z]}}
 \end{align}
-When we are not toriodal, we must take $B_b.x$ into
+When we are not toriodal, we must take $B_{b[x]}$ into
 account, but it is non-zero, so we can divide by it.
 By imagining a plane pressed downward from the
-object axis to the helix axis, we see that $B_a.y$
+object axis to the helix axis, we see that $B_{a[y]}$
 is proportional to a ration of the angle bisector
-$B_b.y/B_b.x$ times the $B_a.x$ value:
+$B_{b[y]}/B_{b[x]}$ times the $B_{a[x]}$ value:
 \begin{align}
-  B_a.y &=  \frac{ B_b.y B_a.x}{ B_b.x}
+  B_{a[y]} &=  \frac{ B_{b[y]} B_{a[x]}}{ B_{b[x]}}
 \end{align}
 
 Having computed all of $B_a$, the remaining intrinsic properties are easily
@@ -951,7 +985,7 @@ when we conjoin objects
 their relationship is always the same.
 After placing $BC$ along
 the $z$-axis, there is always an angle $\psi$ which will
-rotate the points $A$ and $D$ into balance (that is, $(A.x = -D.x) \wedge (A.z = -D.z) \wedge (A.y = D.y)$.
+rotate the points $A$ and $D$ into balance (that is, $(A_x = -D_x) \wedge (A_z = -D_z) \wedge (A_y = D_y)$.
 
 For computer programmers with a graphics library supporting transformation matrices such
 as THREE.js\cite{dirksen2013learning},
@@ -1273,7 +1307,7 @@ or molecules.
      \centering
      \includegraphics[width=0.40\textwidth]{figures/Dodecashaft.png}
      \caption{The Dodecashaft}
-  \label{fig:dodecashaft}
+1  \label{fig:dodecashaft}
 \end{figure}
 \item ``The Dodecadoubler'' (Figure \ref{fig:dodecadoubler}) presents the appearance of being a double helix, even though in fact it is a single helix with
   a simple twist of 72 $\degree$ from the Dodecashaft
@@ -1330,7 +1364,8 @@ The math and the algoritms are simple enough that if coded in a symbolic algebra
 or with careful work, closed-form
 expressions could be produced for all the regular Platonic helices.
 These would be interesting if they happen to be short; we have no reason to
-believe they will be. The same work could be done for the Archimedean solids.
+believe they will be. The same work could be done for the Archimedean solids. The current work would
+serve as a useful validation check and intuition-builder for such work.
 
 There may exist a closed-form expression for twist $\tau$ which produces a desired helix angle $\psi$; we have provided only
 an iterative algorithm for it, which is practical but less elegant.
@@ -1338,7 +1373,12 @@ an iterative algorithm for it, which is practical but less elegant.
 \section{ To Do}
 
 \begin{itemize}
+\item Find the green and red spheres and remove.
+\item change the axis color to Darkgreen
+  \item Add sprites for $B_a$ and $C_a$
+  \item Add a nice diagram of a segmented helix with basic structure.
   \item Modify that so that it truly respects $\psi$ as an input.
+    \item ``Put number of object controls'' on same line as heading to save space.
 \item Add citation to our own GitHub repo.
 \item Provide explanation, graphically, if need be, for
   the computation of $B_{ax}, B_{ay}, B_{az}$ in the general cases.
