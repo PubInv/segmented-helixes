@@ -140,35 +140,32 @@ function labelAxis(width, data, direction){
 // https://stemkoski.github.io/Three.js/Sprite-Text-Labels.html
 function makeTextSprite( message, parameters, color = "yellow" )
 {
-	if ( parameters === undefined ) parameters = {};
+  if ( parameters === undefined ) parameters = {};
 
-	var fontface = parameters["fontface"] || "Helvetica";
-        var fontsize = parameters["fontsize"] || 70;
-	var canvas = document.createElement('canvas');
-	var context = canvas.getContext('2d');
-	context.font = fontsize + "px " + fontface;
+  var fontface = parameters["fontface"] || "Helvetica";
+  var fontsize = parameters["fontsize"] || 70;
+  var canvas = document.createElement('canvas');
+  var context = canvas.getContext('2d');
+  context.font = fontsize + "px " + fontface;
 
-	// get size data (height depends only on font size)
-	var metrics = context.measureText( message );
-	var textWidth = metrics.width;
+  // get size data (height depends only on font size)
+  var metrics = context.measureText( message );
+  var textWidth = metrics.width;
 
+  // text color
+  context.fillStyle = color;
 
-	// text color
-        context.fillStyle = color;
+  context.fillText( message, 0, fontsize);
 
-	context.fillText( message, 0, fontsize);
+  // canvas contents will be used for a texture
+  var texture = new THREE.Texture(canvas)
+  texture.minFilter = THREE.LinearFilter;
+  texture.needsUpdate = true;
 
-	// canvas contents will be used for a texture
-	var texture = new THREE.Texture(canvas)
-			texture.minFilter = THREE.LinearFilter;
-			texture.needsUpdate = true;
-
-    var spriteMaterial = new THREE.SpriteMaterial({ map: texture
-//                                                    ,
-//                                                    useScreenCoordinates: false
-                                                  });
-	var sprite = new THREE.Sprite( spriteMaterial );
-	return sprite;
+  var spriteMaterial = new THREE.SpriteMaterial({ map: texture
+                                                });
+  var sprite = new THREE.Sprite( spriteMaterial );
+  return sprite;
 }
 
 function getMeterScale(sep,meters,offset) {

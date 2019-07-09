@@ -653,7 +653,7 @@ function initGraphics() {
     var hex = 0xffff00;
 
     var xarrowHelper = new THREE.ArrowHelper( xdir, origin, length, 0xff0000 );
-    var yarrowHelper = new THREE.ArrowHelper( ydir, origin, length, 0x00ff00 );
+    var yarrowHelper = new THREE.ArrowHelper( ydir, origin, length, 0x00aa00 );
     var zarrowHelper = new THREE.ArrowHelper( zdir, origin, length, 0x0000ff );
 
     am.scene.add( xarrowHelper );
@@ -686,7 +686,6 @@ AM.prototype.remove_body_mesh_pair = function (body, mesh) {
       this.bodies.splice(i, 1);
     }
   }
-  //    delete mesh["ammo_obj"];
   for (var i = this.rigidBodies.length - 1; i >= 0; i--) {
     if (this.rigidBodies[i].name === body.name) {
       this.rigidBodies.splice(i, 1);
@@ -1019,7 +1018,9 @@ function RenderHelix(l,r,d,theta,v,phi,wh,MAX_POINTS) {
 
 
 
-function set_outputs(radius,theta,travel,phi,ScaleToUnitEdgeLength,tightness_stats) {
+function set_outputs(axis,radius,theta,travel,phi,ScaleToUnitEdgeLength,tightness_stats) {
+
+  $( "#axis_output" ).val( "(" + format_num(axis.x,4) +  ", " + format_num(axis.y,0) + ", " + format_num(axis.z,4) + ")");
   $( "#radius_output" ).val( format_num(radius,4) );
   $( "#theta_output" ).val( format_num(theta * 180 / Math.PI,4));
   $( "#travel_output" ).val( format_num(travel,4) );
@@ -1084,29 +1085,49 @@ function format_num(num,digits) {
 // color c, and text t.
 var A_SPRITE = { p: new THREE.Vector3(0,0,0),
                  c: "red",
+                 yd: -0.0,
                  t: "A"};
 var B_SPRITE = { p: new THREE.Vector3(0,0,0),
                  c: "blue",
+                 yd: -0.0,
                  t: "B"};
 var C_SPRITE = { p: new THREE.Vector3(0,0,0),
                  c: "green",
+                 yd: -0.0,
                  t: "C"};
+
+var Ba_SPRITE = { p: new THREE.Vector3(0,0,0),
+                  c: "blue",
+                  yd: -0.4,
+                  t: "Ba"};
+var Ca_SPRITE = { p: new THREE.Vector3(0,0,0),
+                  c: "green",
+                  yd: -0.4,
+                  t: "Ca"};
+
 var D_SPRITE = { p: new THREE.Vector3(0,0,0),
                  c: "purple",
+                 yd: 0,
                  t: "D"};
 var PHI_SPRITE = { p: new THREE.Vector3(0,0,0),
-                 c: "green",
-                 t: "D"};
+                   c: "green",
+                   yd: 0,
+                   t: "D"};
 var TAU_SPRITE = { p: new THREE.Vector3(0,0,0),
-                 c: "green",
-                 t: "D"};
+                   c: "green",
+                   yd: 0,
+                   t: "D"};
 var THETA_SPRITE = { p: new THREE.Vector3(0,0,0),
-                 c: "green",
-                 t: "D"};
+                     c: "green",
+                     yd: 0,
+                     t: "D"};
+
 var LABEL_SPRITES = [
   A_SPRITE,
   B_SPRITE,
   C_SPRITE,
+  Ba_SPRITE,
+  Ca_SPRITE,
   D_SPRITE,
   PHI_SPRITE,
   TAU_SPRITE,
@@ -1266,7 +1287,7 @@ function renderSprite(obj) {
                               {fontsize: LABEL_SPRITE_FONT_SIZE},
                               obj.c );
 
-  obj.s.position.set(obj.p.x,obj.p.y,obj.p.z);
+  obj.s.position.set(obj.p.x,obj.p.y+obj.yd,obj.p.z);
   am.grid_scene.add(obj.s);
 }
 
@@ -1504,7 +1525,7 @@ function RenderSegmentedHelix(solid,tau_v) {
     res = resK;
 
   r = res[0];
-  theta = res[1];
+  theta = (res[1] != null) ? res[1] : tau_v;
   d = res[2];
   phi = res[4];
 
@@ -1523,6 +1544,12 @@ function RenderSegmentedHelix(solid,tau_v) {
 
     // We'll put a Ball at Ba ...
     cSphere(am.JOINT_RADIUS/5,new THREE.Vector3(Ba.x,Ba.y,Ba.z),"red");
+
+    Ba_SPRITE.p = Ba.clone();
+    const Ca = new THREE.Vector3(-Ba.x,Ba.y,-Ba.z);
+    Ca_SPRITE.p = Ca.clone();
+    cSphere(am.JOINT_RADIUS/4,Ba_SPRITE.p,Ba_SPRITE.c);
+    cSphere(am.JOINT_RADIUS/4,Ca_SPRITE.p,Ca_SPRITE.c);
   }
 
   // Ba and Ca need to be on the axis, that is an assertion.
@@ -1530,6 +1557,7 @@ function RenderSegmentedHelix(solid,tau_v) {
 
   B_SPRITE.p = B.clone();
   C_SPRITE.p = C.clone();
+
 
   D_SPRITE.p = prisms[1][0][7].position.clone();
   A_SPRITE.p = prisms[2][0][6].position.clone();
@@ -1556,7 +1584,9 @@ function RenderSegmentedHelix(solid,tau_v) {
   // phi = res[4];
   const tightness_stats = [[max_tightness,max_tightness_tau],
                            [min_tightness,min_tightness_tau]];
-  set_outputs(r,theta,d,phi,ScaleToUnitEdgeLength,tightness_stats);
+
+  const axis = res[5].clone();
+  set_outputs(axis,r,theta,d,phi,ScaleToUnitEdgeLength,tightness_stats);
 
 
 
@@ -1634,7 +1664,7 @@ function RenderSegmentedHelix(solid,tau_v) {
     cSphere(am.JOINT_RADIUS/5,Cpara,"green");
     // a nice greenline parallel to the helix axis should help..
 
-    lineBetwixt(C,Cpara,"back");
+    lineBetwixt(C,Cpara,"black");
     // here I attempt to create the visually important
     // theta protractor
     // A test here is that the cross of the vectors
@@ -2164,8 +2194,8 @@ function registerHelix(name,number,solid_num,analogs,face,tau,radius,theta,trave
   theta_c.innerHTML = format_num(theta * 180 / Math.PI,3);
   travel_c.innerHTML = format_num(travel,3);
   angle_c.innerHTML = format_num(helix_angle  * 180 / Math.PI,3);
-  var button1 = "<button class='collapse' onclick='hideClassNum(\""+name+"\","+class_num+",\"none\")'>Collapse "+class_num+"</button>";
-  var button2 = "<button onclick='hideClassNum(\""+name+"\","+class_num+",\"table-row\")'>Expand "+class_num+"</button>";
+  var button1 = "<button class='collapse' onclick='hideClassNum(\""+name+"\","+class_num+",\"none\")'>Collapse "+analogs+"</button>";
+  var button2 = "<button onclick='hideClassNum(\""+name+"\","+class_num+",\"table-row\")'>Expand "+analogs+"</button>";
   class_c.innerHTML = button1 + button2;
 }
 

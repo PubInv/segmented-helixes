@@ -54,9 +54,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
     <script src="https://d3js.org/d3-time.v1.min.js"></script>
     <script src="https://d3js.org/d3-time-format.v2.min.js"></script>
     <script src="https://d3js.org/d3-scale.v1.min.js"></script>
-    <style>
-  codenza, code {}     /*  noop mnemonic aide that codenza mimes code tag  */
-  codenza {display:block;white-space:pre-wrap}
+<style>
+codenza, code {}
+codenza {display:block;white-space:pre-wrap}
 
 </style>
 </head>
@@ -66,10 +66,11 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 <body>
   <div id="threecontainer"></div>
 
-    <label for="link-spinner">Number of Objects:</label>
-  <input id="link-spinner" name="value">
 
- <h2>Control Mode (Scroll Down for Usage Explanation)</h2>
+  <h2>Control Mode (Scroll Down for Usage Explanation)</h2>
+  <div id="titlearea">
+
+
   <fieldset id="superstructure">
     <legend>Controls: </legend>
     <label for="radio-arb">Arbitrary Faces</label>
@@ -85,9 +86,16 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
     <label for="radio-ico">Icosahedron</label>
     <input type="radio" name="radio-1" id="radio-ico">
   </fieldset>
+    <div id="spinnerarea"?
+      <label for="link-spinner">Prisms to Render:</label>
+      <input id="link-spinner" name="value">
+      </div>
 
+</div>
+
+<div id="zoocontrolarea">
   <fieldset id="tau-fieldset" style='display: none;'>
-    <legend>Face-matching Tau: </legend>
+    <legend>Face-matching <span lang='latex'>\tau</span>: </legend>
     <label for="radio-t0" id="radio-t0-l">first</label>
     <input type="radio" name="radio-2" id="radio-t0">
     <label for="radio-t1" id="radio-t1-l">second</label>
@@ -104,6 +112,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
   <label for="face-spinner">Conjunction Face number:</label>
   <input id="face-spinner" name="value">
   </span>
+  </div>
 
 
     <section>
@@ -116,7 +125,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
   </tr>
 
   <tr>
-    <td><label for="tau_d">Tau</label></td>
+    <td><label for="tau_d">Twist (<span lang='latex'>\tau</span>)</label></td>
     <td> <input type="text" id="tau_d" readonly style="border:0; color:#f6931f; font-weight:bold;">
 </td>
     <td> <div id="tau_slider"></div> </td>
@@ -172,119 +181,126 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
       </section>
 
     <section>
-      <h2>Computed Properties of Induced Segmented Helix</h2>
-    <table>
-      <tr>
-        <td>
-    <section>
- The nodes of the segmented helix are,<br> for integers <i>n</i>:
-      <div lang="latex">
-y = r \cos{(n \theta)}
-</div>
-      <div lang="latex">
-x =  r \sin{(n \theta)}
-</div>
-      <div lang="latex">
-z = n \cdot d
-</div>
-    </section>
-        </td>
+        <div class="toprowarea">
+          <div class="columnarea">
+            <h4>Intrinsic helix properties:</h4>
+            <span>
+              <label for="theta_output">Theta (<span lang='latex'>\theta</span>):</label>
+              <input type="text" id="theta_output" readonly style="border:0; color:#f6931f; font-weight:bold;">
+            </span>
 
-        <td>
-          <section>
-         <h2>Parameters (unit object axis length)</h2>
-      <p>
-    <label for="radius_output">Radius (r):</label>
-    <input type="text" id="radius_output" readonly style="border:0; color:#f6931f; font-weight:bold;">
-    </p>
-          <p>
-    <label for="theta_output">Theta (<span lang='latex'>\theta</span>):</label>
-    <input type="text" id="theta_output" readonly style="border:0; color:#f6931f; font-weight:bold;">
-    </p>
-          <p>
-    <label for="travel_output">Travel (d):</label>
-    <input type="text" id="travel_output" readonly style="border:0; color:#f6931f; font-weight:bold;">
-    </p>
-          <p>
-    <label for="phi_output">Phi:</label>
-      <input type="text" id="phi_output" readonly style="border:0; color:#f6931f; font-weight:bold;">
-    </p>
-          <p>
-    <label for="pitch_output">Pitch (p):</label>
-      <input type="text" id="pitch_output" readonly style="border:0; color:#f6931f; font-weight:bold;">
-    </p>
-          <p>
-    <label for="sidedness_output">Sidedness (s):</label>
-      <input type="text" id="sidedness_output" readonly style="border:0; color:#f6931f; font-weight:bold;">
-    </p>
-          <p>
-    <label for="torsion_output">Torsion:</label>
-      <input type="text" id="torsion_output" readonly style="border:0; color:#f6931f; font-weight:bold;">
-    </p>
-          <p>
-    <label for="curvature_output">Curvature:</label>
-      <input type="text" id="curvature_output" readonly style="border:0; color:#f6931f; font-weight:bold;">
-          </p>
-          <td>
-          <p>
-            <label for="tightness_output">Tightness:</label>
-            <input type="text" id="tightness_output" readonly style="border:0; color:#f6931f; font-weight:bold;">
-          </p>
-          <p>
-            <label for="max_tightness_output">Max Tightness:</label>
-            <input type="text" id="max_tightness_output" readonly style="border:0; color:#f6931f; font-weight:bold;">
-          </p>
-          <p>
-            <label for="max_tightness_tau_output">Max Tightness <span lang="latex">
-\tau
-</span>:</label>
-            <input type="text" id="max_tightness_tau_output" readonly style="border:0; color:#f6931f; font-weight:bold;">
-          </p>
-          <p>
-            <label for="min_tightness_output">Min Tightness:</label>
-            <input type="text" id="min_tightness_output" readonly style="border:0; color:#f6931f; font-weight:bold;">
-          </p>
-          <p>
-            <label for="min_tightness_tau_output">Min Tightness <span lang="latex">
-\tau
-</span>:</label>
-            <input type="text" id="min_tightness_tau_output" readonly style="border:0; color:#f6931f; font-weight:bold;">
-          </p>
-          </td>
-    </section>
-        </td>
-        <td id="platonic_parameters">
-         <h2>Platonic Parameters (unit edge length)</h2>
-    <section>
-      <p>
+            <span>
+              <label for="phi_output">Phi:</label>
+              <input type="text" id="phi_output" readonly style="border:0; color:#f6931f; font-weight:bold;">
+            </span>
+
+            <span>
+              <label for="axis_output">Axis (x,y,z):</label>
+              <input type="text" id="axis_output" readonly style="border:0; color:#f6931f; font-weight:bold;">
+            </span>
+            <span>
+              <label for="pitch_output">Pitch (p):</label>
+              <input type="text" id="pitch_output" readonly style="border:0; color:#f6931f; font-weight:bold;">
+            </span>
+
+            <span>
+              <label for="sidedness_output">Sidedness (s):</label>
+              <input type="text" id="sidedness_output" readonly style="border:0; color:#f6931f; font-weight:bold;">
+            </span>
+          </div>
+                    <div class="columnarea">
+            <h4>Intrinsic helix properties (unit object axis length):</h4>
+            <span>
+              <label for="radius_output">Radius (r):</label>
+              <input type="text" id="radius_output" readonly style="border:0; color:#f6931f; font-weight:bold;">
+            </span>
+
+            <span>
+              <label for="travel_output">Travel (d):</label>
+              <input type="text" id="travel_output" readonly style="border:0; color:#f6931f; font-weight:bold;">
+            </span>
+
+              <span>
+                <label for="tightness_output">Tightness:</label>
+                <input type="text" id="tightness_output" readonly style="border:0; color:#f6931f; font-weight:bold;">
+              </span>
+
+          </div>
+          <div  class="columnarea">
+            <h4>Other computed properties:</h4>
+            <span>
+              <label for="torsion_output">Torsion:</label>
+              <input type="text" id="torsion_output" readonly style="border:0; color:#f6931f; font-weight:bold;">
+            </span>
+
+            <span>
+              <label for="curvature_output">Curvature:</label>
+              <input type="text" id="curvature_output" readonly style="border:0; color:#f6931f; font-weight:bold;">
+            </span>
+            <div class="columnarea">
+              <span>
+                <label for="tightness_output">Tightness:</label>
+                <input type="text" id="tightness_output" readonly style="border:0; color:#f6931f; font-weight:bold;">
+              </span>
+
+              <span>
+                <label for="max_tightness_output">Max Tightness:</label>
+                <input type="text" id="max_tightness_output" readonly style="border:0; color:#f6931f; font-weight:bold;">
+              </span>
+
+              <span>
+                <label for="max_tightness_tau_output">Max Tightness <span lang="latex">
+                    \tau
+                  </span>:</label>
+                <input type="text" id="max_tightness_tau_output" readonly style="border:0; color:#f6931f; font-weight:bold;">
+              </span>
+
+              <span>
+                <label for="min_tightness_output">Min Tightness:</label>
+                <input type="text" id="min_tightness_output" readonly style="border:0; color:#f6931f; font-weight:bold;">
+              </span>
+
+              <span>
+                <label for="min_tightness_tau_output">Min Tightness <span lang="latex">
+                    \tau
+                  </span>:</label>
+                <input type="text" id="min_tightness_tau_output" readonly style="border:0; color:#f6931f; font-weight:bold;">
+              </span>
+
+            </div>
+          </div>
+
+        <div id="platonic_parameters">
+         <h4>Platonic Parameters (unit edge length):</h4>
+           <div class="columnarea">
+      <span>
     <label for="radius_output_plato">Radius (r):</label>
     <input type="text" id="radius_output_plato" readonly style="border:0; color:#f6931f; font-weight:bold;">
-    </p>
-          <p>
+    </span>
+          <span>
     <label for="travel_output_plato">Travel (d):</label>
     <input type="text" id="travel_output_plato" readonly style="border:0; color:#f6931f; font-weight:bold;">
-    </p>
-          <p>
+    </span>
+          <span>
     <label for="pitch_output_plato">Pitch (p):</label>
       <input type="text" id="pitch_output_plato" readonly style="border:0; color:#f6931f; font-weight:bold;">
-    </p>
-          <p>
+    </span>
+          <span>
     <label for="tightness_output_plato">Tightness:</label>
       <input type="text" id="tightness_output_plato" readonly style="border:0; color:#f6931f; font-weight:bold;">
-    </p>
-          <p>
+    </span>
+          <span>
     <label for="torsion_output_plato">Torsion:</label>
       <input type="text" id="torsion_output_plato" readonly style="border:0; color:#f6931f; font-weight:bold;">
-    </p>
-          <p>
+    </span>
+          <span>
     <label for="curvature_output_plato">Curvature:</label>
       <input type="text" id="curvature_output_plato" readonly style="border:0; color:#f6931f; font-weight:bold;">
-          </p>
-    </section>
-        </td>
-        </tr>
-    </table>
-    </section>
+          </span>
+          </div>
+        </div>
+      </div>
+
 
     <section>
         <h2>A Zoo of Platonic Helices</h2>
@@ -317,13 +333,10 @@ z = n \cdot d
 </div>
 <section>
 
-
-
     <section id="textsection">
-        <h1 id="message_banner">Basic Usage -- Test Discrete Helix Math</h1>
-        <h2> This is an interactive 3D simulation. To change the view, place your mouse in the view area, and
+        <p> <strong>This is an interactive 3D simulation. To change the view, place your mouse in the view area, and
             hold and "drag" the mouse to rotate the image.
-          The mouse wheel or a drag on your trackpad should zoom you in or out.</h2>
+          The mouse wheel or a drag on your trackpad should zoom you in or out.</strong> </p>
 
 
         <h2>Creating a Helix</h2>
@@ -366,7 +379,7 @@ z = n \cdot d
 
         <p>
         This interactive tool makes clear that it is possible to use a single object with oblique faces and to wildly vary the coiling by
-        changing only the "twist" tau.
+        changing only the "twist" <span lang='latex'>\tau</span>.
         </p>
         <p>
           This suggests that it may be possible to build an interesting tentacle that using only rotary servos at each joint.
@@ -380,7 +393,15 @@ z = n \cdot d
           which is a tremendous advantage.
           </p>
 
+        <h2>Unit Tests</h2>
+        This code has extensive unit tests which are executed in-browser.
+        Clicking on the button below executes these tests.
+        Refer to the code for details and the console for details.
 
+        <p>
+        <button type="button" onclick="runUnitTests()">
+          Execute Tests!</button>
+        </p>
 
         <h2>Licensing</h2>
 
