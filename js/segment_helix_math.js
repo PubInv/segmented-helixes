@@ -14,6 +14,8 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+
+/////////////////////////////////////////////////////////////////////
 // for testing, we need to know when somethigns is "closeto a target"
 // to deal with roundoff error
 
@@ -1118,7 +1120,7 @@ function bruteForceTauComputation(Nb,Nc) {
 }
 
 function testBruteForceTauComputation() {
-  const NUM_TEST = 4;
+  const NUM_TEST = 2;
   for(var i = 0; i < NUM_TEST; i++) {
     var Nbx = -1 + i*(2/NUM_TEST);
     for(var j = 0; j < NUM_TEST; j++) {
