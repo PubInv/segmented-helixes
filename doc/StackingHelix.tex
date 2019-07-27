@@ -529,13 +529,6 @@ In order to be robust, it is valuable to check that the transformation
 matrix is a rigid transformation\cite{wiki:rigid},
 as Chasles' theorem applies only to rigid transformations.
 
-(TODO: Note that the wikipedia article on rotations tells
-us we must treat his as a special case, but does not give
-this ``zig zag'' treatment, instead saying we must ``it is necessary to diagonalize  R and find the eigenvector corresponding to an eigenvalue of 1.'' That seems more complicated than what
-I am doing there, though perhaps it is better. Probably
-it avoids the problem of accidentally guessing P to be
-on the axis.)
-
 The angle of rotation is computable from the trace of $R$, $Tr(R)$.
 \begin{align}
   \theta &= \arccos{\frac{Tr(R) - 1}{2}}
@@ -697,7 +690,7 @@ Therefore four consecutive points completely determine at least one segmented he
 only with the helix that makes the least rotation between points.
 We provide a modification of the {\em PointAxis} algorithm
 with takes four such points (without loss of generality $B$ and $c$ are assumed to be centered on the $z$-axis, and that a
-rotation has been performed to balance $A$ and $D$ to that $A.x = -D.x, A.z = - D.z$, and $A.y = D.y$. Thus the input to
+rotation has been performed to balance $A$ and $D$ to that $A_x = -D_x, A_z = -D_z$, and $A_y = D_y$. Thus the input to
 {\em PointAxis} in fact has three only three degrees of freedom, which determine the three intrinsic properties $r,d,\theta$
 which completely define the shape of a segments helix (but not its location in space.) A practitioner may be able to set up
 the coordinate system such that the four points are in balance;
@@ -863,7 +856,7 @@ the $x$ and $z$ component of $B_a$ are:
 However, this computation exposes another special case: when the
 helix angle $\phi$ is $\pi /2$, the segmented helix is
 a torus-like. In this case the axis point $B_a$ is in fact
-on the $y$-axis, and we need only compute $B_a.y$:
+on the $y$-axis, and we need only compute $B_{a[y]}$:
 \begin{align}
   B_{a[y]} &=  \frac{L B_{b[y]}}{2 B_{b[z]}}
 \end{align}
@@ -1424,6 +1417,10 @@ an iterative algorithm for it, which is practical but less elegant.
 \section{ To Do}
 
 \begin{itemize}
+\item Consider application here: https://imbicorg.blogspot.com/p/the-main-objective-of-conference-is-to.html
+  \item Here: http://www.ramsaconference.com/
+\item Add sidedness to our calculations?
+  \item
   \item Modify that so that it truly respects $\psi$ as an input.
 \item Provide explanation, graphically, if need be, for
   the computation of $B_{ax}, B_{ay}, B_{az}$ in the general cases.
@@ -1431,7 +1428,7 @@ an iterative algorithm for it, which is practical but less elegant.
 \item Go through each reference 1 day
 \item Try to get list of references to the computation of a screw from an arbitrary matrix, and compare and contrast to our code. 1 day
 \item Need to understand possibility of further simplifying specification of object.
-\item Note further that Equations 7 and 8 of this paper\cite{kahn1989defining} give BETTER equations for radius $r$ and the distance $d$ than what I have so far given. Note: I've studied this; I'm not sure there is anything worth doing there.
+
 \item Need to get this paper, by hook or by crook, and probably cite:
   Note: An historical review of the theoretical development of rigid body displacements from Rodrigues parameters to the finite twist
   \url{https://www.sciencedirect.com/science/article/pii/S0094114X0500087X}
@@ -1441,8 +1438,8 @@ an iterative algorithm for it, which is practical but less elegant.
 
 \section{References that need to be studied or reviewed}
 
-This is a long, expensive book, but it may be quite relevant\cite{hyde1996language}:
-\url{https://books.google.com/books?hl=en&lr=&id=1LZlSZ7ORrQC&oi=fnd&pg=PP1&ots=0hSEwJvlUB&sig=xNG9UWv_H1OXHwaOiOBJN7TW6xA#v=onepage&q&f=false}
+
+Note further that Equations 7 and 8 of this paper\cite{kahn1989defining} give BETTER equations for radius $r$ and the distance $d$ than what I have so far given. Note: I've studied this; I'm not sure there is anything worth doing there.
 
 This is a discussion of segmented coils in a protein structure:
 
@@ -1485,6 +1482,10 @@ intitiated this work.
 \end{document}
 
 \section{References Reviewed but not worth citing}
+
+This is a long, expensive book, but it is not relevant relevant\cite{hyde1996language}:
+\url{https://books.google.com/books?hl=en&lr=&id=1LZlSZ7ORrQC&oi=fnd&pg=PP1&ots=0hSEwJvlUB&sig=xNG9UWv_H1OXHwaOiOBJN7TW6xA#v=onepage&q&f=false}
+
 
 Note: There is another long, deep book that needs to be obtained and studied\cite{sadoc2006geometrical}.
 \url{https://books.google.com/books?hl=en&lr=&id=FHPlDWvz1bEC&oi=fnd&pg=PP1&ots=TsOnodavEZ&sig=HO86UUVlqRVWGqY-Tv02nb7x7NA#v=onepage&q&f=false}
