@@ -1053,38 +1053,92 @@ which are intrinsic to the shape, will be the same, but the axis vector, $\phi$,
 \subsection{Changing $\tau$ Smoothly Changes Tightness}
 
 \begin{theorem}[Twist Spectrum]
-  For any choice of face normals having non-zero $x$ or $y$ components, changing $\tau$ smoothly varies the segmented helix
-  between a torus and zig-zag cases.
-  \end{theorem}
+  For any choice of face normals having non-zero $x$ or $y$ components,
+  changing the twist angle $\tau$ through a complete rotation ($0..2\pi$)
+  smoothly varies the segmented helix
+  between a torus and flat cases.
+\end{theorem}
+
+\begin{figure}
+     \centering
+     \includegraphics[width=0.80\textwidth]{figures/TwistSpectrumProof.png}
+     \caption{Twist Spectrum Proof Diagram}
+  \label{fig:twistspectrum}
+\end{figure}
+
 
 \begin{proof}
-  Define $\alpha$ to be the angle of the project of the point $A$ into the $XY$-plane
-  in our standard positioning. Define $\beta$ to be the angle of the $D$ projection.
-  Define $\psi$ to be the angle between these: $\psi = \alpha - \beta$.
-  By the continuity of mechanical processes, there can be not discontinuity
-  in the shape as $\tau$ is minutely varied. Rotating the twist $\tau$ through
-  an entire revolution returns us to the starting configuration. Therefore
-  such a revolution must achieve all values of $\psi$ between $0$ and $\pi$.
-  One of these values is similar to a torus, and one is a zig-zag.
-  \end{proof}
+  Please see Figure \ref{fig:twistspectrum}, which renders and arbitrary
+  prism in balanced position. The $B$ joint is on the backside of the
+  prism, not visible. As usual, $\tau$ is measured against the
+  face. The face normals are labelled $N_b$ and $N_c$. The are drawn
+  to projection planes orthogonal to the object axis, which is $z$-axis
+  aligned as per our usual convention. The $N_b$ face normal forms
+  an angle $\delta$ with negative $z$-axis, and the $N_c$ face normal
+  an angle $\gamma$ with the positive $z$-axis.
 
-\begin{theorem}[Torus Corollary]
-  For any choice of face normals, there is choice of the twist $\tau$ for which the segmented helix is a planar polygon,
-  thereby resembling a torus.
-  \end{theorem}
+  Let the function $\alpha(\tau)$ which is the angle formed by the
+  projection of $A$ and the orign with the $X$ axis in the $XY$-plane.
+  Let $\beta(\tau)$ be the angle of the $D$ projection. $\alpha(\tau)$
+  and $\beta(\tau)$ are periodic on $\tau$ ranging between $0$ and
+  $2\pi$.
 
-\begin{proof}
-  Define $\alpha$ to be the angle of the project of the point $A$ into the $XY$-plane
-  in our standard positioning. Define $\beta$ to be the angle of the $D$ projection.
-  Define $\psi$ to be the angle between these: $\psi = \alpha - \beta$.
-  By Lord's Observation, any change
-  to $\tau$ still produces a segmented helix, therefore a balancable configuration.
-  by Lord's Observation,
-  $\frac{\partial \alpha}{\partial \tau} = -\frac{\partial \beta}{\partial \tau}$.
-  Therefore $\frac{\partial \psi}{\partial \tau} = 2\frac{\partial \alpha}{\partial \tau}$. By observation and the continuity of mechanical processes, $\alpha(\tau)$ is a monotone function. Therefore it is always
-  possibly to continuously change $\tau$ to either increase or decrease $\psi$.
-  The $\tau$ that makes $\psi = 0$ produces a torus.
+    Let $\gamma$ and $\delta$ be the angle between the $A$ face-vector and
+    $B$ face-vectors respectively formed with the
+    $\overline{BA}$ vector and $\overline{AB}$ respectively.
+
+    If $\gamma \neq \delta$ then one is greater than the other.
+    Without loss of generality, assume $\gamma > \delta$.
+    Then $D$ moves in a cone
+    about the $N_c$ face normal as $\tau$ is varied. The
+    angle of the projection of $D$ is $\beta$, which varies as $\tau$
+    varies.
+    The projection of both $A$ and $D$ move in circles
+    potentially tilted to the $z$-axis, thereby
+    forming ellipse-like figures in the projection planes.
+
+    By our assumption, because $\gamma > \delta$, the
+    ellipse formed by $D$ as $\tau$ changes
+    strictly contains the origin of the projection plane.
+    Therefore at least one of $\beta(\tau)$  has a range
+    containing both $0$ and $2\pi$, since the angle swept out by
+    a point on the edge of this figure goes completely around the origin.
+    Without loss of generality, let $\alpha$ have that property.
+
+    Both $\alpha$ and $\beta$ are continuous, by the continuity of
+    physcial mechanisms and the composition of continuous functions.
+
+    Note that although the motion need not be proportional, the sign
+    of the motion of $\alpha(\tau)$ is the opposite of the sign of the
+    motion of $\beta(\tau)$ as $\tau$ is varied.
+
+    Because $\alpha$ varies between $0$ and $2\pi$ (although
+    $\beta$ may not), and because $\beta$ moves in the opposite direction,
+    by the Intermediate Value Theorem, there is a $\tau$ where
+    $\alpha(\tau) = \beta(\tau)$. Such a point produces a toroid-like
+    figure.
+
+    Since $\alpha$ can be moved in a complete circle (between 0 and
+    $2\pi$), there is always
+    exactly one
+    $\tau$ which places $\alpha$ oppsite $\beta$
+    (i.e., $\alpha = \pi + \beta$). This is the flat case, which
+    is the maximal extend of the segmented helix.
+
+    Now let us consider the case that $\gamma = \delta$.
+    By our assumption that both there are non-zero $x$ or $y$ components
+    to the face normals, $\gamma > 0$ and $\delta > 0$. The figures
+    they describe may both contain the origin. However, one of them
+    moves through an elliptical figure, and there without loss of
+    generality $\beta(\tau)$ sweeps out the full domain between $0$ and
+    $2\pi$. By our previous argument, both the torioidal and flat cases
+    are found.
+
+    Therefore we can always move continuously through a torus-like
+    planar polygon ($\phi = 0$) and a maximally extended flat case.
+
 \end{proof}
+
 
 It would be more useful and elegant to have a formula for the $\tau$ that produces
 a torus as a function of the joint face normals; the authors have not been able
@@ -1417,6 +1471,7 @@ an iterative algorithm for it, which is practical but less elegant.
 \section{ To Do}
 
 \begin{itemize}
+  \item MAJOR BUG: C.z < 0 and B.z < 0 causes mismatch
 \item Consider application here: https://imbicorg.blogspot.com/p/the-main-objective-of-conference-is-to.html
   \item Here: http://www.ramsaconference.com/
 \item Add sidedness to our calculations?
