@@ -1066,6 +1066,13 @@ which are intrinsic to the shape, will be the same, but the axis vector, $\phi$,
   \label{fig:twistspectrum}
 \end{figure}
 
+\begin{figure}
+     \centering
+     \includegraphics[width=0.80\textwidth]{figures/RotatingPlane.png}
+     \caption{Planes Rotating About the $z$-axis}
+  \label{fig:twistspectrum}
+\end{figure}
+
 
 \begin{proof}
   Please see Figure \ref{fig:twistspectrum}, which renders and arbitrary
@@ -1123,9 +1130,26 @@ which are intrinsic to the shape, will be the same, but the axis vector, $\phi$,
     exactly one
     $\tau$ which places $\alpha$ oppsite $\beta$
     (i.e., $\alpha = \pi + \beta$). This is the flat case, which
-    is the maximal extend of the segmented helix.
+    is the maximal extent of the segmented helix.
 
     Now let us consider the case that $\gamma = \delta$.
+    THE THEOREM MAY NOT HOLD IN THIS CASE.
+    I Believe a torus cannot be formed (except in a degenerate sense)
+    When the face vectors are anti-parallel. When anti-parallel,
+    the ``torus'', at zero twist, is in fact flat.
+    I am starting to suspect that simply the travel may be the simplest
+    feature to discuss in this theorem.
+
+    In this case, the projected figures do not complete enclose
+    the projection of the $z$-axis into the projection planes, because
+    the origin lies on the edge of the figures itself.
+    That is, there are some configurations in which the point $A$ or $D$
+    lies on the $z$-axis itself.
+
+    However, any such case may be considered a ``flat'' case of
+    maximal extent---that is, the points $A,B,C,D$ all lie in a plane.
+
+
     By our assumption that both there are non-zero $x$ or $y$ components
     to the face normals, $\gamma > 0$ and $\delta > 0$. The figures
     they describe may both contain the origin. However, one of them
@@ -1138,6 +1162,74 @@ which are intrinsic to the shape, will be the same, but the axis vector, $\phi$,
     planar polygon ($\phi = 0$) and a maximally extended flat case.
 
 \end{proof}
+
+After some thought, I developed an alternative proof that may be simpler.
+
+\begin{proof}
+
+    Let $\gamma$ and $\delta$ be the angle between the $A$ face-vector and
+    $B$ face-vectors respectively formed with the
+    $\overline{BA}$ vector and $\overline{AB}$ respectively.
+    By assumption, at least one of $\gamma$ and $\delta$ is not zero.
+
+    Arbitrarily choose a $\tau$ such that $ABC$ are not collinear and
+    $BCD$ are not collinear. Although there may be specific $\tau$ values
+    which make these collinear, there can only be two such.
+
+    Consider the plane defined by the non-collinear points $ABC$ and
+    the separate plane containing $BCD$. Both of these planes contain
+    the $z$-axis because the contain $BC$, which without loss of generality
+    is $z$-aligned. As illustrated in Figure \ref{fig:rotatingplane}
+
+    As illustrated in Figure \ref{fig:rotatingplane},
+    construct a vector $B'$ in the $ABC$ plane which is perpendicular
+    to the $z$-axis (and segment $BC$). Imaagine the tail of this
+    vector at $B$. Construct a vector $C'$ from $C$ in the $BCD$ plane
+    perpendicular to the $z$-axis.
+
+    As $\tau$ is varied minutely, the joints $A$ and $D$ move about
+    the $z$-axis in opposite directions, and therefore
+    the planes $ABC$ and $BCD$. There is a computable $R_A$
+    rotation about the $z$ axis that effects this rotation for the
+    $ABC$ plane, and
+    separate rotation $R_D$ which effects it for $BCD$.
+
+    Let $\phi$ be the angle between the vectors $B'$ and $D'$.
+    The rotations $R_A$ applied to $B'$ and $R_D$ applied to $C'$
+    rotate these vectors about the $z$-axis in opposite directions.
+    Thus $\phi$ either increases or decreases with a change in $\tau$
+    of a particular sign.
+
+    The domain of $\tau$ is $0$ to $2\pi$; we may always perform
+    a complete rotation of our joints, sweeping continuously through
+    $\tau$ and returning to precisely the same configuration.
+
+    $\phi$ is a continous function $R_A$ and $R_D$ which are continuous
+    functions of $\tau$. $phi(\tau)$ is therefore a continous function
+    of $\tau$. By the Intermediate Value Theorem, $\phi$
+    takes on all values between $0$ and $\pi$ as $\tau$ is swept out.
+    There is always some $\tau$ which makes for which $\phi(\tau) = 0$.
+    Indeed there is some $\tau$ for any value or $\phi$ we choose.
+
+    There may be a $\tau$ which makes $ABC$ collinear; however,
+    the rotation $R_A$ still exists and still rotates $B'$, even
+    when $ABC$ are collinear.
+
+    When $\phi(\tau)$ is zero, the $ABC$ and $BCD$ planes are conincident.
+    This produces a toroid-like segemented helix, (though possibly
+    a degenerate one which is a simply flat if the face normals are
+    anti-parallel.) When $\phi(\tau) = \pi$, the segmented helix
+    has all joints in the same plane, a ``zig-zag'' and maximally extended
+    case.
+
+    Thus by varying $\tau$ through a complete rotation we can always
+    find a segmented helix with a travel $d$ of zero, which is a
+    toroid-like figure with all joints in a plane perpendicular to the
+    axis of the helix, and likewise can always find a configuration
+    in which all joints are in a plane parallel to the axis of the helix.
+
+    There is thus a ``twist spectrum'' of helices for any face normals.
+  \end{proof}
 
 
 It would be more useful and elegant to have a formula for the $\tau$ that produces
