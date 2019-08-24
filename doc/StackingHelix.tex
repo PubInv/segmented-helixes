@@ -1074,105 +1074,155 @@ the same shape, but in our calculation they will have different signs for the ax
 absolute value of the travel,
 which are intrinsic to the shape, will be the same, but the axis vector, $\phi$, and the sign of $d$ will be different.
 
-\section{Checks and Explorations}
 
-\subsection{Changing $\tau$ Smoothly Changes Tightness}
+
+\section{Changing $\tau$ Smoothly Changes Tightness}
 
 \begin{theorem}[Twist Spectrum]
-  For any choice of face normals having non-zero $x$ or $y$ components,
+  For any choice of non-parallel face normals having non-zero $x$ or $y$ components,
   changing the twist angle $\tau$ through a complete rotation ($0 \leq \tau \leq 2\pi$)
   smoothly varies the segmented helix
   between a torus and flat cases.
 \end{theorem}
 
 
+
+
 \begin{figure}
      \centering
-     \includegraphics[width=0.80\textwidth]{figures/RotatingPlane.png}
-     \caption{Planes Rotating About the $z$-axis}
-  \label{fig:rotatingplane}
+     \includegraphics[width=0.80\textwidth]{figures/TwistSpectrumGeneral.png}
+     \caption{Twist Spectrum Proof Diagram}
+  \label{fig:twistspectrum}
 \end{figure}
 
-
-
 \begin{proof}
+  Please see Figure \ref{fig:twistspectrum}, which renders and arbitrary
+  prism in balanced position. The $B$ joint is on the backside of the
+  prism, not visible. As usual, $\tau$ is measured against the
+  face. The face normals are labelled $N_b$ and $N_c$. The are drawn
+  to projection planes orthogonal to the object axis, which is $z$-axis
+  aligned as per our usual convention. The $N_b$ face normal forms
+  an angle $\delta$ with negative $z$-axis, and the $N_c$ face normal
+  an angle $\gamma$ with the positive $z$-axis.
 
-    For given joint face normals,
-    arbitrarily choose a $\tau$ such that $ABC$ are not collinear and
-    $BCD$ are not collinear. Although there may be specific $\tau$ values
-    which make these collinear, there can only be two such.
+  Let the function $\alpha(\tau)$ which is the angle formed by the
+  projection of $A$ and the orign with the $X$ axis in the $XY$-plane.
+  Let $\beta(\tau)$ be the angle of the $D$ projection. $\alpha(\tau)$
+  and $\beta(\tau)$ are periodic on $\tau$ ranging between $0$ and
+  $2\pi$.
 
-    Consider the plane defined by the non-collinear points $ABC$ and
-    the separate plane containing $BCD$. Both of these planes contain
-    the $z$-axis because the contain $BC$, which without loss of generality
-    is $z$-aligned.
+    Let $\gamma$ and $\delta$ be the angle between the $A$ face-vector and
+    $B$ face-vectors respectively formed with the
+    $\overline{BA}$ vector and $\overline{AB}$ respectively.
 
-    As illustrated in Figure \ref{fig:rotatingplane},
-    construct a unit-length vector $B'$ in the $ABC$ plane which is perpendicular
-    to the $z$-axis (and segment $BC$). Imaagine the tail of this
-    vector at $B$. Construct a unit-length vector $C'$ from $C$ in the $BCD$ plane
-    perpendicular to the $z$-axis.
+    If $\gamma \neq \delta$ then one is greater than the other.
+    Without loss of generality, assume $\gamma > \delta$.
+    Then $D$ moves in a cone
+    about the $N_c$ face normal as $\tau$ is varied. The
+    angle of the projection of $D$ is $\beta$, which varies as $\tau$
+    varies.
+    The projection of both $A$ and $D$ move in circles
+    potentially tilted to the $z$-axis, thereby
+    forming ellipse-like figures in the projection planes.
 
-    As $\tau$ is varied minutely, the joints $A$ and $D$ move about
-    the $z$-axis in opposite directions, and therefore
-    the planes $ABC$ and $BCD$ rotate. There is a computable $R_A(\tau)$
-    rotation about the $z$ axis that effects this rotation for the
-    $ABC$ plane, and
-    separate rotation $R_D(\tau)$ which effects it for $BCD$.
-    These rotations preserve the perpendicularity of $B'$ and $C'$ to
-    the $z$-axis.
+    By our assumption, because $\gamma > \delta$, the
+    ellipse formed by $D$ as $\tau$ changes
+    strictly contains the origin of the projection plane.
+    Therefore at least one of $\beta(\tau)$  has a range
+    containing both $0$ and $2\pi$, since the angle swept out by
+    a point on the edge of this figure goes completely around the origin.
+    Without loss of generality, let $\alpha$ have that property.
 
-    Let $\phi$ be the (unsigned) angle between the vectors $B'$ and $C'$ (these vectors and the angle is in the $XY$-plane):
-    \begin{align}
-      \phi(\tau) = \arccos{( R_A(\tau)B' . R_D(\tau)C')}
-      \end{align}
-    The rotations $R_A$ applied to $B'$ and $R_D$ applied to $C'$
-    rotate these vectors about the $z$-axis in opposite directions. The dot product of these rotated vectors
-    computes the cosine of the angle between them.
-    By convention measure angles counterclockwise against the $x$ axis.
-    Then minutely increasing $\tau$ while maintaing a balanced configuration
-    of $BC$ on the $z$-axis increase the angle of $B'$ with the $x$ axis,
-    and mintuely increasing $\tau$ decreases the angle of $C'$ with the $x$ axis
-    if both are measured from the $B$ to $C$ direction. Therefore:
-    \begin{align}
-      \phi(\tau) = & \atantwo(B'_x,B'_y) - \atantwo(C'_x,C'_y) \\
-    \end{align}
-    Therefore  $\phi(\tau)$ is strictly increasing until $B'$ and $C'$ are opposite
-    each other ($\phi(\tau) = \pi$), and then strictly decrease until they are equal
-    ($\phi(\tau) = 0$.)
+    Both $\alpha$ and $\beta$ are continuous, by the continuity of
+    physcial mechanisms and the composition of continuous functions.
 
-    The domain of $\tau$ is $0$ to $2\pi$; we may always perform
-    a complete rotation of our joints, sweeping continuously through
-    a full revolution and returning to precisely the same configuration.
+    Note that although the motion need not be proportional, the sign
+    of the motion of $\alpha(\tau)$ is the opposite of the sign of the
+    motion of $\beta(\tau)$ as $\tau$ is varied.
 
-    $\phi(\tau)$ is a continous function $R_A(\tau)$ and $R_D(\tau)$ which are continuous
-    functions of $\tau$. $\phi(\tau)$ is therefore a continous function
-    of $\tau$. By the Intermediate Value Theorem, $\phi$
-    takes on all values between $0$ and $\pi$ (and back down to $0$) as $\tau$ is swept out through a complete revolution.
-    There is always some $\tau$ for which $\phi(\tau) = 0$.
-    Indeed there is some $\tau$ for any value of $0 \leq \phi \leq \pi$ we choose.
+    Because $\alpha$ varies between $0$ and $2\pi$ (although
+    $\beta$ may not), and because $\beta$ moves in the opposite direction,
+    by the Intermediate Value Theorem, there is a $\tau$ where
+    $\alpha(\tau) = \beta(\tau)$. Such a point produces a toroid-like
+    figure.
 
-    There may be a $\tau$ which makes $ABC$ collinear; however,
-    the rotation $R_A$ still exists and still rotates $B'$, even
-    when $ABC$ are collinear.
+    Since $\alpha$ can be moved in a complete circle (between 0 and
+    $2\pi$), there is always
+    exactly one
+    $\tau$ which places $\alpha$ oppsite $\beta$
+    (i.e., $\alpha = \pi + \beta$). This is the flat case, which
+    is the maximal extent of the segmented helix.
 
-    When $\phi(\tau)$ is zero, the $ABC$ and $BCD$ planes are conincident.
-    This produces a toroid-like segemented helix, (though possibly
-    a degenerate one which is a simply flat if the face normals are
-    anti-parallel.) When $\phi(\tau) = \pi$, the segmented helix
-    has all joints in the same plane, a ``zig-zag'' and maximally extended
-    case. If the face normals are parallel, the toroid-like shape may contain
-    only two distinct joint locations.
+    Now let us consider the case that $\gamma = \delta$, as illustraed
+    in Figure \ref{fig:twistspectrumequal}.
 
-    Thus by varying $\tau$ through a complete rotation we can always
-    find a segmented helix with a travel $d$ of zero, which is a
-    toroid-like figure with all joints in a plane perpendicular to the
-    axis of the helix, and likewise can always find a configuration
-    in which all joints are in a plane parallel to the axis of the helix.
+    \begin{figure}
+     \centering
+     \includegraphics[width=0.80\textwidth]{figures/TwistSpectrumEqual.png}
+     \caption{Equal face angle magnitudes}
+  \label{fig:twistspectrumequal}
+    \end{figure}
 
-    Therefore, for any face normals (not both zero), there is a ``twist spectrum'' of helices that includes
-    any desired helix angle.
-  \end{proof}
+    In this case, the edges of the ellipses formed in the projection plane of both $A$ and $D$
+    intersect
+    the $z$-axis, because there is always a $\tau$ that rotates
+    the face about the face normal so that they cancel completely. By our
+    proof of segemented helices, this must occur at the same time on both sides,
+    because the angle of the CD member with BC must equal the angle of the AB member
+    with BC.
+
+    Note that the projected ellipses may occur in any relation to each other.
+    Figure \ref{twistspectrumequal} illustrates one cirumstance in which the face normal
+    vectors are pointin in approximately opposite directions.
+    If the
+    projections of the
+    face normals are anti-parallel, they will be exactly opposite each other. In this
+    case, the green (D) and red (A) projections will conincide at only one point; this
+    is a straight line or a degenerate torus.
+        \begin{figure}
+     \centering
+     \includegraphics[width=0.80\textwidth]{figures/TwistSpectrumProjection.png}
+     \caption{Balanced Projection}
+  \label{fig:twistspectrumprojection}
+    \end{figure}
+
+    In an unbalanced position, the rate of change or $\alpha(\tau)$ and $\beta(\tau)$
+    need not be proportional.
+    However, if we always rotate the entire figure into
+    our conventional balanced configuration for any given $\tau$, then the rate of
+    change of $\alpha$ will be exactly opposite $\beta$,
+    as illustrated in Figure \ref{fig:twistspectrumprojection}. Let $\alpha'(\tau)$ and $\beta'(\tau)$ be the angles
+    formed with the negative $y$-axis in the balanced configuration. By the definition of balance
+    being balanced around the $y$-axis,
+    $\alpha'(\tau) = -\beta'(\tau)$
+
+    This means that the
+    intersection point of the two projected ellipses (which may be very close to the
+    $z$-axis), will always be reached at exactly time ($\tau$): $\alpha'(\tau) = 0 - \beta'(\tau)$.
+    This intesection point
+    in the balanced configuration is straight down; it is the point at which the projections
+    are in the same plane (and the plane of the $z$-axis), and at this point the segmented
+    helix is a toroid-like figure. Since there is always such an intersection point
+    and we can move $\tau$ through a full rotation, we can always reach such a toroidal point.
+    If the face normals are precisely anti-parallel, this point will occur at the origin,
+    and so will be a straightline which is in a sense a degenerate torus-like figure, but
+    we do not consider it such.
+
+    Similarly, we can always rotate to a point where $A$ and $D$ are pointing opposite each other
+    as measured from the origin of the projection plane, so that
+    $\beta'(\tau) = \alpha'(\tau) + \pm \pi$.
+    This is always the ``flat'' or maximally
+    extended point. In the balnced convention, this occurs when the projection points are
+    coincident with the $x$-axis in the projection plane, as shown in Figure \ref{fig:twistspectrumprojection}.
+    Because in this case $\gamma = \delta$ and A and D points are always (even in the first case of this proof)
+    at equal angles to the $z$-axis aligned object axis $BC$, the $A$ and $D$ projection points move
+    at the same speed (with respect to $\tau$), they meet the $x$-axis at the same $\tau$ value.
+
+    Thus when the absolute value of the face normals formed with the $z$-axis are equal,
+    we can smoothly move through a spectrum between the toroid-like
+    figure (zero travel, or $d = 0$), and the position of maximal travel.
+
+\end{proof}
 
 
 It would be more useful and elegant to have a formula for the $\tau$ that produces
@@ -1181,6 +1231,8 @@ to produce such a formula. However, in the calculator page, we numerically
 provide the $\tau$ that produces the minimum tightness (torus-like) and maximum tightness (zig-zag) to the
 nearest 360-degree,
 with the labels {\em Minimum Tightness $\tau$} and {\em Maximum Tightness $\tau$}.
+
+\section{Checks and Explorations}
 
 \subsection{Qualitative Observations}
 
@@ -1621,100 +1673,96 @@ Some discussion of ``screw transformations''
 
 \url{https://www.researchgate.net/profile/Alexander_Tropsha/publication/250901525_Analyzing_Protein_Structure_Using_Almost-Delaunay_Tetrahedra/links/5578584408ae75215870347c/Analyzing-Protein-Structure-Using-Almost-Delaunay-Tetrahedra.pdf}
 
+
+
 \begin{figure}
      \centering
-     \includegraphics[width=0.80\textwidth]{figures/TwistSpectrumProof.png}
-     \caption{Twist Spectrum Proof Diagram}
-  \label{fig:twistspectrum}
+     \includegraphics[width=0.80\textwidth]{figures/RotatingPlane.png}
+     \caption{Planes Rotating About the $z$-axis}
+  \label{fig:rotatingplane}
 \end{figure}
 
+
+
 \begin{proof}
-  Please see Figure \ref{fig:twistspectrum}, which renders and arbitrary
-  prism in balanced position. The $B$ joint is on the backside of the
-  prism, not visible. As usual, $\tau$ is measured against the
-  face. The face normals are labelled $N_b$ and $N_c$. The are drawn
-  to projection planes orthogonal to the object axis, which is $z$-axis
-  aligned as per our usual convention. The $N_b$ face normal forms
-  an angle $\delta$ with negative $z$-axis, and the $N_c$ face normal
-  an angle $\gamma$ with the positive $z$-axis.
 
-  Let the function $\alpha(\tau)$ which is the angle formed by the
-  projection of $A$ and the orign with the $X$ axis in the $XY$-plane.
-  Let $\beta(\tau)$ be the angle of the $D$ projection. $\alpha(\tau)$
-  and $\beta(\tau)$ are periodic on $\tau$ ranging between $0$ and
-  $2\pi$.
+    For given joint face normals,
+    arbitrarily choose a $\tau$ such that $ABC$ are not collinear and
+    $BCD$ are not collinear. Although there may be specific $\tau$ values
+    which make these collinear, there can only be two such.
 
-    Let $\gamma$ and $\delta$ be the angle between the $A$ face-vector and
-    $B$ face-vectors respectively formed with the
-    $\overline{BA}$ vector and $\overline{AB}$ respectively.
+    Consider the plane defined by the non-collinear points $ABC$ and
+    the separate plane containing $BCD$. Both of these planes contain
+    the $z$-axis because the contain $BC$, which without loss of generality
+    is $z$-aligned.
 
-    If $\gamma \neq \delta$ then one is greater than the other.
-    Without loss of generality, assume $\gamma > \delta$.
-    Then $D$ moves in a cone
-    about the $N_c$ face normal as $\tau$ is varied. The
-    angle of the projection of $D$ is $\beta$, which varies as $\tau$
-    varies.
-    The projection of both $A$ and $D$ move in circles
-    potentially tilted to the $z$-axis, thereby
-    forming ellipse-like figures in the projection planes.
+    As illustrated in Figure \ref{fig:rotatingplane},
+    construct a unit-length vector $B'$ in the $ABC$ plane which is perpendicular
+    to the $z$-axis (and segment $BC$). Imaagine the tail of this
+    vector at $B$. Construct a unit-length vector $C'$ from $C$ in the $BCD$ plane
+    perpendicular to the $z$-axis. This is possible whenever $A$, $B$, $C$, and $D$
+    are not collinear (when the $x$ and $y$ components of the face normals are not zero.)
 
-    By our assumption, because $\gamma > \delta$, the
-    ellipse formed by $D$ as $\tau$ changes
-    strictly contains the origin of the projection plane.
-    Therefore at least one of $\beta(\tau)$  has a range
-    containing both $0$ and $2\pi$, since the angle swept out by
-    a point on the edge of this figure goes completely around the origin.
-    Without loss of generality, let $\alpha$ have that property.
+    If the face normals are parallel, these planes are parallel, and so the angle
+    between them does not vary with $\tau$. Otherwise,
+    as $\tau$ is varied minutely, the joints $A$ and $D$ move about
+    the $z$-axis in opposite directions, and therefore
+    the planes $ABC$ and $BCD$ rotate around the $z$-axis and with respect to each other.
+    There is a computable $R_A(\tau)$
+    rotation about the $z$ axis that effects this rotation for the
+    $ABC$ plane, and
+    separate rotation $R_D(\tau)$ which effects it for $BCD$.
+    These rotations preserve the perpendicularity of $B'$ and $C'$ to
+    the $z$-axis.
 
-    Both $\alpha$ and $\beta$ are continuous, by the continuity of
-    physcial mechanisms and the composition of continuous functions.
+    Let $\phi$ be the (unsigned) angle between the vectors $B'$ and $C'$ (these vectors and the angle is in the $XY$-plane):
+    \begin{align}
+      \phi(\tau) = \arccos{( R_A(\tau)B' . R_D(\tau)C')}
+      \end{align}
+    The rotations $R_A$ applied to $B'$ and $R_D$ applied to $C'$
+    rotate these vectors about the $z$-axis in opposite directions. The dot product of these rotated vectors
+    computes the cosine of the angle between them.
+    By convention measure angles counterclockwise against the $x$ axis.
+    Then minutely increasing $\tau$ while maintaing a balanced configuration
+    of $BC$ on the $z$-axis increase the angle of $B'$ with the $x$ axis,
+    and mintuely increasing $\tau$ decreases the angle of $C'$ with the $x$ axis
+    if both are measured from the $B$ to $C$ direction. Therefore:
+    \begin{align}
+      \phi(\tau) = & \atantwo(B'_x,B'_y) - \atantwo(C'_x,C'_y) \\
+    \end{align}
+    Therefore  $\phi(\tau)$ is strictly increasing until $B'$ and $C'$ are opposite
+    each other ($\phi(\tau) = \pi$), and then strictly decrease until they are equal
+    ($\phi(\tau) = 0$.)
 
-    Note that although the motion need not be proportional, the sign
-    of the motion of $\alpha(\tau)$ is the opposite of the sign of the
-    motion of $\beta(\tau)$ as $\tau$ is varied.
+    The domain of $\tau$ is $0$ to $2\pi$; we may always perform
+    a complete rotation of our joints, sweeping continuously through
+    a full revolution and returning to precisely the same configuration.
 
-    Because $\alpha$ varies between $0$ and $2\pi$ (although
-    $\beta$ may not), and because $\beta$ moves in the opposite direction,
-    by the Intermediate Value Theorem, there is a $\tau$ where
-    $\alpha(\tau) = \beta(\tau)$. Such a point produces a toroid-like
-    figure.
+    $\phi(\tau)$ is a continous function $R_A(\tau)$ and $R_D(\tau)$ which are continuous
+    functions of $\tau$. $\phi(\tau)$ is therefore a continous function
+    of $\tau$. By the Intermediate Value Theorem, $\phi$
+    takes on all values between $0$ and $\pi$ (and back down to $0$) as $\tau$ is swept out through a complete revolution.
+    There is always some $\tau$ for which $\phi(\tau) = 0$.
+    Indeed there is some $\tau$ for any value of $0 \leq \phi \leq \pi$ we choose.
 
-    Since $\alpha$ can be moved in a complete circle (between 0 and
-    $2\pi$), there is always
-    exactly one
-    $\tau$ which places $\alpha$ oppsite $\beta$
-    (i.e., $\alpha = \pi + \beta$). This is the flat case, which
-    is the maximal extent of the segmented helix.
+    There may be a $\tau$ which makes $ABC$ collinear; however,
+    the rotation $R_A$ still exists and still rotates $B'$, even
+    when $ABC$ are collinear.
 
-    Now let us consider the case that $\gamma = \delta$.
-    THE THEOREM MAY NOT HOLD IN THIS CASE.
-    I Believe a torus cannot be formed (except in a degenerate sense)
-    When the face vectors are anti-parallel. When anti-parallel,
-    the ``torus'', at zero twist, is in fact flat.
-    I am starting to suspect that simply the travel may be the simplest
-    feature to discuss in this theorem.
+    When $\phi(\tau)$ is zero, the $ABC$ and $BCD$ planes are conincident.
+    This produces a toroid-like segemented helix, (though possibly
+    a degenerate one which is a simply flat if the face normals are
+    anti-parallel.) When $\phi(\tau) = \pi$, the segmented helix
+    has all joints in the same plane, a ``zig-zag'' and maximally extended
+    case. If the face normals are parallel, the toroid-like shape may contain
+    only two distinct joint locations.
 
-    In this case, the projected figures do not complete enclose
-    the projection of the $z$-axis into the projection planes, because
-    the origin lies on the edge of the figures itself.
-    That is, there are some configurations in which the point $A$ or $D$
-    lies on the $z$-axis itself.
+    Thus by varying $\tau$ through a complete rotation we can always
+    find a segmented helix with a travel $d$ of zero, which is a
+    toroid-like figure with all joints in a plane perpendicular to the
+    axis of the helix, and likewise can always find a configuration
+    in which all joints are in a plane parallel to the axis of the helix.
 
-    However, any such case may be considered a ``flat'' case of
-    maximal extent---that is, the points $A,B,C,D$ all lie in a plane.
-
-
-    By our assumption that both there are non-zero $x$ or $y$ components
-    to the face normals, $\gamma > 0$ and $\delta > 0$. The figures
-    they describe may both contain the origin. However, one of them
-    moves through an elliptical figure, and there without loss of
-    generality $\beta(\tau)$ sweeps out the full domain between $0$ and
-    $2\pi$. By our previous argument, both the torioidal and flat cases
-    are found.
-
-    Therefore we can always move continuously through a torus-like
-    planar polygon ($\phi = 0$) and a maximally extended flat case.
-
-\end{proof}
-
-After some thought, I developed an alternative proof that may be simpler.
+    Therefore, for any face normals (not both zero), there is a ``twist spectrum'' of helices that includes
+    any desired helix angle.
+  \end{proof}
