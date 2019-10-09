@@ -118,7 +118,7 @@ segmented helices generated in this way.
 
 Finding the properties of a segmented helix from three contiguous segments on the helix from screw theory\cite{abbasi2015review,wittenburg2016kinematics,wiki:screwaxis,kahn1989defining},
 is explained and formulated. An interactive, 3D rendering website written in JavaScript which allows both calculation and
-interactive play and study is provided\cite{segmentedhelixinteractive}. This allows
+interactive play and study is provided\cite{segmentedhelixinteractive}(see Figure \ref{fig:dodecahedron}.) This allows
 a structure, or ``molecule'', coincident to a segmented helix to be designed
 by adjustments to the repeated object, or for the shape of
 a repeated subunit to be inferred from the intrinsic properties of the
@@ -150,7 +150,7 @@ has been completely described to date.
 \section{A Warm-up: Two Dimensions}
 
 Considering the problem in two dimensions may be a valuable introduction.
-Suppose that we consider a polygon that that as two edges, called $A$ and $B$, and that we define the length $L$ of the
+Suppose that we consider a polygon that has two edges, called $A$ and $B$, and that we define the length $L$ of the
 polygon as the distance between the midpoints of these edges. Suppose that we are only allowed to join these
 polygons by aligning $A$ of one polygon to $B$ of another polygon, with their midpoints coincident. Let us
 further assume that we disallow inversions of the polygon.  Let us imagine that we have a
@@ -181,12 +181,12 @@ If $\theta = 0$, the joints will be collinear.
 
 If $\theta \neq 0$, then form an isoceles triangle in the direction of the second
 object, whose axis is $A'B'$.
-Form this triangle so the one edge is a bisector of the angle between the axes,
+Form this triangle so the one edge is a bisector of the angle between the axes$\angle ABB'$,
 as illustrated in Figure \ref{fig:prismdiagram}.
 Make $\angle CAB = \angle CBA$.
 
 Then $\angle ABC = \frac{\pi - \theta}{2}$. Therefore $\angle ACB = \pi - 2(\pi-\theta)/2 = \theta$.
-By considering the right triangle formed by midpoint of $\overline AB$ and $C$,
+By considering the right triangle formed by midpoint $M$ of $\overline{AB}$ and $C$,
 the length of the sides $\overline{AC} = \overline{BC}$ can be computed by the half-angle
 of theta:
 \[
@@ -229,13 +229,13 @@ A segmented helix may be thought of as function that, given an integer, gives ba
    P_z(n) &= n d
 \end{align*}
 
-$d$ is the distance or {\em travel} along the axis between adjacent joints. In this canonical representation this is
+$d$ is the distance or {\em travel} along the axis between adjacent joints. In this canonical representation the axis is
 the $z$-axis.
 $\theta$ is the rotation around the $z$-axis
 between adjacent points.
 $r$ is the radius of the segmented helix.
 Note that if $\theta = \pi$, we have a third form of degeneracy (to the human eye) of a segmented helix
-which is a zig-zag contained completely within a single plane.
+which is a {\em zig-zag} contained completely within a single plane.
 
 If we think of the segmented helix as describing a polyline in 3-space, we would like to investigate
 the properties of that polyline. If we consider only the intrinsic shape of the segmented helix, there are three degrees
@@ -259,22 +259,21 @@ the axis of the segmented helix, which is drawn as a dark green arrow, pointing 
 parallel to the $XZ$-plane. For ease of viewing, the entire segmented helix has been raised by two units on the $y$ axis.
 The segment $\overline{BC}$ has coordinate $y = 2$, and is aligned with the $z$-axis, and centered in $z$ direction.
 
-The positive $x,y$ and $z$ axes are shown by the red, green and blue axes, respectively.
+The positive $x,y$ and $z$ axes are shown by the red, green and blue axes arrows, respectively.
 Following computer graphics convention, the $y$ axis is oriented vertically.
 The points $A,B,C,D$ correspond to $P(0), P(1), P(2)$, and $ P(3)$ for a segmented helix aligned
 to this axis (not the $z$-axis.)
 A thin green polyline represents the segmented helix, and thus connects the joints $A,B,C$, and $D$.
 The points are wrapping around the axis clockwise, with an angle of $\theta = 56.6 \degree$ as
 show by the on-screen protractor as the rotation from one point to the next. As will be explained in Section \ref{sec:facenormal},
-$\tau$ is the face-on-face joint rotation of $45 \degree$.
+$\tau$ is the face-on-face joint rotation, in this case of $45 \degree$.
 The helix angle $\phi = 39.7 \degree$ is rendered by a protractor on the $y = 0$ plane; this the angle between the axis
-and of the helix and the $z$ axis, and therefore the angle of any one segment against the helix angle.
+and of the helix and the $z$ axis, and therefore the angle of any one segment against the helix axis.
 
-Any point on on the segmented helix has a closest point on the axis of the helix. In particular, we will call the points closest to the
+Any point on the segmented helix has a closest point on the axis of the helix. In particular, we will call the points closest to the
 joints {\em joint axis points}. Then $d$ is the distance along the axis between consecutive joint axis points.
 
-A line is drawn from the blue point $B$ to an black sphere on the helix axis. The point on the helix axis, which renders it as a
-black sphere, is denoted $B_a$. Analogously, $C_a$ is the point
+A line is drawn from the blue point $B$ to a black sphere on the helix axis, the joint axis point, denoted $B_a$. Analogously, $C_a$ is the point
 on the axis closest to he green point $C$.
 
 
@@ -291,8 +290,8 @@ The following concepts and conventional variable names for them will be related:
   \item $r$ is the distance between a point and the helix axis (that is, $B$ and $B_a$ for example.)
   \item $\theta$ is the rotation about the helix axis between two consecutive joints.
   \item $c$ is the length of a chord formed by the projection of the segment between two points projected along the axis of the segmented helix (A chemist may recognized this as the distance between residues on a {\em helical wheel} projection).
-  \item $d$ is the distance along the axis of the helix between any two joints ($B_a$ and $C_a$, for example, rendered as a small black and blue
-    sphere, respectively in Figure \ref{fig:naming}.
+  \item $d$ is the distance along the axis of the helix between any two joint axis points ($B_a$ and $C_a$, for example, rendered as a small black and blue
+    sphere, respectively in Figure \ref{fig:naming}.)
 \item $\phi$ is the angle between any vector between two adjacent joints and the axis of the helix. In physical screws used in mechanical engineering, this is analogous to the {\em helix angle} \cite{wiki:helixangle}.
   \item $p$ is the pitch of the helix, the distance traveled in one complete rotation.
   \item $s$ is the number of segments in a complete rotation (in general not rational.)
@@ -362,7 +361,7 @@ Although fairly obvious from Chasles' Theorem, we have not found this stated in 
 \end{observation}
 Lord's Observation may perhaps be clarified that in fact identical objects conjoined via a rule
 produce periodic chains of objects that are uniformly intersected by segmented helices and that they may be degenerate in one of
-three ways that we might not strike the human eye as a helix if we are not seeking them:
+three ways that might not strike the human eye as a helix if we are not seeking them:
 \begin{enumerate}
 \item The segments may form a straight line. (For example, see Figure \ref{fig:pearlshaft}).
 \item The segments may be planar about a center, forming a polygon or ring. (For example, see Figure \ref{fig:thewheel}).
@@ -383,7 +382,7 @@ For example, we may have microscopic objects such as proteins
 or atoms, and we know from crystallography something about the positioning of these objects, without
 knowing ahead of time the angles at which these objects would combine in their natural environment.
 In this case, we use a variant of a linear algebra method\cite{kahn1989defining} for determining the radius, travel, and twist
-of the segmented helix (these terms will be defined precisely below.)
+of the segmented helix ({\em twist} will be defined precisely below.)
 
 In the other approach, we may know {\it a priori} exactly the
 relevant properties of the objects and the rule which which they combine, and we seek to compactly describe the segmented helix they create.
@@ -417,7 +416,7 @@ prove that such a segmented helix indeed exists for every periodic chain.
   attached to it is always in the same position in the frame of reference for $i$.
   Informally, $i+1$ ``looks the same'' to $i$, no matter what $i$ we choose, $i < N$.
   Call a chain of $N$ identical rigid objects conjoined via a rule that
-  conjoins $A_i$ to $B_{i+1}$ in such a way that every vector
+  conjoins $A_{i+1}$ to $B_i$ in such a way that every vector
   of $B$ is always in the same position relative to a frame of reference
   constructed from $A$ a {\em periodic chain.}
 
@@ -429,7 +428,7 @@ prove that such a segmented helix indeed exists for every periodic chain.
 \begin{proof}
   We will proceed by induction.
 
-  Base Case ($k == 3$):
+  Base Case ($k = 3$):
 
   Take an object $A$ with axis $\overrightarrow{AB}$.
   By Chasles' theorem\cite{wiki:chasles}
@@ -439,7 +438,7 @@ prove that such a segmented helix indeed exists for every periodic chain.
   position where the second object $B$ with axis $\overrightarrow{BC}$ is.
   Take one of the rotation angles of smallest value.
   Construct the points $A'$, $B'$ and $C'$ as the closest points
-  to $A,B$ and $C$ on this axis. These points are collinear by construction.
+  to $A,B$ and $C$ on this screw axis. These points are collinear by construction.
 
   Now add the object $\overrightarrow{CD}$ to object $\overrightarrow{BC}$
   by our the rule of periodic chains. Consider the points
@@ -468,7 +467,7 @@ so $r = \| \overrightarrow{A A'} \|$.
 
   Now construct a segmented helix, the radius $r$, distance $d$,
   and angle $\theta$. This segmented helix can be positioned coincident with the screw axis
-  $S$ so
+  $\overrightarrow{S}$ so
   that $H_0 = A$. Then $H_1=B$, $H_2=C$, and $H_3=D$.
 
   Therefore, for the base case of three objects, there is a segmented helix whose
@@ -485,7 +484,7 @@ so $r = \| \overrightarrow{A A'} \|$.
   a segment
   of a segmented helix. Attach vectors $\overrightarrow{A_{k}A'_{k}}$ and $\overrightarrow{B_{k}B'_{k}}$
   from the
-  joints of object $k$ to the axis joints of the segmented helix perpendicularly. Define these
+  joints of object $k$ to the corresponding axis joints of the segmented helix perpendicularly. Define these
   vectors in the frame of reference for $k$.
 
   To the $k-1$th object, the tips of  $\overrightarrow{A_{k}A'_{k}}$ and $\overrightarrow{B_{k}B'_{k}}$ vectors ($A'_{k}$ and $B'_{k}$) define
@@ -562,7 +561,7 @@ transposition, or travel, along the axis of one transformation.
 Neither a transformation matrix or its corresponding screw transformation
 completely define all of the intrinsic
 properties of a segmented helix. In particular, a matrix $\bm{M}$ maps any point $p$ to a point $p'$.
-Since this applies to all points no matter how far from the screw axis or the axis of rotation and
+Since this applies to all points no matter how far from the screw axis (axis of rotation) and
 such transformations preserve distance to this axis (the radius), the radius of a segmented helix
 is not determined by a transformation matrix or a screw. Since the helix angle $\phi$ changes
 with radius for a helix of a given pitch, $\phi$ is not determined.
@@ -578,13 +577,13 @@ Although not original to this paper, the author found it
 difficult to find clear documentation on how to calculate the
 screw from the transformation matrix.
 We therefore include an exposition here, in hope it will be useful,
-and a valuable adjunct to the code to a programmer seeking to duplicate
+and a valuable addition to the code in the source code repository to a programmer seeking to duplicate
 this functionality.
 
 \subsection{Computing the Screw Axis from a Transformation Matrix}
 
 Our goal is to compute a normalized vector $\hat{\overrightarrow{H}}$ aligned with the screw
-axis of the transformation effected by a transformation matrix $\bm{R}$.
+axis of the transformation composed and effected by a transformation matrix $\bm{R}$.
 
 In order to be robust, it is valuable to check that the transformation
 matrix is a rigid transformation\cite{wiki:rigid},
@@ -599,7 +598,7 @@ The angle of rotation is computable from the trace of $\bm{R}$, $Tr(\bm{R})$.
 \end{align}
 Technically, $\arccos$ is multi-valued, but we will take $\theta$
 to be in its principle range, $0 \leq \theta \leq \pi$.
-If $\theta$ is $0$ or a multiple of $\pi$, then we the {\em zig-zag}
+If $\theta$ is $0$ or a multiple of $\pi$, then we have the {\em zig-zag}
 degenerate case, the method of computing $\overrightarrow{H}$ from the rotation
 basis of $\bm{R}$ is numerically unstable. However, in this case
 we can compute the direction vector $\overrightarrow{H}$ as the difference vector
@@ -611,14 +610,14 @@ twice. Informally, this is a ``zig, then a zag''.
 \end{align}
 (Note that in general $\overrightarrow{H}$ is not normalized, $\overrightarrow{H} \neq \hat{\overrightarrow{H}}$.
 Also recall that multiplication by a transformation matrix
-produces a point that in a new position representing
+produces a point that is in a new position representing
 the transformation.)
 
 In other cases, $\overrightarrow{H}$ can be computed from the direction
 cosines of $\bm{R}$\cite{wiki:rotation}:
 \begin{align}
   R &=     \begin{bmatrix} a & b & c' & x \\ d' & e & f & y\\ g & h & i & z\\ 0 &  0 & 0 & 1\end{bmatrix} \\
-    H &=  \begin{bmatrix} h - f \\ c' - g \\ d' - b \\ 1 \end{bmatrix}
+    \overrightarrow{H} &=  \begin{bmatrix} h - f \\ c' - g \\ d' - b \\ 1 \end{bmatrix}
 \end{align}
 (The variables $c'$ and $d'$ are marked to distinguish them from
 the symbols for the chord $c$ and the travel along the axis $d$.)
@@ -627,7 +626,7 @@ when $\theta$ is $0$ or multiple of $\pi$, hence our need
 to treat those cases differently.
 
 Although the matrix $\bm{R}$ in general produces both a rotation
-and a translation in space, distance between $q$ and $\bm{R}q$
+and a translation in space, the distance between $q$ and $\bm{R}q$
 in general depends on how far $q$ is from the axis of rotation.
 However, the travel $d$ along the axis of the rotation does
 not depend on $q$. It can be computed as a dot product:
@@ -663,7 +662,7 @@ Sidedness and pitch ($s$ and $p$) follow directly.
 Finally, the vector $\hat{\overrightarrow{H}}$ gives the direction of the
 axis of the helix, but does not give us a point which fixes
 it in space. It is most convenient to accept a point $B$
-which is a joint and produce the point $B_a$ which is the
+which is a joint and produce the joint axis point $B_a$ which is the
 point on the helix axis closest to $B$.
 
 \begin{figure}
@@ -674,16 +673,17 @@ point on the helix axis closest to $B$.
 \end{figure}
 
 
+Figure \ref{fig:threemembersdiagram}
+may be useful in picturing the following quantities.
 To do this, we conceptually construct the midpoint,
-treated as a vector $\overrightarrow{M}$ below,
-of $\overrightarrow{BC}$ and utilize the fact that the vector $\overrightarrow{Q}$
-from it to its closest point on the axis $M_a$ is perpendicular
-to the containing both $\overrightarrow{BC}$ and $H$. Therefore
+$\overrightarrow{M}$
+of $\overrightarrow{BC}$ and utilize the fact that the vector
+from $\overrightarrow{M}$ to its closest point on the axis $M_a$ (call this vector $\overrightarrow{Q}$) is perpendicular
+to the plane containing both $\overrightarrow{BC}$ and $\overrightarrow{H}$. Therefore
 its direction is constructible via cross product, and
 its length $l$ is computable from the radius and chord. $M_a$
 is the midpoint of $B_a$ and $C_a$, so we can just move back
-half the travel $d$ along the vector $H$ to get $B_a$. Figure \ref{fig:threemembersdiagram}
-may be useful in picturing these quantities.
+half the travel $d$ along the vector $H$ to get $B_a$.
 
 \begin{align}
   C &= R(B) \\
@@ -695,10 +695,10 @@ may be useful in picturing these quantities.
   B_a &= \overrightarrow{M} + \overrightarrow{Q'} - \frac{d}{2}\hat{\overrightarrow{H}}
 \end{align}
 
-Thus given only the transformation $R$, the length $L$, and one
+Thus given only the transformation $\bm{R}$, the length $L$, and one
 joint $B$, one may compute all of the intrinsic properties
 ($r,\theta,d,c,\phi$) of
-the segmented helix and positioned it in space via $H$ and $B_a$.
+the segmented helix and position it in space via $\overrightarrow{H}$ and $B_a$.
 
 As is common in kinematics\cite{funda1990computational}, there are many ways to represent
 the same physical or mathematical situation.
@@ -723,9 +723,9 @@ have learned the position of four points and wish to compute from that.
 Kahn\cite{kahn1989defining} has given a method for computing
 the axis of a helix in the context of chemistry.
 This method uses the observation that the angle bisectors
-of the segments on a segmented helix are perpendicular
+of the segments on a segmented helix are perpendicular to
 and intersect the axis of the helix.
-Because the helices may not be perfect and because the measurement of positions may not be perfectly accurate,
+Because chemical helices may not be perfect and because the measurement of positions may not be perfectly accurate,
 it is common for chemists to use regression and fitting methods to fit helix parameters to observed positions
 on the helix.
 Kahn's method was a prelude to some error-tolerant methods applicable to
@@ -742,14 +742,15 @@ four consecutive known points $A,B,C,D$ is:
 \begin{itemize}
 \item Construct a rigid transformation that places the points conveniently on the $z$-axis and balanced
   around the $y$-axis.
-\item Compute the bisectors of the angle $\overrightarrow{B_b}$ of $ \angle{ABC}$ and the angle $\overrightarrow{C_b}$ of $\angle{BCD}$.
+\item Compute the bisectors of the angle between object axes $ \angle{ABC}$, called $\overrightarrow{B_b}$ and the
+  bisecting angle $\overrightarrow{C_b}$ of $\angle{BCD}$.
   If the points are collinear, we have a special case.
 \item Because these angle bisectors point at the axis of the segmented helix, their cross product is a vector
   in the direction of the axis. If $\overrightarrow{B_b}$ and $\overrightarrow{C_b}$ are parallel or anti-parallel the cross product is not defined
   and we have special cases.
-\item  Otherwise the vectors $\overrightarrow{B_b}$ and $\overrightarrow{C_b}$ are skew, the algorithm for the closest points on
+\item  Otherwise the vectors $\overrightarrow{B_b}$ and $\overrightarrow{C_b}$ are skew, and the algorithm for the closest points on
   two skew lines provides two axis points $B_a$ and $C_a$ on these vectors which
-  are the closest points on on those lines and are also points on the axis.
+  are the closest points on those lines and are also points on the helix axis.
 \item The distance between $B_a$ and $B$ is the radius, and the distance between $B_a$ and $C_a$ is the travel $d$ along the axis.
   \item The angle between $\overrightarrow{B - B_a}$ and $\overrightarrow{C - C_a}$ is $\theta$.
 \end{itemize}
@@ -777,7 +778,7 @@ instead of at the origin.)
 $A$ (the red sphere) is a reflection of $D$ (the purple sphere) across
 the $y$-axis.
 Both $A$ and $D$ are hanging downward.
-If the structure where hung on a point at the origin, it would
+If the structure were hung on a point at the origin, it would
 be physically balanced.
 As shown below, it is always possible to achieve this balance,
 even though a single object
@@ -794,8 +795,8 @@ the convenience of calculation, that we consider it a Lemma:
     \wedge B_z < 0 \wedge C_z = -B_z$.
   \item The joints $A$ and $D$ are in rotational balance about
     the $y$ axis, as if they were weights hanging downward:
-    $B_y = C_y \wedge B_y \leq 0 $ and
-    $B_x = -C_x \wedge B_z = -C_z$.
+    $A_y = D_y \wedge A_y \leq 0 $ and
+    $A_x = -D_x \wedge A_z = -D_z$.
   \end{itemize}
   \label{lem:balance}
 \end{lemma}
@@ -812,30 +813,6 @@ After placing $\overrightarrow{BC}$ along
 the $z$-axis, there is always an angle $\psi$ which will
 rotate the points $A$ and $D$ into balance (that is, $(A_x = -D_x) \wedge (A_z = -D_z) \wedge (A_y = D_y)$.
 
-For computer programmers with a graphics library supporting transformation matrices such
-as THREE.js\cite{dirksen2013learning},
-it is relatively easy to code the math to adjoin objects
-face-to-face based on the face normals, simulating the physical act of
-matching flat faces between macroscopic objects.
-\begin{enumerate}
-  \item Create the transformation the aligns and centers $\overrightarrow{BC}$ on the $z$-axis.
-\item Create a translation of $B$ to $C$.
-\item Create a rotation of the $z$-axis to  $\overrightarrow{N_B}$.
-\item Create a rotation of of $-\overrightarrow{N_C}$ about $\overrightarrow{N_B}$.
-  \item Create a rotation of $\tau$ around that axis.
-\end{enumerate}
-Composing these transformation matrices via multiplication creates a
-transformation matrix which takes $B$ to $C$ and $C$ to $D$.
-
-We will assume this
-as a subroutine called {\em adjoinPrism} which takes a prism and $\tau$
-(the rotation inside the plane of the joint) and produces prism
-in a face-to-face position. A byproduct
-of balancing the points is the a transformation matrix
-that takes $C$ into $D$. Having done this, one can compute
-the screw axis, and hence all of the segmented helix properties,
-from either the transformation matrix or the four points. Our
-code does both and compares the result as a test.
 
 The key insight to finding $\psi$ is to note that we
 can consider the projections of the $B$ and $C$ face normal vectors
@@ -849,7 +826,7 @@ are different, this mechanism works, because by Lord's Observation
 the points $A$ and $D$ must be symmetric about the segment $\overline{BC}$.
 
 By composing this balancing operation with the face-adjoining transformation
-matrix {\em adjoinPrism}, $A$ and $D$ are placed in balance.
+matrix via {\em adjoinPrism} (see Section \ref{sec:adjoin}), $A$ and $D$ are placed in balance.
 
 Note that in the ``zig-zag'' case, $A_y = D_y = 0$.
 
@@ -1177,7 +1154,35 @@ We can identify intrinsic properties:
   measured at the joint face.
 \end{itemize}
 
+\subsection{Adjoining Prisms with Linear Algebra, Producing a Transformation Matrix}
+\label{sec:adjoin}
 
+For computer programmers with a graphics library supporting transformation matrices such
+as THREE.js\cite{dirksen2013learning},
+it is relatively easy to code the math to adjoin objects
+face-to-face based on the face normals, simulating the physical act of
+matching flat faces between macroscopic objects.
+\begin{enumerate}
+  \item Create the transformation the aligns and centers $\overrightarrow{BC}$ on the $z$-axis.
+\item Create a translation of $B$ to $C$.
+\item Create a rotation of the $z$-axis to  $\overrightarrow{N_B}$.
+\item Create a rotation of of $-\overrightarrow{N_C}$ about $\overrightarrow{N_B}$.
+  \item Create a rotation of $\tau$ around that axis.
+\end{enumerate}
+Composing these transformation matrices via multiplication creates a
+transformation matrix which takes $B$ to $C$ and $C$ to $D$.
+
+\subsection{Completing the Face Normal Computation}
+We will assume this functionaliy
+as a subroutine called {\em adjoinPrism} which does this, taking a prism
+(including the face normals $\overrightarrow{N_B}$ and $\overrightarrow{N_C}$) and $\tau$
+(the rotation inside the plane of the joint) and produces prism
+in a face-to-face position. A byproduct
+of balancing the points is the a transformation matrix
+that takes $C$ into $D$. Having done this, one can compute
+the screw axis, and hence all of the segmented helix properties,
+from either the transformation matrix or the four points. Our
+code does both and compares the result as a test.
 
 \section{Changing $\tau$ Smoothly Changes Tightness}
 
