@@ -405,6 +405,7 @@ Before using this symmetry in the construction of the segmented helix correspond
 prove that such a segmented helix indeed exists for every periodic chain.
 
 \begin{theorem}[Segmented Helix]
+  \label{thm:helix}
   Consider $N$ identical objects which each have two points, $A$ and $B$, called {\em joints}. Call
   $\overrightarrow{AB}$ the {\em axis} of this object.
   Consider the frame of reference for this object to have
@@ -813,7 +814,6 @@ After placing $\overrightarrow{BC}$ along
 the $z$-axis, there is always an angle $\psi$ which will
 rotate the points $A$ and $D$ into balance (that is, $(A_x = -D_x) \wedge (A_z = -D_z) \wedge (A_y = D_y)$.
 
-
 The key insight to finding $\psi$ is to note that we
 can consider the projections of the $B$ and $C$ face normal vectors
 projected into the $XY$ plane, and rotate these so that they
@@ -822,7 +822,7 @@ Such a projection into the cross-section of the helix is closely related to
 the {\em helical wheel}\cite{wiki:helicalwheel} plot
 in the study of alpha helices in proteins.
 Even if the lengths of the projections of the face normals in $XY$
-are different, this mechanism works, because by Lord's Observation
+are different, this mechanism works, because by Lord's Observation and Theorem \ref{thm:helix}
 the points $A$ and $D$ must be symmetric about the segment $\overline{BC}$.
 
 By composing this balancing operation with the face-adjoining transformation
@@ -838,11 +838,11 @@ matrix created to balance them.
 
 \subsection{On the Choice of the Screw Axis Direction}
 
-Given only a physical segmented helix without position in space,
+Given only a segmented helix without position in space,
 we may arbitrarily choose the
 direction for the axis.
 Changing our decision will make the screw axis point in the negative direction,
-change the sign of the travel $d$ along the axis, and choose $\phi$ to be $\pi - \phi$.
+change the sign of the travel $d$ along the axis, and change $\phi$ to be $\pi - \phi$.
 
 As can be seen from interactive play with our software\cite{segmentedhelixinteractive}, it is entirely possible for the travel along
 the axis of the helix to be $0$--in fact, choosing $\tau \approx 0$ produces toruses, which have no
@@ -870,13 +870,13 @@ but the axis vector, $\phi$, and the sign of $d$ will be different.
 
 Four consecutive points completely determine at least one segmented helix. We will concern ourselves
 only with the helix that makes the least rotation between points,
-though more rapidly rotating relices will also intersect the points.
+though more rapidly rotating helices will also intersect the points.
 The {\em PointAxis} algorithm
 takes four such points (without loss of generality $B$ and $C$
 are assumed to be centered on the $z$-axis, and that a
-rotation has been performed to balance $A$ and $D$ to that $A_x = -D_x, A_z = -D_z$, and $A_y = D_y$. Thus the input to
+rotation has been performed to balance $A$ and $D$ so that $A_x = -D_x, A_z = -D_z$, and $A_y = D_y$. Thus the input to
 {\em PointAxis} in fact has only three degrees of freedom, which determine the three intrinsic properties $r,d,\theta$
-which completely define the shape of a segments helix (but not its location in space.)
+which completely define the shape of a segmented helix (but not its location in space.)
 
 
 In the derivations below, we rely on certain facts about
@@ -896,7 +896,7 @@ of which is key:
   the midpoint of every member is the same distance from the axis
   which is general a little a less than $r$. In particular the midpoint $M$
   whose closest point on the helix axis $m$ is on the $y$-axis and
-  $\| \overrightarrow{Mm} \| < \| \overrightarrow{Bb} \|$.
+  $\| \overrightarrow{M_m} \| < \| \overrightarrow{B_b} \|$.
 \item The points ($A_a,B_a,C_a,D_a$) on the axis closest to the joints ($A,B,C,D$)
   are equidistant about the axis and centered about the $y$-axis. In
   particular, $\| \overrightarrow{B - B_a} \| = \| \overrightarrow{C - C_a} \|$.
@@ -973,7 +973,7 @@ In this case (denoting the $x$ component of the $B_a$ vector as $B_{a[x]}$):
   d &= (C - B) \times \overrightarrow{H} \\
   r &= \norm{\overrightarrow{B_b}} / 2 \\
   c &= 2 r\\
-  \phi &= \atantwo{(H_z,H_x)} - \pi/2 \\
+  \phi &= \atantwo{(H_z,H_x)}\footnote{$\atantwo$ is the standard two-argument tangent function employed in software packages.} - \pi/2 \\
   c &= 0 \\
   \theta &= \pi \\
   B_{a[x]} &= \frac{d\sqrt{1 - (d/L)^2}}{2} \\
@@ -1000,7 +1000,7 @@ the scalar projection of a segment $\overrightarrow{C - B}$ onto $\overrightarro
 From this $\phi$ is directly calculable. $\phi$ allows
 a direct calculation of the $x,y$ and $z$ components of the
 point $B_a$ on the axis pointed to by $\overrightarrow{B_b}$.
-$r$ is the distance between $Ba$ and $B$. $c$ and $\theta$
+$r$ is the distance between $B_a$ and $B$. $c$ and $\theta$
 are easily computed from these values.
 
 \begin{align}
@@ -1098,7 +1098,7 @@ and from that configuration it is clear there exists a segmented helix that coin
 There is one reason one might prefer the transformation matrix method or the point method over the other: with modern
 computer algebra systems such as Mathematica\cite{Mathematica} it might be possible to use these ``algorithms'' to produce closed-form
 expressions of closed-form (algebraic) inputs. For example, the Platonic solids all have lengths and face normals which
-can be specified exactly in closed (thought irrational) form. Thus it might be possible to produce an expression for the
+can be specified exactly in closed (though irrational) form. Thus it might be possible to produce an expression for the
 radius of one of the Platonic Dodecahelices of unit edge length. We have not undertaken this work.
 
 
@@ -1186,6 +1186,9 @@ code does both and compares the result as a test.
 
 \section{Changing $\tau$ Smoothly Changes Tightness}
 
+Upon implementing our interactive ability to vary $\tau$, the following
+theorem because visually apparent.
+
 \begin{theorem}[Twist Spectrum]
   For any choice of non-parallel face normals having non-zero $x$ or $y$ components,
   changing the twist angle $\tau$ through a complete rotation ($0 \leq \tau \leq 2\pi$)
@@ -1206,7 +1209,7 @@ code does both and compares the result as a test.
 \begin{proof}
   Please see Figure \ref{fig:twistspectrum}, which renders an arbitrary
   prism in balanced position. The $B$ joint is on the backside of the
-  prism, not visible. As usual, $\tau$ is measured against the
+  prism. As usual, $\tau$ is measured against the
   face. The face normals are labeled $\overrightarrow{N_B}$ and $\overrightarrow{N_C}$.
   The are drawn
   to projection planes orthogonal to the object axis, which is $z$-axis
@@ -1547,7 +1550,7 @@ Blockhelix & Cub & 	8 & 	2 & 	-90  &	0.236 &	120.000 & -0.577 & 144.736 \\
 Cubatorus & Cub &	4 &	2 &	0 &	0.500 &	90.000 & 0.000 & 90.000 \\
 \hline %inserts single line
 Octabeam & Oct &	3 &	5 &	-60 &	0.000 &	0.000 &	1.155 &	0.000 \\
-Octaspikey & Oct &	6 &	1 &	-120 &	0.148 &	146.443 & -0.603 & 154.761 \\
+Octaspiky & Oct &	6 &	1 &	-120 &	0.148 &	146.443 & -0.603 & 154.761 \\
 Octamedium & Oct &	6 &	2 &	-120 &	0.163 &	131.810 & -0.894 & 161.565 \\
 Octagear & Oct &	3 &	1 &	0 &	0.408 &	109.471 & 0.000	& 90.000 \\
 Treestar & Oct &	3 &	2 &	0 &	0.816 &	70.529 & 0.000 & 90.000 \\
