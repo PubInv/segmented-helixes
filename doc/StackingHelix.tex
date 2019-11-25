@@ -87,7 +87,7 @@ This allows the deduction of intrinsic properties of a repeated subunit from kno
 want to do.
 Because the algorithms are efficient, a repeated subunit can be designed to create a segmented helix of
 desired properties,
-as a mechanical engineer or robotocist might want.
+as a mechanical engineer or roboticist might want.
 A proof is provided that any subunit can produce a toroid-like helix or a maximally-extended helix, forming a continuous spectrum based
 on joint-face normal twist.
 As a verification and demonstration, the software, website and paper compute, render, and
@@ -352,8 +352,8 @@ properties.
 However, when doing doing computer graphics work or kinematic
 calculations, the sign conventions are critical. Because this
 paper wishes to emphasize the continuum of shapes produced by
-changing an object used to generate the segmented helix, and
-in particular is interested in the degenerate helix which
+changing an object used to generate the segmented helix, and,
+in particular, is interested in the degenerate helix which
 produces toroidal figures, it is preferable to be able to discuss
 the axis of a segmented helix as existing even when the
 figure has no travel along the axis (that is, when $d = 0$).
@@ -373,13 +373,13 @@ Therefore adopt the following conventions:
 
 \section{The Intrinsic Properties of Periodic Chains of Solids}
 
-Although fairly obvious from Chasles' Theorem, in order to prove Observation \ref{obs:lords}
+Although fairly obvious from Chasles' Theorem, in order to prove Observation \ref{obs:lords},
 addtional clarification is helpful.
 If chains of identical repeated 3D units are conjoined identically, they are {\em periodic chains},
 and they generate a segmented helix coincident on their joints.
 Identical objects conjoined via a rule
 produce periodic chains of objects that are uniformly intersected
-by segmented helices and that they may be degenerate in one of
+by segmented helices and may be degenerate in one of
 three ways that might not strike the human eye as a helix at first glance:
 \begin{enumerate}
 \item The segments may form a straight line. (For example, see Figure \ref{fig:pearlshaft}).
@@ -405,7 +405,7 @@ for determining the radius, travel, and ``twist''
 of the segmented helix ({\em twist} will be defined precisely below).
 
 In the other approach, one may know {\it a priori} exactly the
-relevant properties of the objects and the rule which which they combine,
+relevant properties of the objects and the rule with which they combine
 and seek to compactly describe the segmented helix they create.
 For example, a mathematician may consider a chain of dodecahedra,
 or a woodworker may cut identical flat-faced chunks of maple wood,
@@ -423,11 +423,14 @@ of the segmented helix,
 and, conversely, useful to be able to choose the construction
 of the subunits to achieve a particular segmented helix.
 
-In engineering, sometimes the term {\em special helix}\cite{gu2012research} is use for helical curves on non-cylindrical surfaces. This paper use the term {\em helix} only in the sense of {\em cylindrical helix}.
+In engineering, sometimes the term {\em special helix}\cite{gu2012research}
+is used for helical curves on non-cylindrical surfaces.
+This paper use the term {\em helix} only in the
+sense of {\em cylindrical helix}.
 
 \section{Periodic Chains Produce Segmented Helices}
 
-A periodic chain is in fact a simple object which demonstrates tremendous symmetry.
+A periodic chain is, in fact, a simple object which demonstrates tremendous symmetry.
 Before using this symmetry in the construction of the segmented helix corresponding to a periodic chain,
 it is valuable to
 prove that such a segmented helix indeed exists for every periodic chain.
@@ -567,13 +570,13 @@ same for each object, but this is a corollary of Theorem \ref{thm:helix}.
 \begin{proof}
   The axes of each object coincide with a segment of a segmented helix.
   A segmented helix is completely symmetric no matter in which direction
-  of the axis you look down or which point on the axis you begin at. The angle between each pair of objects
+  of the axis you look down or at which point on the axis you begin. The angle between each pair of objects
   is exactly the same.
 \end{proof}
 
-Corollary \ref{cor:symmetric} will be used in the development of {\em PointAxis} algorithm
-and in the computation of segmented helix properties and to justify balancing face normals
-to produce an intrinsic out-vector and to apply the {\em PointAxis} algorithm
+Corollary \ref{cor:symmetric} will be used in the development of {\em PointAxis} algorithm,
+in the computation of segmented helix properties, to justify balancing face normals
+to produce an intrinsic out-vector, and to apply the {\em PointAxis} algorithm
 without actually assigning objects Cartesian coordinates.
 
 \section{Computing Screws and Segmented Helices from Transformation Matrices}
@@ -586,7 +589,7 @@ In general, a human engineer will have to compute this transformation matrix fro
 information, such as the face-to-face conjoining rule.
 We discuss how to do this from joint-face normal
 vectors in Section \ref{sec:facenormal}. However, a transformation matrix clearly
-capture the idea of repetition.
+captures the idea of repetition.
 Since by definition the objects in the chain are the same shape,
 moving one object into a new position and placing an identical copy of that object in that position
 are practically the same.
@@ -601,7 +604,7 @@ transposition, or travel, along the axis of one transformation.
 Neither a transformation matrix nor its corresponding screw transformation
 completely define all of the intrinsic
 properties of a segmented helix. In particular, a matrix $\bm{M}$ maps any point $p$ to a point $p'$.
-Since this applies to all points no matter how far from the screw axis (axis of rotation) and
+Since this applies to all points no matter how far from the screw axis (axis of rotation), and
 such transformations preserve distance to this axis (the radius), the radius of a segmented helix
 is not determined by a transformation matrix or a screw. Since the helix angle $\phi$ changes
 with radius for a helix of a given pitch, $\phi$ is not determined.
@@ -609,12 +612,12 @@ with radius for a helix of a given pitch, $\phi$ is not determined.
 However, given a screw and one point on the axis of the screw fixing it in space
 and the location of one joint, all of the properties of the segmented helix are completely determined.
 
-In the software behind the interactive website implements the calculation of the screw
+The software behind the interactive website implements the calculation of the screw
 directly from a transformation matrix, and
 the additional routines which determine all intrinsic properties from a joint position (making
 certain arbitrary alignment choices without loss of generality).
 
-Although not original to this paper, the it is
+Although not original to this paper, it is
 difficult to find clear documentation on how to calculate the
 screw from the transformation matrix.
 We therefore include an exposition here, in hope it will be useful,
@@ -753,7 +756,7 @@ The code at the interactive website
 in fact codes both approaches and compares them as an automated test to ensure
 correctness.
 
-A mechanical engineer, robotocist, or computer graphics expert is
+A mechanical engineer, roboticist, or computer graphics expert is
 likely to find the computation from the
 transformation matrix more natural and convenient.
 A chemist or crystallographer is more likely to
@@ -889,16 +892,16 @@ change the sign of the travel $d$ along the axis, and change $\phi$ to be $\pi -
 
 As can be seen from interactive play with the website\cite{segmentedhelixinteractive},
 it is entirely possible for the travel along
-the axis of the helix to be $0$--in fact, choosing $\tau \approx 0$ produces toruses, which have no
+the axis of the helix to be $0$. In fact, choosing $\tau \approx 0$ produces toruses, which have no
 travel along the axis.
 
 One could choose to represent this be making the unsigned length of the vector
 representing the axis be the length of the
 travel $d$.
-However, this would have the drawback than when $d$ is zero it would be impossible to determine
+However, this would have the drawback that when $d$ is zero it would be impossible to determine
 the axis of revolution of the torus.
 Although somewhat arbitrary, we have chosen instead to represent the
-axis as a normalized vector of unit length,
+axis as a normalized vector of unit length
 and to allow the travel to be negative. This has the benefit that
 changing $\tau$ through (something close to)
 zero smoothly changes $d$. However, it creates the problem that as $\tau$ approaches
@@ -914,10 +917,10 @@ but the axis vector, $\phi$, and the sign of $d$ will be different.
 
 Four consecutive points completely determine at least one segmented helix.
 Consider
-only with the helix that makes the least rotation between points,
-though more rapidly rotating helices will also intersect the points.
+only the helix that makes the least rotation between these points,
+though more rapidly rotating helices will also intersect these points.
 The {\em PointAxis} algorithm
-takes four such points (without loss of generality $B$ and $C$
+takes four such points. Without loss of generality $B$ and $C$
 are assumed to be centered on the $z$-axis, and that a
 rotation has been performed to balance $A$ and $D$ so that $A_x = -D_x, A_z = -D_z$, and $A_y = D_y$. Thus the input to
 {\em PointAxis} in fact has only three degrees of freedom, which determine the three intrinsic properties $r,d,\theta$
@@ -939,7 +942,7 @@ of which is key:
 \item Every member is in the same angular relation $\phi$ to the axis of the helix.
 \item Since every member of a non-degenerate helix cuts across a cylinder around the axis,
   the midpoint of every member is the same distance from the axis
-  which is general a little a less than $r$. In particular the midpoint $M$
+  which is, in general, a little a less than $r$. In particular the midpoint $M$
   whose closest point on the helix axis $m$ is on the $y$-axis and
   $\| \overrightarrow{M_m} \| < \| \overrightarrow{B_b} \|$.
 \item The points ($A_a,B_a,C_a,D_a$) on the axis closest to the joints ($A,B,C,D$)
@@ -965,14 +968,14 @@ the objects can be arranged as in Figures \ref{fig:naming} and \ref{fig:threemem
 {\em PointAxis} takes a length and a point $D$ known to be in
 a specific relation to $B$ and $C$.
 
-This careful arragement of the axes
+This careful arrangement of the axes
 allows the computation of $\phi$, the angle between the helical axis
 and the $z$ axis. This, in combination with symmetry and the knowledge
 that the helical axis is in the $XZ$ plane, supports computing the
 points on the axis corresponding to the joints directly from $\phi$.
 
 This algorithm coded below is simple enough that Mathematica\cite{Mathematica} can
-actually produce symbolic closed-form formula for all computed valued
+actually produce a symbolic closed-form formula for all computed valued
 in terms of $L, x, y$, and $z$.
 However, these formulae are less comprehensible to the
 human eye than this algorithm.
@@ -991,7 +994,7 @@ The fundamental insight that the axis of the helix $H$ can be
 computed by a cross product of the angle bisector
 vectors ($\overrightarrow{B_b}$ and $\overrightarrow{C_b}$) applies only
 when the angle-bisectors have a non-zero length and when
-they are not anti-parallel. When the are of zero length, this is
+they are not anti-parallel. When they are of zero length, this is
 the degenerate case of a straight line coinciding with all segments.
 This occurs only when $A_x = 0 \wedge A_y = 0 \wedge A_z = -3L/2$.
 In this case:
@@ -1032,7 +1035,7 @@ In this case (denoting the $x$ component of the $B_a$ vector as $B_{a[x]}$):
 \subsection{Standard Case}
 
 However, the most general case is simpler and can be worked
-out with standard linear algebra operations. In the math below
+out with standard linear algebra operations. In the math below,
 which is a direct analog of our coded solution, the tremendous symmetry of the ``balance'' condition
 permits the computation to proceed with
 using mostly scalar operations. There is some hope that
@@ -1057,7 +1060,7 @@ are easily computed from these values.
   c &= \sqrt{L^2 - d^2}
 \end{align}
 
-In this approach to calculation, it is easiest for
+In this approach to calculation, it is easiest
 to compute the axis point $B_a$ corresponding to $B$ and
 use it to complete our computations.
 
@@ -1076,8 +1079,8 @@ the $x$ and $z$ component of $B_a$ are:
 
 However, this computation exposes another special case: when the
 helix angle $\phi$ is $\pi /2$, the segmented helix is
-a torus-like. In this case the axis point $B_a$ is in fact
-on the $y$-axis, and so only $B_{a[y]}$ is neede:
+torus-like. In this case the axis point $B_a$ is in fact
+on the $y$-axis, and so only $B_{a[y]}$ is need:
 \begin{align}
   B_{a[y]} &=  \frac{L B_{b[y]}}{2 B_{b[z]}}
 \end{align}
@@ -1132,7 +1135,7 @@ transformation to the $z$-axis.
 
   By the previous argument of correctness for the {\em PointAxis} algorithm, a rigid transformation always exists
   which balances three such segments. Therefore there always exists a helix axis that
-  is in the $xz$ plane the intersects the $y$ axis and is the same distance from $A$, $B$, $C$ and $D$.
+  is in the $xz$ plane that intersects the $y$ axis and is the same distance from $A$, $B$, $C$ and $D$.
   This axis is the axis of a segmented helix which rotates each point similarly, provides the same translation along the axis,
   and maintains the same radius. Hence a segmented helix exists whose joints are $A$, $B$, $C$, and $D$.
 \end{proof}
@@ -1155,7 +1158,7 @@ radius of one of the Platonic Dodecahelices of unit edge length.
 \label{sec:facenormal}
 
 {\em PointAxis} takes a point $A$ known to be in a specific, balanced relation
-to $B, C$ and $D$. A chemist might know four such points from crystallography,
+to $B, C$ and $D$. A chemist might know four such points from crystallography
 and be able to move them into this symmetric position along the $z$-axis.
 
 However, one might instead know something of the subunits and
@@ -1195,7 +1198,7 @@ Define intrinsic properties:
 \begin{itemize}
 \item Given an object with two identified faces, labeled $B$ and $C$, assume there are normalized
   vectors $\overrightarrow{N_B}$ and $\overrightarrow{N_C}$
-  from each of these points that is aligned with the axis of the conjoined object attached to
+  from each of these points that are aligned with the axis of the conjoined object attached to
   that face. These normals might be enforced by the fact that flat faces are joined in the joint plane.
   However, molecules don't have faces; this conjoining relationship may be enforced some other way.
 \item The length $L$ of an object, measured from joint point $A$ to joint point $B$.
@@ -1227,7 +1230,7 @@ is coded in a subroutine called {\em adjoinPrism} which does this, taking a pris
 (including the face normals $\overrightarrow{N_B}$ and $\overrightarrow{N_C}$) and $\tau$
 (the rotation inside the plane of the joint) and produces prism
 in a face-to-face position. A byproduct
-of balancing the points is the a transformation matrix
+of balancing the points is a transformation matrix
 that takes $C$ into $D$. Having done this, the screw axis is computable,
 and hence all of the segmented helix properties,
 from either the transformation matrix or the four points.
@@ -1365,7 +1368,7 @@ theorem because visually apparent.
     helix is a toroid-like figure. Since there is always such an intersection point
     and  $\tau$ can be moved through a full rotation, such a toroidal point can always be reached.
     If the face normals are precisely anti-parallel, this point will occur at the origin,
-    and in that case will be a straight line which is in a sense a degenerate torus-like figure.
+    and in that case will be a straight line, which is in a sense a degenerate torus-like figure.
 
     Similarly, the objects can always be twisted to a point where $A$ and $D$ are pointing opposite each other
     as measured from the origin of the projection plane, so that
@@ -1376,7 +1379,7 @@ theorem because visually apparent.
     coincident with the $x$-axis in the projection plane, as shown in Figure \ref{fig:twistspectrumprojection}.
     Because in this case $\gamma = \delta$ the A and D points are always (even in the first case of this proof)
     at equal angles to the $z$-axis aligned object axis $BC$, the $A$ and $D$ projection points move
-    at the same speed (with respect to $\tau$), they meet the $x$-axis at the same $\tau$ value.
+    at the same speed (with respect to $\tau$), and they meet the $x$-axis at the same $\tau$ value.
 
     Thus, when the absolute value of the face normals formed with the $z$-axis are equal,
     the objects can be smoothly twisted through a spectrum between the toroid-like
@@ -1420,7 +1423,7 @@ environment would be a telescoping nanomachine or nanoactuator.
 \subsection{A Brute-force Approach to Finding Helix Angle from Twist}
 
 The calculation methods described in this paper hardly warrant the name ``algorithm'' when considered from the view of computational complexity;
-the are all constant time (for a given fixed precision).
+they are all constant time (for a given fixed precision).
 Although involving trigonometric functions, they demand no iteration.
 
 This makes it practical to solve some problems by brute-force iteration.
@@ -1693,7 +1696,7 @@ or molecules.
   \label{fig:dodecacorkscrew}
 \end{figure}
 \item The ``Quasi-planar'' (Figure \ref{fig:quasiplanar}) icosahelix presents a slowly twisting metahelix, so perhaps 10 icosahedron could be said to ``lay flat''. If this were
-  a molecule or a physical structure made of less-than-perfectly rigid members it might be possible to force it into a pure planar configuration,
+  a molecule or a physical structure made of less-than-perfectly rigid members, it might be possible to force it into a pure planar configuration,
   thus wrapping a cylinder or a plane, studding it with icosahedra.
 \begin{figure}
      \centering
