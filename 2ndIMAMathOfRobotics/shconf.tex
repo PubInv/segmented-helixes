@@ -67,10 +67,10 @@ Eric Lord has observed:
   In nature, helical structures arise when identical structural subunits combine sequentially, the orientational and translational relation between each unit
   and its predecessor remaining constant.\cite{lord2002helical}
 \end{quote}
-If a robot is compsoed of modular structural subunits that can change their shape or relation, the shape of the robot
+If a robot is composed of modular structural subunits that can change their shape or relation, the shape of the robot
 can change. If they all change in the same way, the robot will be a segmented helix of varying length and curvature.
-Closed-form c expressions are given for the parameters of
-the segmented helix generated from the intrinsic properties of a stacked object and its
+Closed-form expressions are given for the parameters of
+the segmented helix generated from the intrinsic properties of a chained object and its
 conjoining rule.
 The construction of these from the intrinsic properties of the rule for conjoining repeated subunits of arbitrary shape is provided,
 allowing the complete parameters describing the unique
@@ -82,9 +82,9 @@ want to do.
 Because the algorithms are efficient, a repeated subunit can be designed to create a segmented helix of
 desired properties,
 as a mechanical engineer or roboticist might want.
-A theorem, proved in a longer version \cite{readfullsegmentedhelix}, is stated that any subunit
-can produce a toroid-like helix or a maximally-extended helix, forming a continuous spectrum based
-on joint-face normal twist.
+A theorem, proved in a longer version \cite{readfullsegmentedhelix}, is stated that any chain
+can be transformed continuous between a toroid-like helix and a maximally-extended helix
+by varying joint-face normal twist.
 }
 
 \keywords{Helix, Variable Geometry Truss, Segmented Helix, Solid Geometry, Screw Theory, Platonic Helix}
@@ -107,25 +107,25 @@ The participants of the Public Invention Mathathon of 2018\cite{read2019mathatho
   “In nature, helical structures arise when identical structural subunits combine sequentially, the orientational and translational relation between each unit and its predecessor remaining constant.”\cite{lord2002helical}
   \label{obs:lords}
 \end{observation}
-We have found no earlier articulation of this statement
-in writing, so feel justified in naming it after the author of its earliest statement.
+Having found no earlier articulation of this statement
+in writing, it is justified to name it after its earliest known author.
 
 The purpose of this paper is to provide mathematical
 tools and software for studying arbitrary
 structures generated in this way, which are modeled as segmented helices.
-A proof of Lord's Observation is provided in a longer version \cite{readfullsegmentedhelix}.
+A proof of Lord's Observation is provided in a longer version\cite{readfullsegmentedhelix}.
 An interactive, 3D rendering website written in JavaScript which allows both calculation and
 interactive play and study is provided\cite{segmentedhelixinteractive}
 (see Figure \ref{fig:dodecahedron}).
 
-We exploit Lord's Observation to discover symmetry which allows us to compute the helix when subunits are joined face-to-face with
+Lord's Observation is exploited to discover symmetry which allows us to compute the helix when subunits are joined face-to-face with
 the same {\em twist.}
 This concept can be generalized to a {\em joint face angle}, even if the
 objects conjoined do not technically have flat faces.
-We prove that varying the {\em twist} of the joint faces through a complete rotation produces a smoothly varying
+Varying the {\em twist} of the joint faces through a complete rotation produces a smoothly varying
 spectrum of shapes that always includes a torus-like shape and a
 {\em zig-zag} planar segmented helix of maximal extent.
-A robot thus constructed of identical modules, such as the TetRobot of Figure \ref{fig:tetrahelices} which can change their shape allows the helix to coil and uncoil
+A robot thus constructed of identical modules which can change their shape, such as the TetRobot of Figure \ref{fig:tetrahelices}, allows the helix to coil and uncoil
 predictably based on the math herein.
 
 \begin{figure}
@@ -141,7 +141,7 @@ predictably based on the math herein.
 \begin{figure}
      \centering
      \includegraphics[width=0.30\textwidth]{figures/Dodecahedral.png}
-     \caption{Example Segmented Helix Generated From the Dodecahedron}
+     \caption{Screenshot: Example Segmented Helix Generated From the Dodecahedron}
   \label{fig:dodecahedron}
 \end{figure}
 
@@ -160,20 +160,14 @@ A segmented helix may be thought of as function that, given an integer, gives ba
 \end{align}
 
 There are two complementary ways of learning about such segmented helices.
-In one approach, {\em PointAxis} of Section \ref{sec:pointaxis}),
+In one approach (see {\em PointAxis} of Section \ref{sec:pointaxis})
 we have knowledge of the segmented helix and
 wish to learn about the subunits and the rule with which the subunits are combined.
-In the other approach ({\em The Joint Face Normal Method} of Section \ref{sec:facenormal},
+In the other approach ({\em The Joint Face Normal Method} of Section \ref{sec:facenormal}),
 one may know {\it a priori} exactly the
 relevant properties of the objects and the rule with which they combine
 and seek to compactly describe the segmented helix they create.
 
-$d$ is the distance or {\em travel} along the helix axis between adjacent joints.
-In this canonical representation the helix axis is
-the $z$-axis.
-$\theta$ is the rotation around the $z$-axis
-between adjacent points.
-$r$ is the radius of the segmented helix.
 
 \begin{figure}
      \centering
@@ -186,6 +180,12 @@ Figure \ref{fig:naming}, a screenshot, demonstrates naming convention concepts.
 An arbitrary repeated object is represented as a simplifying prism
 with triangular cross-section,  that supports a face-to-face connection.
 
+In this canonical representation the helix axis is
+the $z$-axis.
+$\theta$ is the rotation around the $z$-axis
+between adjacent points, and
+$r$ is the radius of the segmented helix.
+
 In this diagram, the
 points $A,B,C$, and $D$ are represented by the sphere of the same color as the label. The view is roughly in the direction of
 the axis of the segmented helix, which is drawn as a dark green arrow, pointing in the positive $z$ and positive $x$ direction,
@@ -194,7 +194,7 @@ parallel to the $XZ$-plane.
 Any point on the segmented helix has a closest point on the axis of the helix.
 In particular, the points closest to the
 joints are called {\em joint axis points}, $B_a$ and $C_a$.
-Then $d$ is the distance along the axis between consecutive joint axis points.
+Then $d$ is the distance along the axis (travel) between consecutive joint axis points.
 
 A segmented helix located in space is completely determined by
 the three intrinsic parameters $r,d,\theta$, plus
@@ -211,14 +211,13 @@ Finally, we find it useful to define the {\em tightness t} of a segmented helix
 as travel divided by radius, a number
 analogous to the extension of a coil spring or slinky.
 A torus-like segmented helix has zero tightness and a zig-zag has
-maximum tightness. The letter $t$ represents tightness.
+maximum tightness.
 
 These quantities are related:
 \begin{align}
     c &= 2r\sin{\frac{\theta}{2}} \\
     L^2 &= c^2+d^2  \\
     \arctan{\frac{c}{d}}  &= \phi \\
-    s &= \frac{2 \pi}{\theta} \\
     t &= d / r
 \end{align}
 
@@ -230,9 +229,6 @@ Identical objects conjoined via a rule
 produce {\em periodic chains} of objects that are uniformly intersected
 by segmented helices.
 
-Because periodic chains are merely a clarification of the ``identical structural subunits''
-of Observation \ref{obs:lords},
-this theorem proves that observation.
 
 \begin{theorem}[Segmented Helix]
   \label{thm:helix}
@@ -252,13 +248,16 @@ this theorem proves that observation.
   constructed from $A$, a {\em periodic chain.}
 
   Any periodic chain of three or more objects has a unique segmented helix
-  whose segments correspond
-  to the axes of these objects.
+  whose segments
+  lies on the axes of these objects.
 \end{theorem}
 
 A proof is provided in the longer version of this paper\cite{readfullsegmentedhelix}.
+Because periodic chains are merely a clarification of the ``identical structural subunits''
+of Observation \ref{obs:lords},
+this theorem proves Lord's observation.
 
-Note that \ref{thm:helix} is independent of the actual
+Note that Theorem \ref{thm:helix} is independent of the actual
 shape or shapes of the objects joined, so long as the rule for joining them
 is universal.
 
@@ -319,14 +318,14 @@ computed by a cross product of the angle bisector
 vectors ($\overrightarrow{B_b}$ and $\overrightarrow{C_b}$) applies only
 when the angle-bisectors have a non-zero length and when
 they are not parallel or anti-parallel.
-The math for both of these cases is provided in the longer paper\cite{readfullsegmentedhelix}.
+The math for both of these special cases is provided in the longer paper\cite{readfullsegmentedhelix}.
 
 The signed travel along the axis $d$ is
 the scalar projection of a segment $\overrightarrow{C - B}$ onto $\overrightarrow{H}$.
 From this $\phi$ is directly calculable. $\phi$ allows
 a direct calculation of the $x,y$ and $z$ components of the
 point $B_a$ on the axis pointed to by $\overrightarrow{B_b}$.
-$r$ is the distance between $B_a$ and $B$. $c$ and $\theta$
+$r$ is the distance between $B_a$ and $B$. Quantities $c$ and $\theta$
 are easily computed from these values.
 
 \begin{align}
@@ -373,13 +372,13 @@ calculated:
 \end{align}
 
 Finding the properties of a segmented helix from three contiguous segments on the helix from screw theory\cite{wittenburg2016kinematics,kahn1989defining},
-is also possible, but seems to preclude deriving closed-form expressions as simple as these.
+is roughly equivalent, but seems to preclude deriving closed-form expressions as simple as these.
 
 
 \section{The Joint Face Normal Method}
 \label{sec:facenormal}
 
-{\em PointAxis} takes a points $A$ known to be in a specific, balanced relation
+{\em PointAxis} takes a point $A$ known to be in a specific, balanced relation
 to $B, C$ and $D$. A chemist might know four such points from crystallography
 and be able to move them into this symmetric position along the $z$-axis.
 However, one might instead know something of the subunits and
@@ -392,7 +391,7 @@ joint points and a vector normal to the faces of the two joints, we almost have
 enough to determine the unique stacking of objects. The final piece
 needed is
 the {\em twist}. When face $A$ of a second object is placed on face $B$
-of a first object so that they are flush (that is, their normals are in opposite directions),
+of a first object so that they are flush (that is, their face normals are in opposite directions),
 it remains the case that the second object can be rotated about the normals. To
 define the joining rule, attach an {\em up(out) vector} to each object that points away from the axis.
 Then a joining
@@ -414,6 +413,8 @@ Define intrinsic properties:
 \item A joint twist $\tau$ defining the change in computed out-vector between objects,
   measured at the joint face.
 \end{itemize}
+Then the points $A$ and $D$ can be computed and {\em PointAxis} used to calculate the
+segmented helix.
 
 \section{Changing $\tau$ Smoothly Changes Tightness}
 
@@ -430,7 +431,7 @@ theorem becomes visually apparent.
 A proof is provided in the full version of this paper\cite{readfullsegmentedhelix}.
 The Twist Spectrum theorem asserts that if the twist between the modules of a robot
 can be varied consistently, then the robot can easily move through a toroid-like shape
-into a linear shape and back, as illustrated in \ref{fig:coiling}. If it does not self-collide, it can even change the chirality
+into a linear shape and back, as illustrated in Figure \ref{fig:coiling}. If it does not self-collide, it can even change the chirality
 or handedness of the helix it forms.
 
 In the calculator page
@@ -469,8 +470,9 @@ be varied under electronic control. Such robots tend to be inherently
 tensegrities\cite{NTRT}, although where the cable lengths
 have shrunk to zero.
 The current work was instigated by the author's research with a seven-tet tetrobot
+displayed in Figure
 \ref{fig:tetrobot}.
-In particular, it is possible to construct a tentacle or snake-like or
+In particular, it is possible to construct a tentacle, snake-like or
 variable-geometry truss configuration of tetrahedra which, in its relaxed
 mode, is a regular tetrahelix.
 
@@ -479,7 +481,7 @@ merely an important instance.
 The Boerdijk-Coxeter tetrahelix (BC helix) (see Figure \ref{fig:helixnodes}) is a periodic chain of conjoined regular tetrahedra
 which has been much studied\cite{coxeter1985simplicial,sadler2019periodic,fuller1982synergetics,read2018transforming}
 and happens to have irrational measures, making it an ideal
-test case for these algorithms. A recent paper\cite{sadler2019periodic} has explored this
+test case for these algorithms/formulae. A recent paper\cite{sadler2019periodic} has explored this
 and given an explicit formula for a {\em twist} exactly as defined in this
 paper in order to produce a periodic tetrahelix. Both specific instances match the more general results of {\em PointAxis}.
 
