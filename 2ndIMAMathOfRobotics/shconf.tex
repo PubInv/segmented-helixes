@@ -67,6 +67,7 @@ Eric Lord has observed:
   In nature, helical structures arise when identical structural subunits combine sequentially, the orientational and translational relation between each unit
   and its predecessor remaining constant.\cite{lord2002helical}
 \end{quote}
+We present this as a theorem.
 If a robot is composed of modular structural subunits that can change their shape or relation, the shape of the robot
 can change. If they all change in the same way, the robot will be a segmented helix of varying length and curvature.
 Closed-form expressions are given for the parameters of
@@ -124,7 +125,7 @@ objects conjoined do not technically have flat faces.
 Varying the {\em twist} of the joint faces through a complete rotation produces a smoothly varying
 spectrum of shapes that always includes a torus-like shape and a
 {\em zig-zag} planar segmented helix of maximal extent.
-A robot thus constructed of identical modules which can change their shape, such as the TetRobot of Figure \ref{fig:tetrahelices}, allows the helix to coil and uncoil
+A robot thus constructed of identical modules which can change their shape, such as the Tetrobot of Figure \ref{fig:tetrahelices}, allows the helix to coil and uncoil
 predictably based on the math herein.
 
 \begin{figure}
@@ -146,9 +147,9 @@ predictably based on the math herein.
 
 \section{The Segmented Helix}
 
-The goal is to mathematically descibe a chain of physical objects by
+A chain of physical objects can be described by
 calculating
-the parameters for a continuous helix conincient on the joints by studying
+the parameters for a continuous helix coincident on the joints by studying
 a helix evaluated at integral points. Call such an object a {\em segmented helix}.
 A segmented helix may be thought of as function that, given an integer, gives back a point in
 3-space:
@@ -159,7 +160,7 @@ A segmented helix may be thought of as function that, given an integer, gives ba
 \end{align}
 
 There are two complementary ways of learning about such segmented helices.
-In one approach (see {\em PointAxis} of Section \ref{sec:pointaxis})
+In one approach (see {\em Point Axis} of Section \ref{sec:pointaxis})
 we have knowledge of the segmented helix and
 wish to learn about the subunits and the rule with which the subunits are combined.
 In the other approach ({\em The Joint Face Normal Method} of Section \ref{sec:facenormal}),
@@ -176,8 +177,14 @@ and seek to compactly describe the segmented helix they create.
 \end{figure}
 
 Figure \ref{fig:naming}, a screenshot, demonstrates naming convention and concepts.
-An arbitrary repeated object is represented as a simplifying prism
-with triangular cross-section, thus representing face-to-face connection.
+An arbitrary repeated object is represented as a prism
+with triangular cross-section,
+thus representing face-to-face connection.
+
+In this diagram, the
+points $A,B,C$, and $D$ are represented by the sphere of the same color as the label. The view is roughly in the direction of
+the axis of the segmented helix, which is drawn as a dark green arrow, pointing in the positive $z$ and positive $x$ direction,
+parallel to the $XZ$-plane (Y is vertical).
 
 In this canonical representation the helix axis is
 the $z$-axis.
@@ -185,14 +192,9 @@ $\theta$ is the rotation around the $z$-axis
 between adjacent points, and
 $r$ is the radius of the segmented helix.
 
-In this diagram, the
-points $A,B,C$, and $D$ are represented by the sphere of the same color as the label. The view is roughly in the direction of
-the axis of the segmented helix, which is drawn as a dark green arrow, pointing in the positive $z$ and positive $x$ direction,
-parallel to the $XZ$-plane (Y is vertical).
-
 Any point on the segmented helix has a closest point on the axis of the helix.
 In particular, the points closest to the
-joints are called {\em joint axis points}, $B_a$ and $C_a$.
+joints $B$ and $C$ are called {\em joint axis points}, $B_a$ and $C_a$.
 Then $d$ is the distance along the axis (travel) between consecutive joint axis points.
 
 A segmented helix located in space is completely determined by
@@ -228,24 +230,23 @@ Identical objects conjoined via a rule
 produce {\em periodic chains} of objects that are uniformly intersected
 by segmented helices.
 
+Consider $N$ identical objects which each have two points, $A$ and $B$, called {\em joints}. Call
+$\overrightarrow{AB}$ the {\em axis} of this object.
+Consider the frame of reference for this object to have
+its axis on the $z$-axis with $B$ in the positive direction, the
+midpoint of the object being at the origin.
+
+Consider any rule that conjoins $A$ of object $i+1$ to $B$ such that
+from the frame of reference of $i$, the object $i+1$ and anything rigidly
+attached to it is always in the same position in the frame of reference for $i$.
+Informally, $i+1$ ``looks the same'' to $i$, no matter what $i$ is chosen, $i < N$.
+Call a chain of $N$ identical rigid objects conjoined via a rule that
+conjoins $A_{i+1}$ to $B_i$ in such a way that every vector
+of $B$ is always in the same position relative to a frame of reference
+constructed from $A$, a {\em periodic chain.}
 
 \begin{theorem}[Segmented Helix]
   \label{thm:helix}
-  Consider $N$ identical objects which each have two points, $A$ and $B$, called {\em joints}. Call
-  $\overrightarrow{AB}$ the {\em axis} of this object.
-  Consider the frame of reference for this object to have
-  its axis on the $z$-axis with $B$ in the positive direction, the
-  midpoint of the object being at the origin.
-
-  Consider any rule that conjoins $A$ of object $i+1$ to $B$ such that
-  from the frame of reference of $i$, the object $i+1$ and anything rigidly
-  attached to it is always in the same position in the frame of reference for $i$.
-  Informally, $i+1$ ``looks the same'' to $i$, no matter what $i$ is chosen, $i < N$.
-  Call a chain of $N$ identical rigid objects conjoined via a rule that
-  conjoins $A_{i+1}$ to $B_i$ in such a way that every vector
-  of $B$ is always in the same position relative to a frame of reference
-  constructed from $A$, a {\em periodic chain.}
-
   Any periodic chain of three or more objects has a unique segmented helix
   whose segments
   lies on the axes of these objects.
@@ -272,7 +273,7 @@ a periodic chain of objects may also be degenerate to the human eye, in that the
 \label{sec:pointaxis}
 
 Using tools from linear algebra \cite{kahn1989defining}, a sketch of finding the segmented helix from
-four consecutive known points $A,B,C$, and $D$, is:
+four consecutive known points $A,B,C$, and $D$ ({\em PointAxis}), is:
 \begin{itemize}
 \item Construct a rigid transformation that places the points conveniently on the $z$-axis and balanced
   around the $y$-axis.
@@ -412,7 +413,7 @@ Define intrinsic properties:
 \item A joint twist $\tau$ defining the change in computed out-vector between objects,
   measured at the joint face.
 \end{itemize}
-Then the points $A$ and $D$ can be computed and {\em PointAxis} used to calculate the
+Then the points $A$ and $D$ can be computed by linear algebra and {\em PointAxis} used to calculate the
 segmented helix.
 
 \section{Changing $\tau$ Smoothly Changes Tightness}
@@ -486,7 +487,7 @@ paper in order to produce a periodic tetrahelix. Both specific instances match t
 
 Periodic chains of the five regular Platonic solids joined face-to-face so that their vertices coincide,
 which form {\em Platonic helices}\cite{elgersma2016quadrahelix,lord2001sphere}, are completely calculated in a table\cite{readfullsegmentedhelix}.
-It is discovered that there 28 unique members of this ``zoo'' of structures which are occasionally found in chemistry\cite{lord2004gamma,pearce1990structure}
+It is discovered that there are 28 unique members of this ``zoo'' of structures which are occasionally found in chemistry\cite{lord2004gamma,pearce1990structure}
 
 
 
