@@ -67,7 +67,7 @@ Eric Lord has observed:
   In nature, helical structures arise when identical structural subunits combine sequentially, the orientational and translational relation between each unit
   and its predecessor remaining constant.\cite{lord2002helical}
 \end{quote}
-We present this as a theorem.
+A complete version of this paper proves this\cite{readfullsegmentedhelix}.
 If a robot is composed of modular structural subunits that can change their shape or relation, the shape of the robot
 can change. If they all change in the same way, the robot will be a segmented helix of varying length and curvature.
 Closed-form expressions are given for the parameters of
@@ -83,7 +83,7 @@ want to do.
 Because the algorithms are efficient, a repeated subunit can be designed to create a segmented helix of
 desired properties,
 as a mechanical engineer or roboticist might want.
-A theorem, proved in a longer version \cite{readfullsegmentedhelix}, is stated that any chain
+A theorem, proved in a longer version\cite{readfullsegmentedhelix}, is stated that any chain
 can be transformed continuously between a toroid-like helix and a maximally-extended helix
 by varying joint-face normal twist.
 }
@@ -116,7 +116,7 @@ structures generated in this way, which are modeled as segmented helices.
 A proof of Lord's Observation is provided in a longer version\cite{readfullsegmentedhelix}.
 An interactive, 3D rendering website written in JavaScript which allows both calculation and
 interactive play and study is provided\cite{segmentedhelixinteractive}
-(see Figure \ref{fig:dodecahedron}).
+(see Figure \ref{fig:tetrahelices}).
 
 Lord's Observation is exploited to discover symmetry which allows us to compute the helix when subunits are joined face-to-face with
 the same {\em twist.}
@@ -140,8 +140,13 @@ predictably based on the math herein.
 
 \begin{figure}
      \centering
-     \includegraphics[width=0.30\textwidth]{figures/Dodecahedral.png}
-     \caption{Screenshot: Example Segmented Helix Generated From the Dodecahedron}
+
+     \subcaptionbox{Screenshot: Example Segmented Helix Generated From the Dodecahedron}
+                {
+     \includegraphics[width=0.45\textwidth]{figures/Dodecahedral.png}
+       }
+     \subcaptionbox{Screenshot: A general (non-platonic) segmented helix from prisms\label{fig:prismatic}}
+{\includegraphics[width=0.48\textwidth]{figures/GeneralHelix.png}}
   \label{fig:dodecahedron}
 \end{figure}
 
@@ -171,7 +176,7 @@ and seek to compactly describe the segmented helix they create.
 
 \begin{figure}
      \centering
-     \includegraphics[width=0.30\textwidth]{figures/ABCDFigure.png}
+     \includegraphics[width=0.4\textwidth,height=3.25cm]{figures/ABCDFigure.png}
      \caption{Naming of measures}
   \label{fig:naming}
 \end{figure}
@@ -186,7 +191,7 @@ points $A,B,C$, and $D$ are represented by the sphere of the same color as the l
 the axis of the segmented helix, which is drawn as a dark green arrow, pointing in the positive $z$ and positive $x$ direction,
 parallel to the $XZ$-plane (Y is vertical).
 
-In this canonical representation the helix axis is
+In this canonical representation the object axis $\overrightarrow{BC}$ is
 the $z$-axis.
 $\theta$ is the rotation around the $z$-axis
 between adjacent points, and
@@ -253,9 +258,8 @@ constructed from $A$, a {\em periodic chain.}
 \end{theorem}
 
 A proof is provided in the longer version of this paper\cite{readfullsegmentedhelix}.
-Because periodic chains are merely a clarification of the ``identical structural subunits''
-of Observation \ref{obs:lords},
-this theorem proves Lord's observation.
+Because periodic chains are merely a clarification of ``identical structural subunits'',
+this theorem proves Lord's Observation (Observation \ref{obs:lords}).
 
 Note that Theorem \ref{thm:helix} is independent of the actual
 shape or shapes of the objects joined, so long as the rule for joining them
@@ -290,17 +294,13 @@ four consecutive known points $A,B,C$, and $D$ ({\em PointAxis}), is:
 \end{itemize}
 
 In order to use the {\em PointAxis} algorithm, we need a way
-to compute points $A$ and $D$ in balance around the axis $BC$. In the full paper\cite{readfullsegmentedhelix}
+to compute points $A$ and $D$ in balance around the obect axis $\overrightarrow{BC}$. In the full paper\cite{readfullsegmentedhelix}
 we state and sketch a proof of a lemma that the points $A$ and $D$ can always be brought into simplifying balance.
 
 From the observations that $\| \overrightarrow{B - B_a} \| = \| \overrightarrow{C - C_a} \|$
 it becomes clear that the helix axis is in a plane
 parallel to the $XZ$-plane, it intersects the $y$-axis, but in general is
 not parallel to the $z$-axis.
-
-Because the angle bisectors of each joint are in general skew, and intersect the
-axis perpendicularly, the algorithm
-for the closest points on two skew lines finds $B_a$ and $B_c$.
 
 A careful arrangement of the axes
 allows the computation of $\phi$, the angle between the helical axis
@@ -371,8 +371,9 @@ calculated:
   \theta &= 2 \arcsin{\frac{c}{2r}}
 \end{align}
 
-Finding the properties of a segmented helix from three contiguous segments on the helix from screw theory\cite{wittenburg2016kinematics,kahn1989defining},
-is roughly equivalent, but seems to preclude deriving closed-form expressions as simple as these.
+Finding the properties of a segmented helix from three contiguous segments
+on the helix from screw theory\cite{wittenburg2016kinematics,kahn1989defining},
+is explained fully in the longer paper\cite{readfullsegmentedhelix}, but seems to preclude deriving closed-form expressions as simple as these.
 
 
 \section{The Joint Face Normal Method}
@@ -405,12 +406,12 @@ of the axis of the second object relative to the first in the plane of the coinc
 Define intrinsic properties:
 
 \begin{itemize}
-\item Given an object with two identified faces, labeled $B$ and $C$, assume there are normalized
+\item given an object with two identified faces, labeled $B$ and $C$, assume there are normalized
   vectors $\overrightarrow{N_B}$ and $\overrightarrow{N_C}$
   from each of these points that are aligned with the axis of the conjoined object attached to
-  that face.
-\item The length $L$ of an object, measured from joint point $A$ to joint point $B$.
-\item A joint twist $\tau$ defining the change in computed out-vector between objects,
+  that face,
+\item the length $L$ of an object, measured from joint point $A$ to joint point $B$, and
+\item a joint twist $\tau$ defining the change in computed out-vector between objects,
   measured at the joint face.
 \end{itemize}
 Then the points $A$ and $D$ can be computed by linear algebra and {\em PointAxis} used to calculate the
@@ -419,7 +420,7 @@ segmented helix.
 \section{Changing $\tau$ Smoothly Changes Tightness}
 
 Upon implementing our interactive ability to vary $\tau$, the following
-theorem becomes visually apparent.
+theorem became visually apparent.
 
 \begin{theorem}[Twist Spectrum]
   For any choice of non-parallel face normals having non-zero $x$ or $y$ components,
@@ -480,7 +481,7 @@ The math in the paper applies to modules of any shape---tetrahedra being
 merely an important instance.
 The Boerdijk-Coxeter tetrahelix (BC helix) (see Figure \ref{fig:helixnodes}) is a periodic chain of conjoined regular tetrahedra
 which has been much studied\cite{coxeter1985simplicial,sadler2019periodic,fuller1982synergetics,read2018transforming}
-and happens to have irrational measures, making it an ideal
+and happens to have irrational period, making it an ideal
 test case for these algorithms/formulae. A recent paper\cite{sadler2019periodic} has explored this
 and given an explicit formula for a {\em twist} exactly as defined in this
 paper in order to produce a periodic tetrahelix. Both specific instances match the more general results of {\em PointAxis}.
