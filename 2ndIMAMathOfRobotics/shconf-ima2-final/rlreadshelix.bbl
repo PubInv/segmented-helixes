@@ -1,0 +1,92 @@
+\begin{thebibliography}{10}
+
+\bibitem{coxeter1985simplicial}
+HSM Coxeter et~al.
+\newblock The simplicial helix and the equation tan(n $\theta$) = n
+  tan($\theta$).
+\newblock {\em Canad. Math. Bull}, 28(4):385--393, 1985.
+
+\bibitem{elgersma2016quadrahelix}
+Michael Elgersma and Stan Wagon.
+\newblock The quadrahelix: A nearly perfect loop of tetrahedra.
+\newblock {\em arXiv preprint arXiv:1610.00280}, 2016.
+
+\bibitem{fuller1982synergetics}
+R.B. Fuller and E.J. Applewhite.
+\newblock {\em Synergetics: explorations in the geometry of thinking}.
+\newblock Macmillan, 1982.
+
+\bibitem{TetrobotBook}
+Gregory~J. Hamlin and Arthur~C. Sanderson.
+\newblock {\em Tetrobot: A Modular Approach to Reconfigurable Parallel
+  Robotics}.
+\newblock Springer Science \& Business Media, 2013.
+
+\bibitem{kahn1989defining}
+Peter~C Kahn.
+\newblock Defining the axis of a helix.
+\newblock {\em Computers \& chemistry}, 13(3):185--189, 1989.
+
+\bibitem{lord2001sphere}
+EA~Lord and S~Ranganathan.
+\newblock Sphere packing, helices and the polytope $\{$3, 3, 5$\}$.
+\newblock {\em The European Physical Journal D-Atomic, Molecular, Optical and
+  Plasma Physics}, 15(3):335--343, 2001.
+
+\bibitem{lord2004gamma}
+EA~Lord and S~Ranganathan.
+\newblock {The $\gamma$-brass structure and the Boerdijk--Coxeter helix}.
+\newblock {\em Journal of non-crystalline solids}, 334:121--125, 2004.
+
+\bibitem{lord2002helical}
+Eric~A Lord.
+\newblock Helical structures: the geometry of protein helices and nanotubes.
+\newblock {\em Structural Chemistry}, 13(3-4):305--314, 2002.
+
+\bibitem{NTRT}
+{NTRT - NASA Tensegrity Robotics Toolkit}.
+\newblock
+  \url{https://ti.arc.nasa.gov/tech/asr/intelligent-robotics/tensegrity/ntrt/},
+  2016.
+\newblock Accessed: 2016-09-13.
+
+\bibitem{pearce1990structure}
+Peter Pearce.
+\newblock {\em {Structure in Nature is a Strategy for Design}}.
+\newblock MIT press, 1990.
+
+\bibitem{readfullsegmentedhelix}
+Robert~L. Read.
+\newblock Calculating the segmented helix formed by repetitions of identical
+  subunits thereby generating a zoo of platonic helices.
+\newblock
+  \url{https://github.com/PubInv/segmented-helixes/blob/master/doc/StackingHelix.pdf},
+  2017.
+
+\bibitem{read2018transforming}
+Robert~L. Read.
+\newblock Transforming optimal tetrahelices between the boerdijk-coxeter helix
+  and a planar-faced tetrahelix.
+\newblock {\em Journal of Mechanisms and Robotics}, June 2018.
+
+\bibitem{segmentedhelixinteractive}
+Robert~L. Read.
+\newblock Segmented helix interactive 3d calculator.
+\newblock \url{https://pubinv.github.io/segmented-helixes/index.html}, 2019.
+
+\bibitem{read2019mathathon}
+Robert~L. Read.
+\newblock The story of a public, cooperative mathathon, December 2019.
+\newblock [Online; posted 12-December-2019].
+
+\bibitem{sadler2019periodic}
+Garrett Sadler, Fang Fang, Richard Clawson, and Klee Irwin.
+\newblock Periodic modification of the boerdijk--coxeter helix (tetrahelix).
+\newblock {\em Mathematics}, 7(10):1001, 2019.
+
+\bibitem{wittenburg2016kinematics}
+Jens Wittenburg.
+\newblock {\em Kinematics: theory and applications}.
+\newblock Springer, 2016.
+
+\end{thebibliography}
