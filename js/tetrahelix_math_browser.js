@@ -115,7 +115,7 @@ module.exports.one_hop = (r,rho,el) => {
 
 module.exports.two_hop = (r,rho,el) => {
     var arho = Math.abs(rho);
-    var as = Math.sign(rho);    
+    var as = Math.sign(rho);
     var t1 = el*el*4/9;
     var t2 = -16*Math.sin(rho/2)*Math.sin(rho/2)/9;
     var t3 = Math.sin(2*rho/3 + 4*Math.PI/3);
@@ -125,7 +125,7 @@ module.exports.two_hop = (r,rho,el) => {
 Math.distance3 = function(p0,p1) {
     x = p0[0] - p1[0];
     y = p0[1] - p1[1];
-    z = p0[2] - p1[2];        
+    z = p0[2] - p1[2];
     return Math.sqrt(x*x + y*y + z*z);
 }
 
@@ -157,7 +157,7 @@ module.exports.H_general_factor = (chi,n,c,rho,d,r,f) => {
     var kappa = n+ c/3.0;
     var rk = rho*kappa;
     var angle = chi*(rk + c*2*Math.PI/3);
-    
+
     pnt[0] = r*Math.cos(angle*f);
     pnt[1] = r*Math.sin(angle*f);
     pnt[2] = d*kappa;
