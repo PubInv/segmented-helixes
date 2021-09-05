@@ -2094,9 +2094,9 @@ function RowToNickName(solid,num) {
   case "OCTAHEDRON":
     switch(num) {
     case 0:
-      return "Treestar";
-    case 1:
       return "Octaspikey";
+    case 1:
+      return "Treestar";
     case 3:
       return "Octamedium";
     case 4:
