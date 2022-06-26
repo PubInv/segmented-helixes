@@ -36,8 +36,8 @@ function createAGrid(opts) {
 
   var material = new THREE.LineBasicMaterial({
     color: config.color,
-      opacity: 0.2,
-      linewidth: 2
+      opacity: 0.8,
+      linewidth: 4
   });
 
   var gridObject = new THREE.Object3D(),
@@ -75,8 +75,8 @@ function createZeroedGrid(opts) {
 
   var material = new THREE.LineBasicMaterial({
     color: config.color,
-      opacity: 0.2,
-      linewidth: 2
+      opacity: 1,
+      linewidth: 10
   });
 
   var gridObject = new THREE.Object3D(),

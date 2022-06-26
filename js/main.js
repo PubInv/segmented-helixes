@@ -623,9 +623,11 @@ function initGraphics() {
   am.grid_scene.fog = new THREE.Fog(0x000000, 500, 10000);
 
   // GROUND
-  var groundGeo = new THREE.PlaneBufferGeometry(10000, 10000);
+  //  var groundGeo = new THREE.PlaneBufferGeometry(10000, 10000);
+  var groundGeo = new THREE.PlaneBufferGeometry(10, 10);
   var groundMat;
   groundMat = new THREE.MeshPhongMaterial({ color: 0x777777, specular: 0x050505 });
+//  groundMat = new THREE.MeshPhongMaterial({ color: 0x555555, specular: 0x050505, transparent: false, opacity:0.5 });
 
   var ground = new THREE.Mesh(groundGeo, groundMat);
   ground.name = "GROUND";

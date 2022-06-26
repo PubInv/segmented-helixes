@@ -2,7 +2,7 @@
 %  For support, please attach all files needed for compiling as well as the log file, and specify your operating system, LaTeX version, and LaTeX editor.
 
 %=================================================================
-\documentclass[journal,article,submit,pdftex,moreauthors]{Definitions/mdpi}
+\documentclass[mathematics,article,submit,pdftex,moreauthors]{Definitions/mdpi}
 % For posting an early version of this manuscript as a preprint, you may use "preprints" as the journal and change "submit" to "accept". The document class line would be, e.g., \documentclass[preprints,article,accept,moreauthors,pdftex]{mdpi}. This is especially recommended for submission to arXiv, where line numbers should be removed before posting. For preprints.org, the editorial staff will make this change immediately prior to posting.
 
 %--------------------
@@ -62,6 +62,19 @@
 
 %=================================================================
 % Add packages and commands here. The following packages are loaded in our class file: fontenc, inputenc, calc, indentfirst, fancyhdr, graphicx, epstopdf, lastpage, ifthen, lineno, float, amsmath, setspace, enumitem, mathpazo, booktabs, titlesec, etoolbox, tabto, xcolor, soul, multirow, microtype, tikz, totcount, changepage, attrib, upgreek, cleveref, amsthm, hyphenat, natbib, hyperref, footmisc, url, geometry, newfloat, caption
+
+\usepackage{gensymb}
+\usepackage{bm}
+\usepackage{mathtools}
+%% \usepackage{amsthm}
+%% \usepackage{amsmath}
+
+\DeclareMathOperator{\atantwo}{atan2}
+\DeclareMathOperator{\sign}{sign}
+\DeclareMathOperator{\sense}{sense}
+\DeclarePairedDelimiter{\norm}{\lVert}{\rVert}
+%% \newenvironment{sketch}{%
+%% \renewcommand{\proofname}{Proof Sketch}\proof}{\endproof}
 
 %=================================================================
 %% Please use the following mathematics environments: Theorem, Lemma, Corollary, Proposition, Characterization, Property, Problem, Example, ExamplesandDefinitions, Hypothesis, Remark, Definition, Notation, Assumption
@@ -362,81 +375,76 @@ LD & Linear dichroism
 \end{tabular}
 }
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%% Optional
-\appendixtitles{no} % Leave argument "no" if all appendix headings stay EMPTY (then no dot is printed after "Appendix A"). If the appendix sections contain a heading then change the argument to "yes".
-\appendixstart
-\appendix
-\section[\appendixname~\thesection]{}
-\subsection[\appendixname~\thesubsection]{}
-The appendix is an optional section that can contain details and data supplemental to the main text---for example, explanations of experimental details that would disrupt the flow of the main text but nonetheless remain crucial to understanding and reproducing the research shown; figures of replicates for experiments of which representative data are shown in the main text can be added here if brief, or as Supplementary Data. Mathematical proofs of results not central to the paper can be added as an appendix.
+%% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% %% Optional
+%% \appendixtitles{no} % Leave argument "no" if all appendix headings stay EMPTY (then no dot is printed after "Appendix A"). If the appendix sections contain a heading then change the argument to "yes".
+%% \appendixstart
+%% \appendix
+%% \section[\appendixname~\thesection]{}
+%% \subsection[\appendixname~\thesubsection]{}
+%% The appendix is an optional section that can contain details and data supplemental to the main text---for example, explanations of experimental details that would disrupt the flow of the main text but nonetheless remain crucial to understanding and reproducing the research shown; figures of replicates for experiments of which representative data are shown in the main text can be added here if brief, or as Supplementary Data. Mathematical proofs of results not central to the paper can be added as an appendix.
 
-\begin{table}[H]
-\caption{This is a table caption.\label{tab5}}
-\newcolumntype{C}{>{\centering\arraybackslash}X}
-\begin{tabularx}{\textwidth}{CCC}
-\toprule
-\textbf{Title 1}	& \textbf{Title 2}	& \textbf{Title 3}\\
-\midrule
-Entry 1		& Data			& Data\\
-Entry 2		& Data			& Data\\
-\bottomrule
-\end{tabularx}
-\end{table}
+%% \begin{table}[H]
+%% \caption{This is a table caption.\label{tab5}}
+%% \newcolumntype{C}{>{\centering\arraybackslash}X}
+%% \begin{tabularx}{\textwidth}{CCC}
+%% \toprule
+%% \textbf{Title 1}	& \textbf{Title 2}	& \textbf{Title 3}\\
+%% \midrule
+%% Entry 1		& Data			& Data\\
+%% Entry 2		& Data			& Data\\
+%% \bottomrule
+%% \end{tabularx}
+%% \end{table}
 
-\section[\appendixname~\thesection]{}
-All appendix sections must be cited in the main text. In the appendices, Figures, Tables, etc. should be labeled, starting with ``A''---e.g., Figure A1, Figure A2, etc.
+%% \section[\appendixname~\thesection]{}
+%% All appendix sections must be cited in the main text. In the appendices, Figures, Tables, etc. should be labeled, starting with ``A''---e.g., Figure A1, Figure A2, etc.
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\begin{adjustwidth}{-\extralength}{0cm}
-%\printendnotes[custom] % Un-comment to print a list of endnotes
+%% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% \begin{adjustwidth}{-\extralength}{0cm}
+%% %\printendnotes[custom] % Un-comment to print a list of endnotes
 
-\reftitle{References}
+%% \reftitle{References}
 
-% Please provide either the correct journal abbreviation (e.g. according to the “List of Title Word Abbreviations” http://www.issn.org/services/online-services/access-to-the-ltwa/) or the full name of the journal.
-% Citations and References in Supplementary files are permitted provided that they also appear in the reference list here.
+%% % Please provide either the correct journal abbreviation (e.g. according to the “List of Title Word Abbreviations” http://www.issn.org/services/online-services/access-to-the-ltwa/) or the full name of the journal.
+%% % Citations and References in Supplementary files are permitted provided that they also appear in the reference list here.
 
-%=====================================
-% References, variant A: external bibliography
-%=====================================
-%\bibliography{your_external_BibTeX_file}
+%% %=====================================
+%% % References, variant A: external bibliography
+%% %=====================================
+%% %\bibliography{your_external_BibTeX_file}
 
-%=====================================
-% References, variant B: internal bibliography
-%=====================================
-\begin{thebibliography}{999}
-% Reference 1
-\bibitem[Author1(year)]{ref-journal}
-Author~1, T. The title of the cited article. {\em Journal Abbreviation} {\bf 2008}, {\em 10}, 142--149.
-% Reference 2
-\bibitem[Author2(year)]{ref-book1}
-Author~2, L. The title of the cited contribution. In {\em The Book Title}; Editor 1, F., Editor 2, A., Eds.; Publishing House: City, Country, 2007; pp. 32--58.
-% Reference 3
-\bibitem[Author3(year)]{ref-book2}
-Author 1, A.; Author 2, B. \textit{Book Title}, 3rd ed.; Publisher: Publisher Location, Country, 2008; pp. 154--196.
-% Reference 4
-\bibitem[Author4(year)]{ref-unpublish}
-Author 1, A.B.; Author 2, C. Title of Unpublished Work. \textit{Abbreviated Journal Name} year, \textit{phrase indicating stage of publication (submitted; accepted; in press)}.
-% Reference 5
-\bibitem[Author5(year)]{ref-communication}
-Author 1, A.B. (University, City, State, Country); Author 2, C. (Institute, City, State, Country). Personal communication, 2012.
-% Reference 6
-\bibitem[Author6(year)]{ref-proceeding}
-Author 1, A.B.; Author 2, C.D.; Author 3, E.F. Title of presentation. In Proceedings of the Name of the Conference, Location of Conference, Country, Date of Conference (Day Month Year); Abstract Number (optional), Pagination (optional).
-% Reference 7
-\bibitem[Author7(year)]{ref-thesis}
-Author 1, A.B. Title of Thesis. Level of Thesis, Degree-Granting University, Location of University, Date of Completion.
-% Reference 8
-\bibitem[Author8(year)]{ref-url}
-Title of Site. Available online: URL (accessed on Day Month Year).
-\end{thebibliography}
+%% %=====================================
+%% % References, variant B: internal bibliography
+%% %=====================================
+%% \begin{thebibliography}{999}
+%% % Reference 1
+%% \bibitem[Author1(year)]{ref-journal}
+%% Author~1, T. The title of the cited article. {\em Journal Abbreviation} {\bf 2008}, {\em 10}, 142--149.
+%% % Reference 2
+%% \bibitem[Author2(year)]{ref-book1}
+%% Author~2, L. The title of the cited contribution. In {\em The Book Title}; Editor 1, F., Editor 2, A., Eds.; Publishing House: City, Country, 2007; pp. 32--58.
+%% % Reference 3
+%% \bibitem[Author3(year)]{ref-book2}
+%% Author 1, A.; Author 2, B. \textit{Book Title}, 3rd ed.; Publisher: Publisher Location, Country, 2008; pp. 154--196.
+%% % Reference 4
+%% \bibitem[Author4(year)]{ref-unpublish}
+%% Author 1, A.B.; Author 2, C. Title of Unpublished Work. \textit{Abbreviated Journal Name} year, \textit{phrase indicating stage of publication (submitted; accepted; in press)}.
+%% % Reference 5
+%% \bibitem[Author5(year)]{ref-communication}
+%% Author 1, A.B. (University, City, State, Country); Author 2, C. (Institute, City, State, Country). Personal communication, 2012.
+%% % Reference 6
+%% \bibitem[Author6(year)]{ref-proceeding}
+%% Author 1, A.B.; Author 2, C.D.; Author 3, E.F. Title of presentation. In Proceedings of the Name of the Conference, Location of Conference, Country, Date of Conference (Day Month Year); Abstract Number (optional), Pagination (optional).
+%% % Reference 7
+%% \bibitem[Author7(year)]{ref-thesis}
+%% Author 1, A.B. Title of Thesis. Level of Thesis, Degree-Granting University, Location of University, Date of Completion.
+%% % Reference 8
+%% \bibitem[Author8(year)]{ref-url}
+%% Title of Site. Available online: URL (accessed on Day Month Year).
+%% \end{thebibliography}
 
-% If authors have biography, please use the format below
-%\section*{Short Biography of Authors}
-%\bio
-%{\raisebox{-0.35cm}{\includegraphics[width=3.5cm,height=5.3cm,clip,keepaspectratio]{Definitions/author1.pdf}}}
-%{\textbf{Firstname Lastname} Biography of first author}
-%
+
 %\bio
 %{\raisebox{-0.35cm}{\includegraphics[width=3.5cm,height=5.3cm,clip,keepaspectratio]{Definitions/author2.jpg}}}
 %{\textbf{Firstname Lastname} Biography of second author}
@@ -453,102 +461,100 @@ Title of Site. Available online: URL (accessed on Day Month Year).
 %Reviewer 3 comments and authors’ response
 %}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\end{adjustwidth}
-\end{document}
+%%\end{adjustwidth}
 
 
+% \documentclass[11pt]{article}
+%% \usepackage{geometry} % see geometry.pdf on how to lay out the page. There's lots.
+%% \usepackage{hyperref}
+%% \usepackage{graphicx}
 
-\documentclass[11pt]{article}
-\usepackage{geometry} % see geometry.pdf on how to lay out the page. There's lots.
-\usepackage{hyperref}
-\usepackage{graphicx}
-\usepackage{gensymb}
-\usepackage[affil-it]{authblk}
-\usepackage[toc,page]{appendix}
-\usepackage{pifont}
-\usepackage{amsmath}
-\usepackage{amssymb}
-\usepackage{bm}
-\usepackage{relsize}
-%% \usepackage{draftwatermark}
-\usepackage[mathscr]{eucal}
-\usepackage{amsmath, amssymb, graphics, setspace}
-\usepackage{amsthm}
-\usepackage[english]{babel}
-\usepackage{listings}
-\lstloadlanguages{Mathematica}
-\usepackage{mathtools}
-\DeclarePairedDelimiter{\norm}{\lVert}{\rVert}
+%% \usepackage[affil-it]{authblk}
+%% \usepackage[toc,page]{appendix}
+%% \usepackage{pifont}
+%% \usepackage{amsmath}
+%% \usepackage{amssymb}
+
+%% \usepackage{relsize}
+%% %% \usepackage{draftwatermark}
+%% \usepackage[mathscr]{eucal}
+%% \usepackage{amsmath, amssymb, graphics, setspace}
+%% \usepackage{amsthm}
+%% \usepackage[english]{babel}
+%% \usepackage{listings}
+%% \lstloadlanguages{Mathematica}
+%% \usepackage{mathtools}
+
 
 
 
 \newcommand{\mathsym}[1]{{}}
 \newcommand{\unicode}[1]{{}}
 
-\newtheorem{exercise}{Exercise}
-\newtheorem{theorem}{Theorem}
-\newtheorem{corollary}{Corollary}
-\newtheorem{lemma}{Lemma}
-\newtheorem{conjecture}{Conjecture}
+%% \newtheorem{exercise}{Exercise}
+%% \newtheorem{theorem}{Theorem}
+%% \newtheorem{corollary}{Corollary}
+%% \newtheorem{lemma}{Lemma}
+%% \newtheorem{conjecture}{Conjecture}
 \newtheorem{observation}{Observation}
 
-\newenvironment{sketch}{%
-  \renewcommand{\proofname}{Proof Sketch}\proof}{\endproof}
+%% \newenvironment{sketch}{%
+%%   \renewcommand{\proofname}{Proof Sketch}\proof}{\endproof}
 
-\DeclareMathOperator{\atantwo}{atan2}
-\DeclareMathOperator{\sign}{sign}
-\DeclareMathOperator{\sense}{sense}
 
 % \geometry{letter} % or letter or a5paper or ... etc
 % \geometry{landscape} % rotated page geometry
 
 % See the ``Article customise'' template for come common customisations
 
-\title{Calculating the Segmented Helix Formed by Repetitions of Identical Subunits
-  thereby Generating a Zoo of Platonic Helices}
-\author{Robert L. Read
-  \thanks{read.robert@gmail.com}
-}
-\affil{Founder, Public Invention, a non-profit.}
 
-\date{\today}
 
-%%% BEGIN DOCUMENT
-\begin{document}
 
-\maketitle
+%% \title{Calculating the Segmented Helix Formed by Repetitions of Identical Subunits
+%%   thereby Generating a Zoo of Platonic Helices}
+%% \author{Robert L. Read
+%%   \thanks{read.robert@gmail.com}
+%% }
+%% \affil{Founder, Public Invention, a non-profit.}
 
-\abstract{
-Eric Lord has observed:
-\begin{quote}
-  In nature, helical structures arise when identical structural subunits combine sequentially, the orientational and translational relation between each unit
-  and its predecessor remaining constant.\cite{lord2002helical}
-\end{quote}
-This paper proves Lord's Observation as a consequence of screw theory.
-Constant-time algorithms are given for
-the segmented helix generated from the intrinsic properties of a stacked object and its
-conjoining rule.
-Standard results from screw theory\cite{wittenburg2016kinematics} and
-previous work for finding the axis of a helix from points\cite{kahn1989defining} are combined with
-corollaries of Lord's observation to allow calculations of segmented helices from either transformation matrices or
-four known consecutive points.
-The construction of these from the intrinsic properties of the rule for conjoining repeated subunits of arbitrary shape is provided,
-allowing the complete parameters describing the unique
-segmented helix generated by arbitrary stackings to be easily calculated.
-Free-libre open-source interactive software and a website\cite{segmentedhelixmathfile} is provided which performs this computation
-for arbitrary prisms along with interactive 3D visualization\cite{segmentedhelixinteractive}.
-This allows the deduction of intrinsic properties of a repeated subunit from known properties of a segmented helix, as a chemist might
-want to do.
-Because the algorithms are efficient, a repeated subunit can be designed to create a segmented helix of
-desired properties,
-as a mechanical engineer or roboticist might want.
-A proof is provided that any subunit can produce a toroid-like helix or a maximally-extended helix, forming a continuous spectrum based
-on joint-face normal twist.
-As a verification and demonstration, the software, website and paper compute, render, and
-catalog an exhaustive ``zoo'' of 28 uniquely-shaped platonic helices,
-such as Boerdijk-Coxeter tetrahelix and various
-species of helices formed from dodecahedra.
-\tableofcontents
+%% \date{\today}
+
+%% %%% BEGIN DOCUMENT
+%% \begin{document}
+
+%% \maketitle
+
+%% \abstract{
+%% Eric Lord has observed:
+%% \begin{quote}
+%%   In nature, helical structures arise when identical structural subunits combine sequentially, the orientational and translational relation between each unit
+%%   and its predecessor remaining constant.\cite{lord2002helical}
+%% \end{quote}
+%% This paper proves Lord's Observation as a consequence of screw theory.
+%% Constant-time algorithms are given for
+%% the segmented helix generated from the intrinsic properties of a stacked object and its
+%% conjoining rule.
+%% Standard results from screw theory\cite{wittenburg2016kinematics} and
+%% previous work for finding the axis of a helix from points\cite{kahn1989defining} are combined with
+%% corollaries of Lord's observation to allow calculations of segmented helices from either transformation matrices or
+%% four known consecutive points.
+%% The construction of these from the intrinsic properties of the rule for conjoining repeated subunits of arbitrary shape is provided,
+%% allowing the complete parameters describing the unique
+%% segmented helix generated by arbitrary stackings to be easily calculated.
+%% Free-libre open-source interactive software and a website\cite{segmentedhelixmathfile} is provided which performs this computation
+%% for arbitrary prisms along with interactive 3D visualization\cite{segmentedhelixinteractive}.
+%% This allows the deduction of intrinsic properties of a repeated subunit from known properties of a segmented helix, as a chemist might
+%% want to do.
+%% Because the algorithms are efficient, a repeated subunit can be designed to create a segmented helix of
+%% desired properties,
+%% as a mechanical engineer or roboticist might want.
+%% A proof is provided that any subunit can produce a toroid-like helix or a maximally-extended helix, forming a continuous spectrum based
+%% on joint-face normal twist.
+%% As a verification and demonstration, the software, website and paper compute, render, and
+%% catalog an exhaustive ``zoo'' of 28 uniquely-shaped platonic helices,
+%% such as Boerdijk-Coxeter tetrahelix and various
+%% species of helices formed from dodecahedra.
+%% \tableofcontents
 
 
 \section{Introduction}
@@ -622,14 +628,14 @@ polygons are only joined by aligning $A$ of one polygon to $B$ of another polygo
 countable number of polygons $P_i$ indexed from $0$. Then what shapes can be made by chaining these
 polygons together?
 
-\begin{theorem}
+\begin{Theorem}
   When polygonal subunits are conjoined with their axes at angle $\theta$, they form a
   circle of radius:
   \[
 \frac{L}{2 \sin{\frac{\theta}{2}}}
 \]
 where if $\theta = 0$ the circle is of infinite radius, that is, a straight line.
-  \end{theorem}
+  \end{Theorem}
 \begin{figure}
      \centering
      \includegraphics[width=0.80\textwidth]{figures/2DPolygonStacking.png}
@@ -899,7 +905,7 @@ Because periodic chains are merely a clarification of the ``identical structural
 of Observation \ref{obs:lords},
 this theorem proves that observation.
 
-\begin{theorem}[Segmented Helix]
+\begin{Theorem}[Segmented Helix]
   \label{thm:helix}
   Consider $N$ identical objects which each have two points, $A$ and $B$, called {\em joints}. Call
   $\overrightarrow{AB}$ the {\em axis} of this object.
@@ -919,7 +925,7 @@ this theorem proves that observation.
   Any periodic chain of three or more objects has a unique segmented helix
   whose segments correspond
   to the axes of these objects.
-\end{theorem}
+\end{Theorem}
 
 \begin{proof}
   By induction.
@@ -1023,10 +1029,10 @@ produces a segmented helix, and therefore that the helix angle is the
 same for each object, but this is a corollary of Theorem \ref{thm:helix}.
 
 
-\begin{corollary}[Segment Similarity]
+\begin{Corollary}[Segment Similarity]
   The helix angle of any object axis in a periodic chain is the same.
   \label{cor:symmetric}
-\end{corollary}
+\end{Corollary}
 
 \begin{proof}
   The axes of each object coincide with a segment of a segmented helix.
@@ -1299,7 +1305,7 @@ itself is not symmetric; in this figure the normal of the $B$ face is not symmet
 
 That this is always possible is important enough, if only for
 the convenience of calculation, that we consider it a Lemma:
-\begin{lemma}[Balance Lemma]
+\begin{Lemma}[Balance Lemma]
   For any segmented helix with selected consecutive joints $A,B,C$ and $D$,
   there is a rigid transformation which positions it such that:
   \begin{itemize}
@@ -1312,38 +1318,40 @@ the convenience of calculation, that we consider it a Lemma:
     $A_x = -D_x \wedge A_z = -D_z$.
   \end{itemize}
   \label{lem:balance}
-\end{lemma}
+\end{Lemma}
 
 
-\begin{sketch}
+% TODO: This should really be labelled a sketch.
+%% \begin{proof}
 
-A key insight is that Theorem \ref{thm:helix} implies that no matter
-how lopsided and different
-the normal vectors  $\overrightarrow{N_B}$ and $\overrightarrow{N_C}$
-for the joint faces are and no matter what $\tau$ we choose,
-the relationship of conjoined objects
-is always the same.
-After placing $\overrightarrow{BC}$ along
-the $z$-axis, there is always an angle $\psi$ which will
-rotate the points $A$ and $D$ into balance (that is, $(A_x = -D_x) \wedge (A_z = -D_z) \wedge (A_y = D_y)$).
+%% A key insight is that Theorem \ref{thm:helix} implies that no matter
+%% how lopsided and different
+%% the normal vectors  $\overrightarrow{N_B}$ and $\overrightarrow{N_C}$
+%% for the joint faces are and no matter what $\tau$ we choose,
+%% the relationship of conjoined objects
+%% is always the same.
+%% After placing $\overrightarrow{BC}$ along
+%% the $z$-axis, there is always an angle $\psi$ which will
+%% rotate the points $A$ and $D$ into balance (that is, $(A_x = -D_x) \wedge (A_z = -D_z) \wedge (A_y = D_y)$).
 
-The key insight to finding $\psi$ is to note that
-the projections of the $B$ and $C$ face normal vectors
-projected into the $XY$ plane can be rotated so that they
-are balanced around the negative $y$ unit vector.
-Such a projection into the cross-section of the helix is closely related to
-the {\em helical wheel}\cite{wiki:helicalwheel} plot
-in the study of alpha helices in proteins.
-Even if the lengths of the projections of the face normals in $XY$
-are different, this mechanism works, because by Observation \ref{obs:lords} and Theorem \ref{thm:helix},
-the points $A$ and $D$ must be symmetric about the segment $\overline{BC}$.
+%% The key insight to finding $\psi$ is to note that
+%% the projections of the $B$ and $C$ face normal vectors
+%% projected into the $XY$ plane can be rotated so that they
+%% are balanced around the negative $y$ unit vector.
+%% Such a projection into the cross-section of the helix is closely related to
+%% the {\em helical wheel}\cite{wiki:helicalwheel} plot
+%% in the study of alpha helices in proteins.
+%% Even if the lengths of the projections of the face normals in $XY$
+%% are different, this mechanism works, because by Observation \ref{obs:lords} and Theorem \ref{thm:helix},
+%% the points $A$ and $D$ must be symmetric about the segment $\overline{BC}$.
 
-By composing this balancing operation with the face-adjoining transformation
-matrix via {\em adjoinPrism} (see Section \ref{sec:adjoin}), $A$ and $D$ are placed in balance.
+%% By composing this balancing operation with the face-adjoining transformation
+%% matrix via {\em adjoinPrism} (see Section \ref{sec:adjoin}), $A$ and $D$ are placed in balance.
 
-Note that in the zig-zag case, $A_y = D_y = 0$.
+%% Note that in the zig-zag case, $A_y = D_y = 0$.
 
-\end{sketch}
+%% \end{proof}
+
 
 The screw axis may now
 be computed from either the four points $A,B,C$, and $D$ or from the transformation
@@ -1576,12 +1584,12 @@ It is useful to have a test of whether or not four proposed points really do lie
 if they allow valid inputs to {\em PointAxis} algorithm to be computed via rigid
 transformation to the $z$-axis.
 
-\begin{theorem}[Segmented Helix Test]
+\begin{Theorem}[Segmented Helix Test]
   Four arbitrary sequential points $A,B,C,D$ are consecutive joints of a segmented helix if and only if
   the segments $\overline{AB},\overline{BC}$, and $\overline{CD}$ are equal length and the scalar projection
   of $\overrightarrow{CD}$ onto $\overrightarrow{BC}$ is equal to the scalar projection of $\overrightarrow{AB}$
   onto $\overrightarrow{BC}$.
-\end{theorem}
+\end{Theorem}
 
 \begin{proof}
   ``If'' Case (points on helix imply scalar projections are negations of each other):
@@ -1708,13 +1716,13 @@ The code published at the website does both and compares the result as a test.
 Upon implementing our interactive ability to vary $\tau$, the following
 theorem becomes visually apparent.
 
-\begin{theorem}[Twist Spectrum]
+\begin{Theorem}[Twist Spectrum]
   For any choice of non-parallel face normals having non-zero $x$ or $y$ components,
   changing the twist angle $\tau$ through a complete rotation ($0 \leq \tau \leq 2\pi$)
   smoothly varies the segmented helix
   between a torus and flat cases.
   \label{thm:twistspectrum}
-\end{theorem}
+\end{Theorem}
 
 
 
@@ -2249,11 +2257,17 @@ Thanks to Prof. Eric Lord for his direct communication.
 The enthusiasm of the participants of the 2018 Public Invention Mathathon
 initiated this work.
 
+\begin{adjustwidth}{-\extralength}{0cm}
 \bibliographystyle{unsrt}
 \bibliography{shelix}
+\end{adjustwidth}
 
-\appendix
 
+% If authors have biography, please use the format below
+\section*{Short Biography of Authors}
+\bio
+{\raisebox{-0.35cm}{\includegraphics[width=3.5cm,height=5.3cm,clip,keepaspectratio]{Figures/author1.pdf}}}
+{\textbf{Robert L. Read} This is a biography.}
 
 \end{document}
 
