@@ -627,7 +627,7 @@ or all the calculations in Sections \ref{sec:screws} and \ref{sec:pointaxis}, no
 \end{figure}
 
 
-\section{A Warm-up: Two Dimensions}
+\subsection{A Warm-up: Two Dimensions}
 
 Considering the problem in two dimensions may be a valuable introduction.
 Suppose a polygon has two edges, called $A$ and $B$, and length $L$ of the
@@ -680,7 +680,7 @@ for each object lies on a circle of radius $R$ with center $C$.
 
 \label{sec:2d}
 
-\section{The Segmented Helix}
+\subsection{The Segmented Helix}
 
 An analogous result holds in three dimensions.
 
@@ -847,7 +847,9 @@ Therefore adopt the following conventions:
 \item $\theta$ is never negative.
 \end{itemize}
 
-\section{The Intrinsic Properties of Periodic Chains of Solids}
+\section{Results}
+
+\subsection{The Intrinsic Properties of Periodic Chains of Solids}
 
 Although fairly obvious from Chasles' Theorem, in order to prove Observation \ref{obs:lords},
 additional clarification is helpful.
@@ -904,7 +906,7 @@ is used for helical curves on non-cylindrical surfaces.
 This paper use the term {\em helix} only in the
 sense of {\em cylindrical helix}.
 
-\section{Periodic Chains Produce Segmented Helices}
+\subsection{Periodic Chains Produce Segmented Helices}
 
 A periodic chain is, in fact, a simple object which demonstrates tremendous symmetry.
 Before using this symmetry in the construction of the segmented helix corresponding to a periodic chain,
@@ -1055,7 +1057,7 @@ in the computation of segmented helix properties, to justify balancing face norm
 to produce an intrinsic out-vector, and to apply the {\em PointAxis} algorithm
 without actually assigning objects Cartesian coordinates.
 
-\section{Computing Screws and Segmented Helices from Transformation Matrices}
+\subsection{Computing Screws and Segmented Helices from Transformation Matrices}
 \label{sec:screws}
 
 The rule for how objects in a periodic chain are joined may be
@@ -1244,7 +1246,7 @@ transformation matrix more natural and convenient.
 A chemist or crystallographer is more likely to
 have learned the position of four points and wish to compute from that.
 
-\section{{\em PointAxis}: Computing Segmented Helices from Joints}
+\subsection{{\em PointAxis}: Computing Segmented Helices from Joints}
 \label{sec:pointaxis}
 
 Kahn\cite{kahn1989defining} has given a method for computing
@@ -1638,7 +1640,7 @@ Thus in the future it might be possible to produce an expression for the
 radius of one of the Platonic Dodecahelices of unit edge length.
 
 
-\section{The Joint Face Normal Method}
+\subsection{The Joint Face Normal Method}
 \label{sec:facenormal}
 
 {\em PointAxis} takes a point $A$ known to be in a specific, balanced relation
@@ -1720,7 +1722,7 @@ and hence all of the segmented helix properties,
 from either the transformation matrix or the four points.
 The code published at the website does both and compares the result as a test.
 
-\section{Changing $\tau$ Smoothly Changes Tightness}
+\subsection{Changing $\tau$ Smoothly Changes Tightness}
 
 Upon implementing our interactive ability to vary $\tau$, the following
 theorem becomes visually apparent.
@@ -1880,9 +1882,11 @@ the $\tau$ that produces the minimum tightness (torus-like) and maximum tightnes
 nearest 360-degree is numerically calculated,
 with the labels {\em Minimum Tightness $\tau$} and {\em Maximum Tightness $\tau$}.
 
-\section{Checks and Explorations}
+\section{Discussion}
 
-\subsection{Qualitative Observations}
+\subsection{Checks and Explorations}
+
+\subsubsection{Qualitative Observations}
 
 When the joint face normals are coplanar vectors, then the minimum tightness $\tau$ is
 always $0$, and the maximum tightness occurs when $\tau = \pm \pi$.
@@ -1905,7 +1909,7 @@ response to an external magnetic or electric field or chemicals in the surroundi
 environment would be a telescoping nanomachine or nanoactuator.
 
 
-\subsection{A Brute-force Approach to Finding Helix Angle from Twist}
+\subsubsection{A Brute-force Approach to Finding Helix Angle from Twist}
 
 The calculation methods described in this paper hardly warrant the name ``algorithm'' when considered from the view of computational complexity;
 they are all constant time (for a given fixed precision).
@@ -1923,7 +1927,7 @@ Standard numerical optimization can of course be brought to bear, because an obj
 that depends on the parameters of the segmented helix can
 be efficiently computed in constant time.
 
-\section{Implications}
+\subsection{Implications}
 
 One of the implications of having an easily-calculable understanding of the math
 is that it may be possible to design helices
@@ -1940,7 +1944,7 @@ A modular robot constructed out of repetitions of the same shape-changing module
 produce a helix
 whose precise shape can be controlled by uniformly changing the shape of all of the modules.
 
-\section{Applying to The Boerdijk-Coxeter Tetrahelix}
+\subsection{Applying to The Boerdijk-Coxeter Tetrahelix}
 
 \begin{figure}
      \centering
@@ -2003,7 +2007,7 @@ as one need not choose the precisely opposite face as the joining face, and
 up to three twists may be chosen.
 
 
-\section{Confirming Periodic Twists}
+\subsection{Confirming Periodic Twists}
 
 The Boerdijk-Coxeter tetrahelix has an irrational rotation about the angle,
 meaning that is aperiodic.
@@ -2040,7 +2044,7 @@ of other {\em Platonic Helices}, or would allow an appoximation
 to discovered quickly and simply visually.
 
 
-\section{The Platonic Helices}
+\subsection{The Platonic Helices}
 
 \label{sec:platonic}
 
@@ -2154,7 +2158,7 @@ The Wheel & Ico &	3 &	12 &	0 &	2.080 &	41.810 & 0.000 & 90.000 \\
 \label{table:platonic} % is used to refer this table in the text
 \end{table}
 
-\subsection{Qualitative Descriptions and Interesting Shapes}
+\subsubsection{Qualitative Descriptions and Interesting Shapes}
 
 For fun and to facilitate conversation, we have given all
 28 of these Platonic helices descriptive nicknames.
@@ -2243,7 +2247,7 @@ or molecules.
 \end{figure}
 \end{itemize}
 
-\section{Future Work}
+\subsection{Future Work}
 
 The algorithms and software described herein allow numerical calculation of the intrinsic properties of these
 Platonic helices, but it would be even better to describe them
@@ -2260,17 +2264,19 @@ There may exist a closed-form expression for twist $\tau$ which produces a desir
 The website implements
 an iterative algorithm to find it, which is practical but less elegant.
 
-\section{Acknowledgements}
+\funding{This research received no external funding.}
 
-Thanks to Prof. Eric Lord for his direct communication.
+\acknowledgments{Thanks to Prof. Eric Lord for his direct communication.
 The enthusiasm of the participants of the 2018 Public Invention Mathathon
-initiated this work.
+initiated this work.}
+
+\conflictsofinterest{The authors declare no conflict of interest.}
+
 
 \begin{adjustwidth}{-\extralength}{0cm}
 \bibliographystyle{unsrt}
 \bibliography{shelix}
 \end{adjustwidth}
-
 
 % If authors have biography, please use the format below
 \section*{Short Biography of Authors}
