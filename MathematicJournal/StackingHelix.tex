@@ -202,7 +202,7 @@ Entry 2		& Data			& Data\\
 \begin{table}[H]
 \caption{This is a wide table.\label{tab2}}
 	\begin{adjustwidth}{-\extralength}{0cm}
-		\newcolumntype{C}{>{\centering\arraybackslash}X}
+	  \newcolumntype{C}{>{\centering\arraybackslash}X}
 		\begin{tabularx}{\fulllength}{CCCC}
 			\toprule
 			\textbf{Title 1}	& \textbf{Title 2}	& \textbf{Title 3}     & \textbf{Title 4}\\
@@ -2040,7 +2040,14 @@ of helix is given in the column below.
   \caption{The Platonic Helices} % title of Table
 	\begin{adjustwidth}{-\extralength}{0cm}
           % \begin{tabularx}{l l r r r r r r r}
-\begin{tabularx}{\fulllength}{LCCCCCCCC}
+          \newcolumntype{C}{>{\centering\arraybackslash}X}
+	  \newcolumntype{L}{>{\arraybackslash}X}
+\newcolumntype{b}{L}
+\newcolumntype{s}{>{\hsize=.5\hsize}C}
+\newcolumntype{q}{>{\hsize=.4\hsize}C}
+
+% \begin{tabularx}{\fulllength}{LLCCCCCCC}
+\begin{tabularx}{\fulllength}{bqqqsssss}
   \toprule
   Name & Solid & \# Analogs & C-Face \# & $ \tau $ & radius & $ \theta $ & d & $ \phi $ \\ [0.5ex] % inserts table
 %heading
