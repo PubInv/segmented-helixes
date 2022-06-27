@@ -443,8 +443,9 @@ LD & Linear dichroism
 %% \newtheorem{conjecture}{Conjecture}
 \newtheorem{observation}{Observation}
 
-%% \newenvironment{sketch}{%
-%%   \renewcommand{\proofname}{Proof Sketch}\proof}{\endproof}
+
+\newenvironment{sketch}{%
+   \renewcommand{\proofname}{Proof Sketch}\proof}{\endproof}
 
 
 % \geometry{letter} % or letter or a5paper or ... etc
@@ -529,9 +530,13 @@ polygons together?
 \begin{Theorem}
   When polygonal subunits are conjoined with their axes at angle $\theta$, they form a
   circle of radius:
-  \[
-\frac{L}{2 \sin{\frac{\theta}{2}}}
-\]
+
+\begin{linenomath}
+\begin{equation}
+\frac{L}{2 \sin{\frac{\theta}{2}}},
+\end{equation}
+\end{linenomath}
+
 where if $\theta = 0$ the circle is of infinite radius, that is, a straight line.
   \end{Theorem}
 \begin{figure}
@@ -561,9 +566,11 @@ Then $\angle ABC = \frac{\pi - \theta}{2}$. Therefore $\angle ACB = \pi - 2(\pi-
 By considering the right triangle formed by midpoint $M$ of $\overline{AB}$ and $C$,
 the length of the sides $\overline{AC} = \overline{BC}$ can be computed by the half-angle
 of theta:
-\[
-R = \frac{L}{2 \sin{\frac{\theta}{2}}}
-\]
+\begin{linenomath}
+\begin{equation}
+R = \frac{L}{2 \sin{\frac{\theta}{2}}}.
+\end{equation}
+\end{linenomath}
 Since the triangles formed by placing a new object are similar and share a side which
 is an angle bisector, they all share the point $C$. Therefore, the axis points $A$ and $B$
 for each object lies on a circle of radius $R$ with center $C$.
@@ -579,9 +586,9 @@ An analogous result holds in three dimensions.
 Following the Wikipedia article \cite{wiki:helix},
 a helix is set up parametrically:
 \begin{align}
-    P_x(t) &= r \sin{t}  \\
-    P_y(t) &= r \cos{t} \\
-   P_z(t) &= b t
+    P_x(t) &= r \sin{t},   \\
+    P_y(t) &= r \cos{t}, \\
+   P_z(t) &= b t.
 \end{align}
 Such a helix has a radius of $r$ and slope (if $r \neq 0$) of $b/r$.
 The pitch of the helix---the change in $t$ needed to make one complete revolution---is $2\pi b$.
@@ -594,14 +601,14 @@ A goal is to derive
 the parameters for a continuous helix from such discrete objects by studying
 a helix evaluated at integral points. Call such an object a {\em segmented helix}.
 A segmented helix may be thought of as function that, given an integer, gives back a point in
-3-space.
+3-space,
 \begin{align}
-    P_x(n) &= r \sin{n \theta}  \\
-    P_y(n) &= r \cos{n \theta} \\
-   P_z(n) &= n d
+    P_x(n) &= r \sin{n \theta},  \\
+    P_y(n) &= r \cos{n \theta}, \\
+   P_z(n) &= n d,
 \end{align}
 
-$d$ is the distance or {\em travel} along the helix axis between adjacent joints. In this canonical representation the helix axis is
+where $d$ is the distance or {\em travel} along the helix axis between adjacent joints. In this canonical representation the helix axis is
 the $z$-axis.
 $\theta$ is the rotation around the $z$-axis
 between adjacent points.
@@ -695,13 +702,13 @@ maximum tightness. The letter $t$ represents tightness.
   \end{itemize}
 These quantities are related:
 \begin{align}
-    c &= 2r\sin{\frac{\theta}{2}} \\
-    L^2 &= c^2+d^2  \\
-    \arctan{\frac{c}{d}}  &= \phi \\
-    s &= \frac{2 \pi}{\theta} \\
-    d &= L \cos{\phi} \\
-    p &= d \cdot s \\
-    t &= d / r
+    c &= 2r\sin{\frac{\theta}{2}}, \\
+    L^2 &= c^2+d^2,  \\
+    \arctan{\frac{c}{d}}  &= \phi, \\
+    s &= \frac{2 \pi}{\theta}, \\
+    d &= L \cos{\phi}, \\
+    p &= d \cdot s, \\
+    t &= d / r.
 \end{align}
 
 Measuring $\phi$ demands a decision on the sign of the direction of the axis,
@@ -1012,9 +1019,9 @@ Transformation matrices in homogeneous coordinates, as typically used in kinemat
 and computer graphics, are convenient for this purpose, allowing the transformation
 represented by a matrix to be effected by simple multiplication.
 
-The angle of rotation is computable from the trace of $\bm{R}$, $Tr(\bm{R})$.
+The angle of rotation is computable from the trace of $\bm{R}$, $Tr(\bm{R})$:
 \begin{align}
-  \theta &= \arccos{\frac{Tr(\bm{R}) - 1}{2}}
+  \theta &= \arccos{\frac{Tr(\bm{R}) - 1}{2}}.
 \end{align}
 Technically, $\arccos$ is multi-valued, but take $\theta$
 to be in its principle range, $0 \leq \theta \leq \pi$.
@@ -1025,9 +1032,9 @@ However, in this case
 we can compute the direction vector $\overrightarrow{H}$ as the difference vector
 between an arbitrary point $q$ (a 4 $\times$ 1 vector in homogeneous coordinates)
 and its transformation performed
-twice. Informally, this is a ``zig, then a zag''.
+twice. Informally, this is a ``zig, then a zag'':
 \begin{align}
-  \overrightarrow{H} &= \bm{R} ( \bm{R}( q)) - q
+  \overrightarrow{H} &= \bm{R} ( \bm{R}( q)) - q.
 \end{align}
 (Note that in general $\overrightarrow{H}$ is not normalized, $\overrightarrow{H} \neq \hat{\overrightarrow{H}}$.
 Also recall that multiplication by a transformation matrix
@@ -1038,7 +1045,7 @@ In other cases, $\overrightarrow{H}$ can be computed from the direction
 cosines of $\bm{R}$ \cite{wiki:rotation}:
 \begin{align}
   R &=     \begin{bmatrix} a & b & c' & x \\ d' & e & f & y\\ g & h & i & z\\ 0 &  0 & 0 & 1\end{bmatrix} \\
-    \overrightarrow{H} &=  \begin{bmatrix} h - f \\ c' - g \\ d' - b \\ 1 \end{bmatrix}
+    \overrightarrow{H} &=  \begin{bmatrix} h - f \\ c' - g \\ d' - b \\ 1 \end{bmatrix}.
 \end{align}
 (The variables $c'$ and $d'$ are primed to distinguish them from
 the symbols for the chord $c$ and the travel along the axis $d$).
@@ -1058,12 +1065,12 @@ If, however, we are given a single a joint $B$ in addition to
 $\bm{R}$, then we can completely determine the entire segmented helix.
 $C$ is computed from $\bm{R}$:
 \begin{align}
-  C &= \bm{R}(B) \\
- \overrightarrow{BC} &= C - B\\
+  C &= \bm{R}(B), \\
+ \overrightarrow{BC} &= C - B. \\
 \end{align}
 Then $d$ is computable as a projection:
 \begin{align}
-  d = \overrightarrow{BC} \cdot \hat{\overrightarrow{H}}
+  d = \overrightarrow{BC} \cdot \hat{\overrightarrow{H}}.
 \end{align}
 
 These are the only properties that can be computed from the
@@ -1076,17 +1083,17 @@ The chord of the segmented helix (that is, length of an object of
 axis length $L$
 projected along $\overrightarrow{H}$) is:
 \begin{align}
-  c = \sqrt{L^2 - d^2}
+  c = \sqrt{L^2 - d^2}.
 \end{align}
 Knowing the chord $c$ and the amount of rotation $\theta$
 allows us to compute the radius:
 \begin{align}
-  r = \frac{c}{2 \sin{\theta}}
+  r = \frac{c}{2 \sin{\theta}},
 \end{align},
 unless the chord is $0$, in which case the radius is $0$.
 The helix angle $\phi$ is a a function of $c$ and $d$:
 \begin{align}
-    \phi &= \arctan{\frac{c}{d}}
+    \phi &= \arctan{\frac{c}{d}}.
 \end{align}
 
 Sidedness and pitch ($s$ and $p$) follow directly.
@@ -1118,11 +1125,11 @@ is the midpoint of $B_a$ and $C_a$, so just move back
 half the travel $d$ along the vector $H$ to get $B_a$.
 
 \begin{align}
-  \overrightarrow{M} &= \frac{B + C}{2} \\
-  \overrightarrow{Q} &= \overrightarrow{BC} \times \hat{\overrightarrow{H}} \\
-  l &= \sqrt{r^2 - \frac{c}{2}^2} \\
-  \overrightarrow{Q'} &= -\frac{Q}{l} \\
-  B_a &= \overrightarrow{M} + \overrightarrow{Q'} - \frac{d}{2}\hat{\overrightarrow{H}}
+  \overrightarrow{M} &= \frac{B + C}{2}, \\
+  \overrightarrow{Q} &= \overrightarrow{BC} \times \hat{\overrightarrow{H}}, \\
+  l &= \sqrt{r^2 - \frac{c}{2}^2}, \\
+  \overrightarrow{Q'} &= -\frac{Q}{l}, \\
+  B_a &= \overrightarrow{M} + \overrightarrow{Q'} - \frac{d}{2}\hat{\overrightarrow{H}}.
 \end{align}
 
 Thus, given only the transformation $\bm{R}$, the length $L$, and one
@@ -1236,36 +1243,35 @@ the convenience of calculation, that we consider it a Lemma:
 \end{Lemma}
 
 
-% TODO: This should really be labelled a sketch.
-%% \begin{proof}
+\begin{sketch}
 
-%% A key insight is that Theorem \ref{thm:helix} implies that no matter
-%% how lopsided and different
-%% the normal vectors  $\overrightarrow{N_B}$ and $\overrightarrow{N_C}$
-%% for the joint faces are and no matter what $\tau$ we choose,
-%% the relationship of conjoined objects
-%% is always the same.
-%% After placing $\overrightarrow{BC}$ along
-%% the $z$-axis, there is always an angle $\psi$ which will
-%% rotate the points $A$ and $D$ into balance (that is, $(A_x = -D_x) \wedge (A_z = -D_z) \wedge (A_y = D_y)$).
+A key insight is that Theorem \ref{thm:helix} implies that no matter
+how lopsided and different
+the normal vectors  $\overrightarrow{N_B}$ and $\overrightarrow{N_C}$
+for the joint faces are and no matter what $\tau$ we choose,
+the relationship of conjoined objects
+is always the same.
+After placing $\overrightarrow{BC}$ along
+the $z$-axis, there is always an angle $\psi$ which will
+rotate the points $A$ and $D$ into balance (that is, $(A_x = -D_x) \wedge (A_z = -D_z) \wedge (A_y = D_y)$).
 
-%% The key insight to finding $\psi$ is to note that
-%% the projections of the $B$ and $C$ face normal vectors
-%% projected into the $XY$ plane can be rotated so that they
-%% are balanced around the negative $y$ unit vector.
-%% Such a projection into the cross-section of the helix is closely related to
-%% the {\em helical wheel} \cite{wiki:helicalwheel} plot
-%% in the study of alpha helices in proteins.
-%% Even if the lengths of the projections of the face normals in $XY$
-%% are different, this mechanism works, because by Observation \ref{obs:lords} and Theorem \ref{thm:helix},
-%% the points $A$ and $D$ must be symmetric about the segment $\overline{BC}$.
+The key to finding $\psi$ is to note that
+the projections of the $B$ and $C$ face normal vectors
+projected into the $XY$ plane can be rotated so that they
+are balanced around the negative $y$ unit vector.
+Such a projection into the cross-section of the helix is closely related to
+the {\em helical wheel} \cite{wiki:helicalwheel} plot
+in the study of alpha helices in proteins.
+Even if the lengths of the projections of the face normals in $XY$
+are different, this mechanism works, because by Observation \ref{obs:lords} and Theorem \ref{thm:helix},
+the points $A$ and $D$ must be symmetric about the segment $\overline{BC}$.
 
-%% By composing this balancing operation with the face-adjoining transformation
-%% matrix via {\em adjoinPrism} (see Section \ref{sec:adjoin}), $A$ and $D$ are placed in balance.
+By composing this balancing operation with the face-adjoining transformation
+matrix via {\em adjoinPrism} (see Section \ref{sec:adjoin}), $A$ and $D$ are placed in balance.
 
-%% Note that in the zig-zag case, $A_y = D_y = 0$.
+Note that in the zig-zag case, $A_y = D_y = 0$.
 
-%% \end{proof}
+\end{sketch}
 
 
 The screw axis may now
@@ -1378,8 +1384,8 @@ the change in $r$ with a change in $D$ could be calculated.
 
 Define the angle bisector vectors:
 \begin{align}
-  \overrightarrow{B_b} &= B - (A + C)/2 \\
-  \overrightarrow{C_b} &= C - (B + D)/2
+  \overrightarrow{B_b} &= B - (A + C)/2, \text{ \hspace{3em} and} \\
+  \overrightarrow{C_b} &= C - (B + D)/2.
   \end{align}
 The fundamental insight that the axis of the helix $H$ can be
 computed by a cross product of the angle bisector
@@ -1390,14 +1396,14 @@ the degenerate case of a straight line coinciding with all segments.
 This occurs only when $A_x = 0 \wedge A_y = 0 \wedge A_z = -3L/2$.
 In this case:
 \begin{align}
-  r &= 0 \\
-  \theta &= \text{undefined}\\
-  d &= L \\
-  \phi &= 0 \\
-  \overrightarrow{H} &=  \begin{bmatrix} 0 \\ 0 \\ L  \end{bmatrix} \\
-  B_a &= B = \begin{bmatrix} 0 \\ 0 \\ -L/2  \end{bmatrix}
+  r &= 0, \\
+  \theta &= \text{undefined},\\
+  d &= L, \\
+  \phi &= 0, \\
+  \overrightarrow{H} &=  \begin{bmatrix} 0 \\ 0 \\ L  \end{bmatrix}, \text{ \hspace{3em} and} \\
+  B_a &= B = \begin{bmatrix} 0 \\ 0 \\ -L/2  \end{bmatrix},
 \end{align}
-$\overrightarrow{H}$ is the direction vector of the helix axis.
+where $\overrightarrow{H}$ is the direction vector of the helix axis.
 In this case there is insufficient information to define $\theta$,
 unless it is through other information. For example, when using
 the joint-face normal method which specifies
@@ -1408,17 +1414,17 @@ the zig-zag degeneracy occurs. Since
 $A$ and $D$ are balanced, this occurs only when $A_y = 0$.
 In this case (denoting the $x$ component of the $B_a$ vector as $B_{a[x]}$):
 \begin{align}
-  B_{a} &= \begin{bmatrix} B_{a[x]} \\ B_{a[y]} \\ B_{a[z]}  \end{bmatrix} \\
-  \overrightarrow{H} &=  C - A \\
-  d &= (C - B) \times \overrightarrow{H} \\
-  r &= \norm{\overrightarrow{B_b}} / 2 \\
-  c &= 2 r\\
-  \phi &= \atantwo{(H_z,H_x)} - \pi/2 \\
-  c &= 0 \\
-  \theta &= \pi \\
-  B_{a[x]} &= \frac{d\sqrt{1 - (d/L)^2}}{2} \\
-  B_{a[y]} &= 0 \\
-  B_{a[z]} &= -\frac{d^2}{2L}
+  B_{a} &= \begin{bmatrix} B_{a[x]} \\ B_{a[y]} \\ B_{a[z]}  \end{bmatrix}, \\
+  \overrightarrow{H} &=  C - A, \\
+  d &= (C - B) \times \overrightarrow{H}, \\
+  r &= \norm{\overrightarrow{B_b}} / 2, \\
+  c &= 2 r, \\
+  \phi &= \atantwo{(H_z,H_x)} - \pi/2, \\
+  c &= 0, \\
+  \theta &= \pi, \\
+  B_{a[x]} &= \frac{d\sqrt{1 - (d/L)^2}}{2}, \\
+  B_{a[y]} &= 0, \\
+  B_{a[z]} &= -\frac{d^2}{2L}.
 \end{align}
 (Note: $\atantwo$ is the standard two-argument tangent function employed in software packages).
 
@@ -1444,10 +1450,10 @@ $r$ is the distance between $B_a$ and $B$. $c$ and $\theta$
 are easily computed from these values.
 
 \begin{align}
-  \overrightarrow{H} &=  \begin{bmatrix} -2 B_{b[y]} B_{b[z]} \\ 0 \\ 2 B_{b[y]} B_{b[x]}  \end{bmatrix} \\
-  d &= \frac{L B_{b[x]}}{\sqrt{B_{b[x]}^2 + B_{b[z]}^2}}  \\
-  \phi &= \atantwo{(H_z,H_x)} - \pi/2  \\
-  c &= \sqrt{L^2 - d^2}
+  \overrightarrow{H} &=  \begin{bmatrix} -2 B_{b[y]} B_{b[z]} \\ 0 \\ 2 B_{b[y]} B_{b[x]}  \end{bmatrix}, \\
+  d &= \frac{L B_{b[x]}}{\sqrt{B_{b[x]}^2 + B_{b[z]}^2}},  \\
+  \phi &= \atantwo{(H_z,H_x)} - \pi/2,  \\
+  c &= \sqrt{L^2 - d^2}.
 \end{align}
 
 In this approach to calculation, it is easiest
@@ -1456,15 +1462,15 @@ use it to complete our computations.
 
 From trigonometry and utilizing the facts that
 \begin{align}
-\phi &= \arccos{(d/L)} \\
+\phi &= \arccos{(d/L)}, \text{ \hspace{3em} and} \\
 \sin{(\arccos{x})} &= \sqrt{1 - x^2}
 \end{align}
   it
 can be shown that
 the $x$ and $z$ component of $B_a$ are:
 \begin{align}
-  B_{a[x]} &= \frac{d\sqrt{1 - (d/L)^2}}{2} \\
-  B_{a[z]} &= -\frac{d^2}{2L}
+  B_{a[x]} &= \frac{d\sqrt{1 - (d/L)^2}}{2}, \\
+  B_{a[z]} &= -\frac{d^2}{2L}.
 \end{align}
 
 However, this computation exposes another special case: when the
@@ -1472,7 +1478,7 @@ helix angle $\phi$ is $\pi /2$, the segmented helix is
 torus-like. In this case the axis point $B_a$ is in fact
 on the $y$-axis, and so only $B_{a[y]}$ is need:
 \begin{align}
-  B_{a[y]} &=  \frac{L B_{b[y]}}{2 B_{b[z]}}
+  B_{a[y]} &=  \frac{L B_{b[y]}}{2 B_{b[z]}}.
 \end{align}
 Except for in the toroidal case,  $B_{b[x]}$ must be taken into
 account, but it is non-zero, so we can divide by it.
@@ -1481,15 +1487,15 @@ object axis to the helix axis, it is apparent that $B_{a[y]}$
 is proportional to a ratio of the angle bisector
 $B_{b[y]}/B_{b[x]}$ times the $B_{a[x]}$ value:
 \begin{align}
-  B_{a[y]} &=  \frac{ B_{b[y]} B_{a[x]}}{ B_{b[x]}}
+  B_{a[y]} &=  \frac{ B_{b[y]} B_{a[x]}}{ B_{b[x]}}.
 \end{align}
 
 Having computed all of $B_a$, the remaining intrinsic properties are easily
 calculated:
 
 \begin{align}
-  r &= \norm{B - B_a}  \\
-  \theta &= 2 \arcsin{\frac{c}{2r}}
+  r &= \norm{B - B_a}, \text{ \hspace{3em} and}  \\
+  \theta &= 2 \arcsin{\frac{c}{2r}}.
 \end{align}
 
 
@@ -1507,17 +1513,17 @@ transformation to the $z$-axis.
 \end{Theorem}
 
 \begin{proof}
-  ``If'' Case (points on helix imply scalar projections are negations of each other):
+  \textbf{``If'' Case} (points on helix imply scalar projections are negations of each other):
 
   If $A,B,C,D$ are consecutive joints on a segmented helix, then the angle $\eta$ between any two consecutive segments is the
   same. Then:
   \begin{alignat*}{2}
-    \norm{\overrightarrow{AB}} &= \norm{\overrightarrow{CD}} &\quad &\text{Given}\\
-    \norm{\overrightarrow{AB}}\cos{\eta} &= \norm{\overrightarrow{CD}}\cos{\eta} &\quad &\text{$\eta$ the same for each joint} \\
-    \overrightarrow{AB} \cdot \hat{\overrightarrow{BC}} &= \overrightarrow{CD} \cdot \hat{\overrightarrow{BC}} &\quad &\text{def. of scalar projection} \\
+    \norm{\overrightarrow{AB}} &= \norm{\overrightarrow{CD}} &\quad &\text{\{Given\}}\\
+    \norm{\overrightarrow{AB}}\cos{\eta} &= \norm{\overrightarrow{CD}}\cos{\eta} &\quad &\text{\{$\eta$ the same for each joint\}} \\
+    \overrightarrow{AB} \cdot \hat{\overrightarrow{BC}} &= \overrightarrow{CD} \cdot \hat{\overrightarrow{BC}} &\quad &\text{\{def. of scalar projection\}} \\
   \end{alignat*}
 
-  ``only if'' Case (equal scalar projections and length imply coincident segmented helix):
+  \textbf{``Only if'' Case} (equal scalar projections and length imply coincident segmented helix):
 
   If the scalar projections and the lengths are equal, then the cosines of the angles between segments are equal.
   In the range $0$ to $\pi$,
@@ -1938,7 +1944,7 @@ paper in order to produce a periodic tetrahelix.
 
 Their formula for period $p$ is:
 \begin{align}
-  \beta =& 2 \arccos{\frac{\cos{\frac{p\pi}{m}}}{\cos{\varphi}}}
+  \beta =& 2 \arccos{\frac{\cos{\frac{p\pi}{m}}}{\cos{\varphi}}},
 \end{align}
 where $\beta$ would be the twist $\tau$ and $\varphi = \arccos{\sqrt{\frac{2}{3}}}$,
 the dihedral half-angle of the regular tetrahedron, and $m$ is chosen to
@@ -2049,7 +2055,7 @@ of helix is given in the column below.
 % \begin{tabularx}{\fulllength}{LLCCCCCCC}
 \begin{tabularx}{\fulllength}{bqqqsssss}
   \toprule
-  Name & Solid & \# Analogs & C-Face \# & $ \tau $ & radius & $ \theta $ & d & $ \phi $ \\ [0.5ex] % inserts table
+  Name & Solid & \# of Analogs & C-Face \# & $ \tau $ & radius & $ \theta $ & d & $ \phi $ \\ [0.5ex] % inserts table
 %heading
   \hline % inserts single horizontal line
 Tetrahelix & Tet &	6 &	1 &	-120 &	0.094 &	131.810	& -0.516 & 161.565 \\
