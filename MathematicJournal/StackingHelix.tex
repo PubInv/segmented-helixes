@@ -284,11 +284,11 @@ If $\theta = 0$, the joints will be collinear.
 
 If $\theta \neq 0$, then form an isosceles triangle $\triangle{ABC}$ in the direction of the second
 object, whose axis is $A'B'$.
-Form this triangle so that one edge is a bisector of the angle between the axes$\angle ABB'$,
+Form this triangle so that one edge is a bisector of the angle between the axes $\angle ABB'$,
 as illustrated in Figure~\ref{fig:prismdiagram}.
 Make $\angle CAB = \angle CBA$.
 
-Then $\angle ABC = \frac{\pi - \theta}{2}$. Therefore $\angle ACB = \pi - 2(\pi-\theta)/2 = \theta$.
+Becuase $\overline{BC}$ is a bisector of $\angle B'BA$, $\angle ABC = \frac{\pi - \theta}{2}$. Therefore $\angle ACB = \pi - 2(\pi-\theta)/2 = \theta$.
 By considering the right triangle formed by midpoint $M$ of $\overline{AB}$ and $C$,
 the length of the sides $\overline{AC} = \overline{BC}$ can be computed by the half-angle
 of theta:
@@ -387,7 +387,7 @@ shown by the on-screen protractor as the rotation from one point to the next. As
 $\tau$ is the face-on-face joint rotation, in this case of $45 \degree$.
 The helix angle $\phi = 39.7 \degree$ is rendered by a protractor on the $y = 0$ plane;
 this is the angle between the axis
-and the helix and the $z$ axis, and therefore the angle of any one segment against the helix axis.
+of the helix and the $z$ axis, and therefore the angle of any one segment against the helix axis.
 
 Any point on the segmented helix has a closest point on the axis of the helix.
 In particular, the points closest to the
@@ -815,7 +815,7 @@ Knowing the chord $c$ and the amount of rotation $\theta$
 allows us to compute the radius:
 \begin{align}
   r = \frac{c}{2 \sin{\theta}},
-\end{align},
+\end{align}
 unless the chord is $0$, in which case the radius is $0$.
 The helix angle $\phi$ is a a function of $c$ and $d$:
 \begin{align}
@@ -1236,6 +1236,7 @@ transformation to the $z$-axis.
   the segments $\overline{AB},\overline{BC}$, and $\overline{CD}$ are equal length and the scalar projection
   of $\overrightarrow{CD}$ onto $\overrightarrow{BC}$ is equal to the scalar projection of $\overrightarrow{AB}$
   onto $\overrightarrow{BC}$.
+  \label{thm:segmenthelixtest}
 \end{Theorem}
 
 \begin{proof}
@@ -1266,13 +1267,13 @@ In a single sentence, if the angles (easily measured by scalar projections) and 
 they can be brought into our conventional balanced configuration,
 and from that configuration it is clear there exists a segmented helix that coincides with all joints.
 
-\subsection{Comparison of Methods}
+\subsection{Comparison of Two Methods}
 
 There is one reason one might prefer the transformation matrix method or the point method over the other: with modern
 computer algebra systems such as Mathematica \cite{Mathematica} it might be possible to use these ``algorithms'' to produce closed-form
 expressions of closed-form (algebraic) inputs. For example, the Platonic solids all have lengths and face normals which
 can be specified exactly in closed (though irrational) form.
-Thus in the future it might be possible to produce an expression for the
+Thus in the future it might be possible to produce a closed form expression for the
 radius of one of the Platonic Dodecahelices of unit edge length.
 
 
@@ -1374,10 +1375,10 @@ theorem becomes visually apparent.
 
 
 
-\begin{figure}
+\begin{figure}[H]
   \centering
   \captionsetup{justification=centering}
-     \includegraphics[width=10 cm]{figures/TwistSpectrumGeneral.png}
+     \includegraphics[width=13.5 cm]{figures/TwistSpectrumGeneral.png}
      \caption{Twist Spectrum Proof Diagram}
   \label{fig:twistspectrum}
 \end{figure}
@@ -1386,24 +1387,28 @@ theorem becomes visually apparent.
 
 \begin{proof}
   Figure~\ref{fig:twistspectrum} renders an arbitrary
-  prism in balanced position. The $B$ joint is on the backside of the
-  prism. As usual, $\tau$ is measured against the
+  prism in balanced position. The $B$ joint is on the far-side face of the
+  prism in the figure. As usual, $\tau$ is measured against the
   face. The face normals are labeled $\overrightarrow{N_B}$ and $\overrightarrow{N_C}$.
   They are drawn
   to projection planes orthogonal to the object axis, which is $z$-axis
   aligned as per our usual convention. The $\overrightarrow{N_B}$ face normal forms
-  an angle $\delta$ with negative $z$-axis, and the $\overrightarrow{N_C}$ face normal
-  an angle $\gamma$ with the positive $z$-axis.
+  an angle $\delta$ around negative $z$-axis, and the $\overrightarrow{N_C}$ face normal
+  an angle $\gamma$ around the positive $z$-axis.
 
-  Let the function $\alpha(\tau)$ be the angle formed by the
+
+  Because this theorem is about finding a particular $\tau$,
+  let the function $\alpha(\tau)$ be the angle formed by the
   projection of the vector $A$ and the origin with the $X$ axis in the $XY$-plane.
   Let $\beta(\tau)$ be the angle of the $D$ projection. $\alpha(\tau)$
   and $\beta(\tau)$ are periodic on $\tau$ ranging between $0$ and
-  $2\pi$.
+  $2\pi$. The angles $\alpha(\tau$ and $\beta(\tau)$ are measured in the $XY$ plane against the positive $X$ axis.
 
-    Let $\gamma$ and $\delta$ be the angle between the $A$ face-vector and
+    Let $\gamma$ and $\delta$ be the angles in between the $A$ face-vector and
     $B$ face-vectors respectively formed with the
     $\overrightarrow{BA}$ vector and $\overrightarrow{AB}$ respectively.
+    Unlike $\alpha(\tau)$ and $\beta(\tau)$, $\gamma$ and $\delta$ are
+    not confined to a plane, and describe a cone-like object as $\tau$ varies.
 
     If $\gamma \neq \delta$, then one is greater than the other.
     Without loss of generality, assume $\gamma > \delta$.
@@ -1421,9 +1426,11 @@ theorem becomes visually apparent.
     Therefore, at least one of $\beta(\tau)$  has a range
     containing both $0$ and $2\pi$, since the angle swept out by
     a point on the edge of this figure goes completely around the origin.
-    Without loss of generality, let $\alpha$ have that property.
+    Without loss of generality, let $\alpha(\tau)$ have a range
+    including $0$ and $2\pi$.
 
-    Both $\alpha$ and $\beta$ are continuous, by the continuity of
+    Both $\alpha$ and $\beta$ are continuous functions,
+    by the continuity of
     physical mechanisms and the composition of continuous functions.
 
     Note that although the motion need not be proportional, the sign
@@ -1432,7 +1439,7 @@ theorem becomes visually apparent.
 
     Because $\alpha$ varies between $0$ and $2\pi$ (although
     $\beta$ may not), and because $\beta$ moves in the opposite direction,
-    by the Intermediate Value Theorem, there is a $\tau$ where
+    by the Intermediate Value Theorem of real analysis, there is a $\tau$ where
     $\alpha(\tau) = \beta(\tau)$. Such a point produces a toroid-like
     figure (zero tightness).
 
@@ -1446,10 +1453,10 @@ theorem becomes visually apparent.
     Now consider the case that $\gamma = \delta$, as illustrated
     in Figure~\ref{fig:twistspectrumequal}.
 
-    \begin{figure}
+    \begin{figure}[H]
       \centering
   \captionsetup{justification=centering}
-     \includegraphics[width=10 cm]{figures/TwistSpectrumEqual.png}
+     \includegraphics[width=13.5 cm]{figures/TwistSpectrumEqual.png}
      \caption{Equal face angle magnitudes}
   \label{fig:twistspectrumequal}
     \end{figure}
@@ -1459,8 +1466,7 @@ theorem becomes visually apparent.
     In this case, the edges of the ellipses formed in the projection plane of both $A$ and $D$
     intersect
     the $z$-axis, because there is always a $\tau$ that rotates
-    the face about the face normal so that they cancel completely. By our
-    proof of segmented helices, this must occur at the same time on both sides,
+    the face about the face normal so that they cancel completely. By Theorem~\ref{thm:segmenthelixtest}, this must occur at the same time on both sides,
     because the angle of the $CD$ member with $BC$ must equal the angle of the $AB$ member
     with $BC$.
 
@@ -1472,10 +1478,10 @@ theorem becomes visually apparent.
     face normals are anti-parallel, they will be exactly opposite each other. In this
     case, the green (D) and red (A) projections will coincide at only one point; this
     is a straight line of a degenerate torus.
-        \begin{figure}
+        \begin{figure}[H]
           \centering
   \captionsetup{justification=centering}
-     \includegraphics[width=10 cm]{figures/TwistSpectrumProjection.png}
+     \includegraphics[width=13.5 cm]{figures/TwistSpectrumProjection.png}
      \caption{Balanced Projection}
   \label{fig:twistspectrumprojection}
     \end{figure}
@@ -1971,7 +1977,7 @@ initiated this work.}
 \bio
 {\raisebox{-0.35cm}{\includegraphics[width=3.5cm,height=5.3cm,clip,keepaspectratio]{Figures/author1.pdf}}}
 {\textbf{Robert L. Read, PhD} is a computer scientist who was a U.S. Presidential Innovation Fellow in 2013. He is the founder of the charity Public Invention. His research interests include tetrahedral robots,
-  biomedical engineering of human respiration devices, and ferrofluid pumping. }
+  biomedical engineering of human respiration devices, and ferrofluid pumping. Rob speaks Esperanto fluently.}
 
 \end{document}
 
