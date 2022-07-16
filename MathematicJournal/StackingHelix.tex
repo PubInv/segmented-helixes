@@ -76,6 +76,10 @@
 %% \newenvironment{sketch}{%
 %% \renewcommand{\proofname}{Proof Sketch}\proof}{\endproof}
 
+%% Added for the purpose of minor revisions
+\usepackage[margins]{trackchanges}
+\addeditor{RLR}
+
 %=================================================================
 %% Please use the following mathematics environments: Theorem, Lemma, Corollary, Proposition, Characterization, Property, Problem, Example, ExamplesandDefinitions, Hypothesis, Remark, Definition, Notation, Assumption
 %% For proofs, please use the proof environment (the amsthm package is loaded by the MDPI class).
@@ -94,7 +98,7 @@
 %\newcommand{\orcidauthorB}{0000-0000-0000-000X} % Add \orcidB{} behind the author's name
 
 % Authors, for the paper (add full first names)
-\Author{Robert L. Read $^{1,\dagger}$\orcidA{0000-0003-4749-7045}}
+\Author{Robert L. Read $^{1,\dagger,\ddagger}$\orcidA{0000-0003-4749-7045}}
 
 %\longauthorlist{yes}
 
@@ -115,7 +119,9 @@ $^{1}$ \quad Public Invention; read.robert@pubinv.org\\
 
 % Current address and/or shared authorship
 \firstnote{Current address: Public Invention, 1709 Norris Dr., Austin, TX, 78704}
-% \secondnote{These authors contributed equally to this work.}
+\secondnote{This paper is an extended version of our paper In Proceedings of the IMA Conference on Mathematics of Robotics. Springer, 2020, pp. 115–124.}
+
+
 % The commands \thirdnote{} till \eighthnote{} are available for further notes
 
 %\simplesumm{} % Simple summary
@@ -149,7 +155,10 @@ species of helices formed from dodecahedra.
 }
 
 % Keywords
-\keyword{solid geometry, helix, Chasles' theorem, platonic helix, tetrahelix, linear algebrea, computer graphics}
+\keyword{solid geometry, helix, Chasles' theorem, platonic helix, tetrahelix,
+  linear alegebra,
+%%  \change[RLR]{linear alegebra}{linear algebra},
+  computer graphics}
 %% \keyword{keyword 1; keyword 2; keyword 3 (List three to ten pertinent keywords specific to the article; yet reasonably common within the subject discipline.)}
 
 % The fields PACS, MSC, and JEL may be left empty or commented out if not applicable
@@ -561,8 +570,8 @@ this theorem proves that observation.
   Informally, $i+1$ ``looks the same'' to $i$, no matter what $i$ is chosen, $i < N$.
   Call a chain of $N$ identical rigid objects conjoined via a rule that
   conjoins $A_{i+1}$ to $B_i$ in such a way that every vector
-  of $B$ is always in the same position relative to a frame of reference
-  constructed from $A$, a {\em periodic chain.}
+  rigidly attached to object $i+1$ is always in the same position relative to the frame of reference
+  constructed from object $i$, a {\em periodic chain.}
 
   Any periodic chain of three or more objects has a unique segmented helix
   whose segments correspond
