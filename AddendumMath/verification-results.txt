@@ -1,0 +1,43 @@
+23 catalog checks: angles in degrees
+Name                       Computed    Catalog   Abs. error
+Tetratorus               70.5287794     70.529    0.0002206
+Tetrahelix              131.8103149    131.810    0.0003149
+Cubatorus                90.0000000     90.000    0.0000000
+Blockhelix              120.0000000    120.000    0.0000000
+Octagear                109.4712206    109.471    0.0002206
+Octaspiky               146.4426902    146.443    0.0003098
+Treestar                 70.5287794     70.529    0.0002206
+Octamedium              131.8103149    131.810    0.0003149
+Dodecagear              116.5650512    116.565    0.0000512
+Dodecashaft             129.6574757    129.657    0.0004757
+Dodecadoubler           161.3005929    161.301    0.0004071
+Dodecadonut              63.4349488     63.435    0.0000512
+Dodecacorkscrew          93.0258445     93.026    0.0001555
+The Alternater          149.5196754    149.520    0.0003246
+Icosa Tree Star         138.1896851    138.190    0.0003149
+Two Strands             159.4455573    159.446    0.0004427
+Planar point cluster    109.4712206    109.471    0.0002206
+Rock Candy              146.4426902    146.443    0.0003098
+Big Icosacorkscrew       82.0637505     82.064    0.0002495
+Icosacorkscrew           99.2525971     99.253    0.0004029
+Quasi-planar            167.7642601    167.764    0.0002601
+The Wheel                41.8103149     41.810    0.0003149
+Slow Twist              124.3093605    124.309    0.0003605
+PASS: 23/23; largest error 0.0004757 degrees (< 0.0005).
+
+PASS: Tet face-normal multiplicities.
+PASS: Cub face-normal multiplicities.
+PASS: Oct face-normal multiplicities.
+PASS: Dod face-normal multiplicities.
+PASS: Ico face-normal multiplicities.
+PASS: 564 ordered nonparallel face-center baselines have zero phase.
+PASS: 1000 perpendicular-axis matrix/half-angle comparisons.
+PASS: 250 general two-stage baselines with computed reference phases.
+PASS: noncoplanar example: alpha = 60 degrees, phase = 19.4712206, full rotation = 62.7994296 degrees.
+PASS: Boxbeam: full rotation 180 degrees; straight joint orbit.
+PASS: Staircase: full rotation 180 degrees; straight joint orbit.
+PASS: Octabeam: full rotation 60 degrees; straight joint orbit.
+PASS: Dodecabeam: full rotation 108 degrees; straight joint orbit.
+PASS: Pearlshaft: full rotation 60 degrees; straight joint orbit.
+
+All checks passed. Numerical checks supplement the proof; they do not replace it.
