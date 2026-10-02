@@ -1,0 +1,61 @@
+Verified exact vertex derivation of cos(beta) and sin(beta).
+Verified exact expressions: Tetrahelix
+Verified exact expressions: Tetratorus
+Verified exact expressions: Boxbeam
+Verified exact expressions: Staircase
+Verified exact expressions: Blockhelix
+Verified exact expressions: Cubatorus
+Verified exact expressions: Octabeam
+Verified exact expressions: Octaspiky
+Verified exact expressions: Octamedium
+Verified exact expressions: Octagear
+Verified exact expressions: Treestar
+Verified exact expressions: Dodecabeam
+Verified exact expressions: Dodecadoubler
+Verified exact expressions: The Alternater
+Verified exact expressions: Dodecashaft
+Verified exact expressions: Dodecagear
+Verified exact expressions: Dodecacorkscrew
+Verified exact expressions: Dodecadonut
+Verified exact expressions: Pearlshaft
+Verified exact expressions: Quasi-planar
+Verified exact expressions: Two Strands
+Verified exact expressions: Slow Twist
+Verified exact expressions: Rock Candy
+Verified exact expressions: Icosa Tree Star
+Verified exact expressions: Icosacorkscrew
+Verified exact expressions: Planar point cluster
+Verified exact expressions: Big Icosacorkscrew
+Verified exact expressions: The Wheel
+Symbolic checks passed for 28 original catalog rows and 3 matching corrections.
+Tetrahelix -120 {'r': 'sqrt(3)/30', 'd': '-1/sqrt(10)', 'cos_phi': '-3/sqrt(10)', 'cos_theta': '-2/3'}
+Tetratorus 0 {'r': 'sqrt(3)/6', 'd': '0', 'cos_phi': '0', 'cos_theta': '1/3'}
+Boxbeam -180 {'r': '0', 'd': '1', 'cos_phi': '1', 'cos_theta': '-1'}
+Staircase -180 {'r': '0', 'd': '1/sqrt(2)', 'cos_phi': '1', 'cos_theta': '-1'}
+Blockhelix -90 {'r': 'sqrt(2)/6', 'd': '-1/sqrt(3)', 'cos_phi': '-sqrt(2/3)', 'cos_theta': '-1/2'}
+Cubatorus 0 {'r': '1/2', 'd': '0', 'cos_phi': '0', 'cos_theta': '0'}
+Octabeam -60 {'r': '0', 'd': 'sqrt(6)/3', 'cos_phi': '1', 'cos_theta': '1/2'}
+Octaspiky -120 {'r': '2*sqrt(3)/33', 'd': '-sqrt(22)/11', 'cos_phi': '-3/sqrt(11)', 'cos_theta': '-5/6'}
+Octamedium -120 {'r': 'sqrt(3)/15', 'd': '-sqrt(10)/5', 'cos_phi': '-3/sqrt(10)', 'cos_theta': '-2/3'}
+Octagear 0 {'r': 'sqrt(3)/6', 'd': '0', 'cos_phi': '0', 'cos_theta': '-1/3'}
+Treestar 0 {'r': 'sqrt(3)/3', 'd': '0', 'cos_phi': '0', 'cos_theta': '1/3'}
+Dodecabeam -108 {'r': '0', 'd': 'sqrt(250+110*w)/10', 'cos_phi': '1', 'cos_theta': '-(-1 + w)/4'}
+Dodecadoubler -144 {'r': '2*w*K/(15+2*w)', 'd': '-g**2/w*sqrt(10/(13-w))', 'cos_phi': '-sqrt(10/(13-w))', 'cos_theta': '-(2*w + 5)/10'}
+The Alternater -144 {'r': '4*w*K/(35+w)', 'd': '-g**3/w*sqrt(10/(17-3*w))', 'cos_phi': '-sqrt(10/(17-3*w))', 'cos_theta': '-(w + 15)/20'}
+Dodecashaft -72 {'r': '4*w*g**2*K/(35-w)', 'd': '-g**2/w*sqrt(10/(17+3*w))', 'cos_phi': '-sqrt(10/(17+3*w))', 'cos_theta': '(-15 + w)/20'}
+Dodecagear 0 {'r': 'K', 'd': '0', 'cos_phi': '0', 'cos_theta': '-w/5'}
+Dodecacorkscrew -72 {'r': '2*w*g**2*K/(15-2*w)', 'd': '-g**3/w*sqrt(10/(13+w))', 'cos_phi': '-sqrt(10/(13+w))', 'cos_theta': '(-5 + 2*w)/10'}
+Dodecadonut 0 {'r': 'g**2*K', 'd': '0', 'cos_phi': '0', 'cos_theta': 'w/5'}
+Pearlshaft -60 {'r': '0', 'd': 'g**2/sqrt(3)', 'cos_phi': '1', 'cos_theta': '1/2'}
+Quasi-planar 165 {'r': 'g**2*sqrt(4-p)/(sqrt(3)*(8+p))', 'd': 'g**2*sqrt((4+p)/(3*(8+p)))', 'cos_phi': 'sqrt(3*(4+p)/(2*(8+p)))', 'cos_theta': '-(2+p)/6'}
+Two Strands 120 {'r': '2*g**2/(sqrt(3)*(21+w))', 'd': 'g*sqrt(2/(21+w))', 'cos_phi': 'sqrt(18/(21+w))', 'cos_theta': '-(w + 9)/12'}
+Slow Twist 120 {'r': '2*g**2/(sqrt(3)*(21-w))', 'd': 'g**3*sqrt(2/(21-w))', 'cos_phi': 'sqrt(18/(21-w))', 'cos_theta': '(-9 + w)/12'}
+Rock Candy 120 {'r': 'g**2*sqrt(6)/33', 'd': 'g**2/sqrt(11)', 'cos_phi': '3/sqrt(11)', 'cos_theta': '-5/6'}
+Icosa Tree Star 0 {'r': 'sqrt(3)/6', 'd': '0', 'cos_phi': '0', 'cos_theta': '-w/3'}
+Icosacorkscrew -75 {'r': 'g**2*sqrt(4+q)/(sqrt(3)*(8-q))', 'd': '-g**2*sqrt((4-q)/(3*(8-q)))', 'cos_phi': '-sqrt(3*(4-q)/(2*(8-q)))', 'cos_theta': '(q-2)/6'}
+Planar point cluster 0 {'r': 'g**2/(2*sqrt(6))', 'd': '0', 'cos_phi': '0', 'cos_theta': '-1/3'}
+Big Icosacorkscrew 45 {'r': 'g**2*sqrt(26+17*sqrt(2))/(14*sqrt(3))', 'd': 'g**2*sqrt((3-sqrt(2))/21)', 'cos_phi': 'sqrt((9-3*sqrt(2))/14)', 'cos_theta': '(-1 + sqrt(2))/3'}
+The Wheel 0 {'r': 'g**4/(2*sqrt(3))', 'd': '0', 'cos_phi': '0', 'cos_theta': 'w/3'}
+Quasi-planar beta+120 {'r': '2/(sqrt(3)*(17+3*w))', 'd': 'g**3*sqrt(2/(17+3*w))', 'cos_phi': '3*g/sqrt(17+3*w)', 'cos_theta': '-(5 + 3*w)/12'}
+Icosacorkscrew beta-120 {'r': 'g**2*sqrt(15)/21', 'd': '-g**2/sqrt(7)', 'cos_phi': '-3/sqrt(14)', 'cos_theta': '-1/6'}
+Big Icosacorkscrew beta {'r': '2*g**4/(sqrt(3)*(17-3*w))', 'd': 'g*sqrt(2/(17-3*w))', 'cos_phi': '3/(g*sqrt(17-3*w))', 'cos_theta': '(-5 + 3*w)/12'}

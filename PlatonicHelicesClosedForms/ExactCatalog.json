@@ -1,0 +1,1132 @@
+{
+  "source_revision": "8be3839de2204b966c8aedb7c28f6a6f5c18076e",
+  "normalization": "unit edge length",
+  "constants": {
+    "w": "sqrt(5)",
+    "g": "1/2 + sqrt(5)/2",
+    "p": "sqrt(2) + sqrt(6)",
+    "q": "-sqrt(2) + sqrt(6)",
+    "K": "sqrt(5)*sqrt(2*sqrt(5) + 5)/10"
+  },
+  "angle_convention": "principal rigid-motion theta; forward axis in straight rows",
+  "original_catalog": [
+    {
+      "name": "Tetrahelix",
+      "solid": "Tet",
+      "analogs": 6,
+      "face": 1,
+      "twist_label": "-120",
+      "twist_degrees": -120,
+      "cos_alpha": "1/3",
+      "cos_tau": "-1/2",
+      "L_squared": "1/9",
+      "straight": false,
+      "expressions": {
+        "r": "sqrt(3)/30",
+        "d": "-1/sqrt(10)",
+        "cos_phi": "-3/sqrt(10)",
+        "cos_theta": "-2/3"
+      },
+      "latex": {
+        "r": "\\frac{\\sqrt{3}}{30}",
+        "d": "- \\frac{1}{\\sqrt{10}}",
+        "cos_phi": "- \\frac{3}{\\sqrt{10}}",
+        "cos_theta": "- \\frac{2}{3}"
+      },
+      "values": {
+        "cos_theta": -0.6666666666666666,
+        "cos_phi": -0.9486832980505138,
+        "r": 0.057735026918962574,
+        "d": -0.31622776601683794
+      },
+      "source_printed": {
+        "r": 0.094,
+        "theta": 131.81,
+        "d": -0.516,
+        "phi": 161.565
+      }
+    },
+    {
+      "name": "Tetratorus",
+      "solid": "Tet",
+      "analogs": 3,
+      "face": 1,
+      "twist_label": "0",
+      "twist_degrees": 0,
+      "cos_alpha": "1/3",
+      "cos_tau": "1",
+      "L_squared": "1/9",
+      "straight": false,
+      "expressions": {
+        "r": "sqrt(3)/6",
+        "d": "0",
+        "cos_phi": "0",
+        "cos_theta": "1/3"
+      },
+      "latex": {
+        "r": "\\frac{\\sqrt{3}}{6}",
+        "d": "0",
+        "cos_phi": "0",
+        "cos_theta": "\\frac{1}{3}"
+      },
+      "values": {
+        "cos_theta": 0.3333333333333333,
+        "cos_phi": 0.0,
+        "r": 0.28867513459481287,
+        "d": 0.0
+      },
+      "source_printed": {
+        "r": 0.471,
+        "theta": 70.529,
+        "d": 0,
+        "phi": 90
+      }
+    },
+    {
+      "name": "Boxbeam",
+      "solid": "Cub",
+      "analogs": 4,
+      "face": 1,
+      "twist_label": "-180",
+      "twist_degrees": -180,
+      "cos_alpha": "1",
+      "cos_tau": "-1",
+      "L_squared": "1",
+      "straight": true,
+      "expressions": {
+        "r": "0",
+        "d": "1",
+        "cos_phi": "1",
+        "cos_theta": "-1"
+      },
+      "latex": {
+        "r": "0",
+        "d": "1",
+        "cos_phi": "1",
+        "cos_theta": "-1"
+      },
+      "values": {
+        "cos_theta": -1.0,
+        "cos_phi": 1.0,
+        "r": 0.0,
+        "d": 1.0
+      },
+      "source_printed": {
+        "r": 0,
+        "theta": 0,
+        "d": 1,
+        "phi": 0
+      }
+    },
+    {
+      "name": "Staircase",
+      "solid": "Cub",
+      "analogs": 4,
+      "face": 2,
+      "twist_label": "-180",
+      "twist_degrees": -180,
+      "cos_alpha": "0",
+      "cos_tau": "-1",
+      "L_squared": "1/2",
+      "straight": true,
+      "expressions": {
+        "r": "0",
+        "d": "1/sqrt(2)",
+        "cos_phi": "1",
+        "cos_theta": "-1"
+      },
+      "latex": {
+        "r": "0",
+        "d": "\\frac{1}{\\sqrt{2}}",
+        "cos_phi": "1",
+        "cos_theta": "-1"
+      },
+      "values": {
+        "cos_theta": -1.0,
+        "cos_phi": 1.0,
+        "r": 0.0,
+        "d": 0.7071067811865476
+      },
+      "source_printed": {
+        "r": 0,
+        "theta": 0,
+        "d": 0.707,
+        "phi": 0
+      }
+    },
+    {
+      "name": "Blockhelix",
+      "solid": "Cub",
+      "analogs": 8,
+      "face": 2,
+      "twist_label": "-90",
+      "twist_degrees": -90,
+      "cos_alpha": "0",
+      "cos_tau": "0",
+      "L_squared": "1/2",
+      "straight": false,
+      "expressions": {
+        "r": "sqrt(2)/6",
+        "d": "-1/sqrt(3)",
+        "cos_phi": "-sqrt(2/3)",
+        "cos_theta": "-1/2"
+      },
+      "latex": {
+        "r": "\\frac{\\sqrt{2}}{6}",
+        "d": "- \\frac{1}{\\sqrt{3}}",
+        "cos_phi": "- \\sqrt{\\frac{2}{3}}",
+        "cos_theta": "- \\frac{1}{2}"
+      },
+      "values": {
+        "cos_theta": -0.5,
+        "cos_phi": -0.816496580927726,
+        "r": 0.23570226039551584,
+        "d": -0.5773502691896257
+      },
+      "source_printed": {
+        "r": 0.236,
+        "theta": 120,
+        "d": -0.577,
+        "phi": 144.736
+      }
+    },
+    {
+      "name": "Cubatorus",
+      "solid": "Cub",
+      "analogs": 4,
+      "face": 2,
+      "twist_label": "0",
+      "twist_degrees": 0,
+      "cos_alpha": "0",
+      "cos_tau": "1",
+      "L_squared": "1/2",
+      "straight": false,
+      "expressions": {
+        "r": "1/2",
+        "d": "0",
+        "cos_phi": "0",
+        "cos_theta": "0"
+      },
+      "latex": {
+        "r": "\\frac{1}{2}",
+        "d": "0",
+        "cos_phi": "0",
+        "cos_theta": "0"
+      },
+      "values": {
+        "cos_theta": 0.0,
+        "cos_phi": 0.0,
+        "r": 0.5,
+        "d": 0.0
+      },
+      "source_printed": {
+        "r": 0.5,
+        "theta": 90,
+        "d": 0,
+        "phi": 90
+      }
+    },
+    {
+      "name": "Octabeam",
+      "solid": "Oct",
+      "analogs": 3,
+      "face": 5,
+      "twist_label": "-60",
+      "twist_degrees": -60,
+      "cos_alpha": "1",
+      "cos_tau": "1/2",
+      "L_squared": "2/3",
+      "straight": true,
+      "expressions": {
+        "r": "0",
+        "d": "sqrt(6)/3",
+        "cos_phi": "1",
+        "cos_theta": "1/2"
+      },
+      "latex": {
+        "r": "0",
+        "d": "\\frac{\\sqrt{6}}{3}",
+        "cos_phi": "1",
+        "cos_theta": "\\frac{1}{2}"
+      },
+      "values": {
+        "cos_theta": 0.5,
+        "cos_phi": 1.0,
+        "r": 0.0,
+        "d": 0.816496580927726
+      },
+      "source_printed": {
+        "r": 0,
+        "theta": 0,
+        "d": 1.155,
+        "phi": 0
+      }
+    },
+    {
+      "name": "Octaspiky",
+      "solid": "Oct",
+      "analogs": 6,
+      "face": 1,
+      "twist_label": "-120",
+      "twist_degrees": -120,
+      "cos_alpha": "-1/3",
+      "cos_tau": "-1/2",
+      "L_squared": "2/9",
+      "straight": false,
+      "expressions": {
+        "r": "2*sqrt(3)/33",
+        "d": "-sqrt(22)/11",
+        "cos_phi": "-3/sqrt(11)",
+        "cos_theta": "-5/6"
+      },
+      "latex": {
+        "r": "\\frac{2 \\sqrt{3}}{33}",
+        "d": "\\frac{- \\sqrt{22}}{11}",
+        "cos_phi": "- \\frac{3}{\\sqrt{11}}",
+        "cos_theta": "- \\frac{5}{6}"
+      },
+      "values": {
+        "cos_theta": -0.8333333333333334,
+        "cos_phi": -0.9045340337332909,
+        "r": 0.1049727762162956,
+        "d": -0.4264014327112209
+      },
+      "source_printed": {
+        "r": 0.148,
+        "theta": 146.443,
+        "d": -0.603,
+        "phi": 154.761
+      }
+    },
+    {
+      "name": "Octamedium",
+      "solid": "Oct",
+      "analogs": 6,
+      "face": 2,
+      "twist_label": "-120",
+      "twist_degrees": -120,
+      "cos_alpha": "1/3",
+      "cos_tau": "-1/2",
+      "L_squared": "4/9",
+      "straight": false,
+      "expressions": {
+        "r": "sqrt(3)/15",
+        "d": "-sqrt(10)/5",
+        "cos_phi": "-3/sqrt(10)",
+        "cos_theta": "-2/3"
+      },
+      "latex": {
+        "r": "\\frac{\\sqrt{3}}{15}",
+        "d": "\\frac{- \\sqrt{10}}{5}",
+        "cos_phi": "- \\frac{3}{\\sqrt{10}}",
+        "cos_theta": "- \\frac{2}{3}"
+      },
+      "values": {
+        "cos_theta": -0.6666666666666666,
+        "cos_phi": -0.9486832980505138,
+        "r": 0.11547005383792515,
+        "d": -0.6324555320336759
+      },
+      "source_printed": {
+        "r": 0.163,
+        "theta": 131.81,
+        "d": -0.894,
+        "phi": 161.565
+      }
+    },
+    {
+      "name": "Octagear",
+      "solid": "Oct",
+      "analogs": 3,
+      "face": 1,
+      "twist_label": "0",
+      "twist_degrees": 0,
+      "cos_alpha": "-1/3",
+      "cos_tau": "1",
+      "L_squared": "2/9",
+      "straight": false,
+      "expressions": {
+        "r": "sqrt(3)/6",
+        "d": "0",
+        "cos_phi": "0",
+        "cos_theta": "-1/3"
+      },
+      "latex": {
+        "r": "\\frac{\\sqrt{3}}{6}",
+        "d": "0",
+        "cos_phi": "0",
+        "cos_theta": "- \\frac{1}{3}"
+      },
+      "values": {
+        "cos_theta": -0.3333333333333333,
+        "cos_phi": 0.0,
+        "r": 0.28867513459481287,
+        "d": 0.0
+      },
+      "source_printed": {
+        "r": 0.408,
+        "theta": 109.471,
+        "d": 0,
+        "phi": 90
+      }
+    },
+    {
+      "name": "Treestar",
+      "solid": "Oct",
+      "analogs": 3,
+      "face": 2,
+      "twist_label": "0",
+      "twist_degrees": 0,
+      "cos_alpha": "1/3",
+      "cos_tau": "1",
+      "L_squared": "4/9",
+      "straight": false,
+      "expressions": {
+        "r": "sqrt(3)/3",
+        "d": "0",
+        "cos_phi": "0",
+        "cos_theta": "1/3"
+      },
+      "latex": {
+        "r": "\\frac{\\sqrt{3}}{3}",
+        "d": "0",
+        "cos_phi": "0",
+        "cos_theta": "\\frac{1}{3}"
+      },
+      "values": {
+        "cos_theta": 0.3333333333333333,
+        "cos_phi": 0.0,
+        "r": 0.5773502691896257,
+        "d": 0.0
+      },
+      "source_printed": {
+        "r": 0.816,
+        "theta": 70.529,
+        "d": 0,
+        "phi": 90
+      }
+    },
+    {
+      "name": "Dodecabeam",
+      "solid": "Dod",
+      "analogs": 5,
+      "face": 8,
+      "twist_label": "-108",
+      "twist_degrees": -108,
+      "cos_alpha": "1",
+      "cos_tau": "1/4 - sqrt(5)/4",
+      "L_squared": "11*sqrt(5)/10 + 5/2",
+      "straight": true,
+      "expressions": {
+        "r": "0",
+        "d": "sqrt(250+110*w)/10",
+        "cos_phi": "1",
+        "cos_theta": "-(-1 + w)/4"
+      },
+      "latex": {
+        "r": "0",
+        "d": "\\frac{\\sqrt{110 w + 250}}{10}",
+        "cos_phi": "1",
+        "cos_theta": "\\frac{1 - w}{4}"
+      },
+      "values": {
+        "cos_theta": -0.30901699437494745,
+        "cos_phi": 1.0,
+        "r": 0.0,
+        "d": 2.2270327288232137
+      },
+      "source_printed": {
+        "r": 0,
+        "theta": 0,
+        "d": 1.589,
+        "phi": 0
+      }
+    },
+    {
+      "name": "Dodecadoubler",
+      "solid": "Dod",
+      "analogs": 10,
+      "face": 1,
+      "twist_label": "-144",
+      "twist_degrees": -144,
+      "cos_alpha": "-sqrt(5)/5",
+      "cos_tau": "-sqrt(5)/4 - 1/4",
+      "L_squared": "3*sqrt(5)/10 + 7/10",
+      "straight": false,
+      "expressions": {
+        "r": "2*w*K/(15+2*w)",
+        "d": "-g**2/w*sqrt(10/(13-w))",
+        "cos_phi": "-sqrt(10/(13-w))",
+        "cos_theta": "-(2*w + 5)/10"
+      },
+      "latex": {
+        "r": "\\frac{2 K w}{2 w + 15}",
+        "d": "-\\frac{g^2}{w}\\sqrt{\\frac{10}{13 - w}}",
+        "cos_phi": "- \\sqrt{\\frac{10}{13 - w}}",
+        "cos_theta": "\\frac{- 2 w - 5}{10}"
+      },
+      "values": {
+        "cos_theta": -0.947213595499958,
+        "cos_phi": -0.9638612634676226,
+        "r": 0.15805577489227837,
+        "d": -1.128508423531543
+      },
+      "source_printed": {
+        "r": 0.113,
+        "theta": 161.301,
+        "d": -0.805,
+        "phi": 164.55
+      }
+    },
+    {
+      "name": "The Alternater",
+      "solid": "Dod",
+      "analogs": 10,
+      "face": 2,
+      "twist_label": "-144",
+      "twist_degrees": -144,
+      "cos_alpha": "sqrt(5)/5",
+      "cos_tau": "-sqrt(5)/4 - 1/4",
+      "L_squared": "4*sqrt(5)/5 + 9/5",
+      "straight": false,
+      "expressions": {
+        "r": "4*w*K/(35+w)",
+        "d": "-g**3/w*sqrt(10/(17-3*w))",
+        "cos_phi": "-sqrt(10/(17-3*w))",
+        "cos_theta": "-(w + 15)/20"
+      },
+      "latex": {
+        "r": "\\frac{4 K w}{w + 35}",
+        "d": "-\\frac{g^3}{w}\\sqrt{\\frac{10}{17 - 3 w}}",
+        "cos_phi": "- \\sqrt{\\frac{10}{17 - 3 w}}",
+        "cos_theta": "\\frac{- w - 15}{20}"
+      },
+      "values": {
+        "cos_theta": -0.8618033988749895,
+        "cos_phi": -0.9857219192813019,
+        "r": 0.16530658065373444,
+        "d": -1.8673784066511225
+      },
+      "source_printed": {
+        "r": 0.118,
+        "theta": 149.52,
+        "d": -1.333,
+        "phi": 170.306
+      }
+    },
+    {
+      "name": "Dodecashaft",
+      "solid": "Dod",
+      "analogs": 10,
+      "face": 1,
+      "twist_label": "-72",
+      "twist_degrees": -72,
+      "cos_alpha": "-sqrt(5)/5",
+      "cos_tau": "-1/4 + sqrt(5)/4",
+      "L_squared": "3*sqrt(5)/10 + 7/10",
+      "straight": false,
+      "expressions": {
+        "r": "4*w*g**2*K/(35-w)",
+        "d": "-g**2/w*sqrt(10/(17+3*w))",
+        "cos_phi": "-sqrt(10/(17+3*w))",
+        "cos_theta": "(-15 + w)/20"
+      },
+      "latex": {
+        "r": "\\frac{4 K g^{2} w}{35 - w}",
+        "d": "-\\frac{g^2}{w}\\sqrt{\\frac{10}{3 w + 17}}",
+        "cos_phi": "- \\sqrt{\\frac{10}{3 w + 17}}",
+        "cos_theta": "\\frac{w - 15}{20}"
+      },
+      "values": {
+        "cos_theta": -0.6381966011250105,
+        "cos_phi": -0.6494574049152155,
+        "r": 0.4918506180154105,
+        "d": -0.7603979742219161
+      },
+      "source_printed": {
+        "r": 0.351,
+        "theta": 129.657,
+        "d": -0.543,
+        "phi": 130.501
+      }
+    },
+    {
+      "name": "Dodecagear",
+      "solid": "Dod",
+      "analogs": 5,
+      "face": 1,
+      "twist_label": "0",
+      "twist_degrees": 0,
+      "cos_alpha": "-sqrt(5)/5",
+      "cos_tau": "1",
+      "L_squared": "3*sqrt(5)/10 + 7/10",
+      "straight": false,
+      "expressions": {
+        "r": "K",
+        "d": "0",
+        "cos_phi": "0",
+        "cos_theta": "-w/5"
+      },
+      "latex": {
+        "r": "K",
+        "d": "0",
+        "cos_phi": "0",
+        "cos_theta": "\\frac{- w}{5}"
+      },
+      "values": {
+        "cos_theta": -0.4472135954999579,
+        "cos_phi": 0.0,
+        "r": 0.6881909602355868,
+        "d": 0.0
+      },
+      "source_printed": {
+        "r": 0.491,
+        "theta": 116.565,
+        "d": 0,
+        "phi": 90
+      }
+    },
+    {
+      "name": "Dodecacorkscrew",
+      "solid": "Dod",
+      "analogs": 10,
+      "face": 2,
+      "twist_label": "-72",
+      "twist_degrees": -72,
+      "cos_alpha": "sqrt(5)/5",
+      "cos_tau": "-1/4 + sqrt(5)/4",
+      "L_squared": "4*sqrt(5)/5 + 9/5",
+      "straight": false,
+      "expressions": {
+        "r": "2*w*g**2*K/(15-2*w)",
+        "d": "-g**3/w*sqrt(10/(13+w))",
+        "cos_phi": "-sqrt(10/(13+w))",
+        "cos_theta": "(-5 + 2*w)/10"
+      },
+      "latex": {
+        "r": "\\frac{2 K g^{2} w}{15 - 2 w}",
+        "d": "-\\frac{g^3}{w}\\sqrt{\\frac{10}{w + 13}}",
+        "cos_phi": "- \\sqrt{\\frac{10}{w + 13}}",
+        "cos_theta": "\\frac{2 w - 5}{10}"
+      },
+      "values": {
+        "cos_theta": -0.05278640450004206,
+        "cos_phi": -0.81014647962275,
+        "r": 0.7653480394978345,
+        "d": -1.5347635196901968
+      },
+      "source_printed": {
+        "r": 0.546,
+        "theta": 93.026,
+        "d": -1.095,
+        "phi": 144.11
+      }
+    },
+    {
+      "name": "Dodecadonut",
+      "solid": "Dod",
+      "analogs": 5,
+      "face": 2,
+      "twist_label": "0",
+      "twist_degrees": 0,
+      "cos_alpha": "sqrt(5)/5",
+      "cos_tau": "1",
+      "L_squared": "4*sqrt(5)/5 + 9/5",
+      "straight": false,
+      "expressions": {
+        "r": "g**2*K",
+        "d": "0",
+        "cos_phi": "0",
+        "cos_theta": "w/5"
+      },
+      "latex": {
+        "r": "K g^{2}",
+        "d": "0",
+        "cos_phi": "0",
+        "cos_theta": "\\frac{w}{5}"
+      },
+      "values": {
+        "cos_theta": 0.4472135954999579,
+        "cos_phi": 0.0,
+        "r": 1.8017073246471935,
+        "d": 0.0
+      },
+      "source_printed": {
+        "r": 1.286,
+        "theta": 63.435,
+        "d": 0,
+        "phi": 90
+      }
+    },
+    {
+      "name": "Pearlshaft",
+      "solid": "Ico",
+      "analogs": 3,
+      "face": 13,
+      "twist_label": "-60",
+      "twist_degrees": -60,
+      "cos_alpha": "1",
+      "cos_tau": "1/2",
+      "L_squared": "sqrt(5)/2 + 7/6",
+      "straight": true,
+      "expressions": {
+        "r": "0",
+        "d": "g**2/sqrt(3)",
+        "cos_phi": "1",
+        "cos_theta": "1/2"
+      },
+      "latex": {
+        "r": "0",
+        "d": "\\frac{g^{2}}{\\sqrt{3}}",
+        "cos_phi": "1",
+        "cos_theta": "\\frac{1}{2}"
+      },
+      "values": {
+        "cos_theta": 0.5,
+        "cos_phi": 1.0,
+        "r": 0.0,
+        "d": 1.5115226281523415
+      },
+      "source_printed": {
+        "r": 0,
+        "theta": 0,
+        "d": 1.589,
+        "phi": 0
+      }
+    },
+    {
+      "name": "Quasi-planar",
+      "solid": "Ico",
+      "analogs": 6,
+      "face": 8,
+      "twist_label": "165",
+      "twist_degrees": 165,
+      "cos_alpha": "1/3",
+      "cos_tau": "-sqrt(6)/4 - sqrt(2)/4",
+      "L_squared": "sqrt(5)/3 + 7/9",
+      "straight": false,
+      "expressions": {
+        "r": "g**2*sqrt(4-p)/(sqrt(3)*(8+p))",
+        "d": "g**2*sqrt((4+p)/(3*(8+p)))",
+        "cos_phi": "sqrt(3*(4+p)/(2*(8+p)))",
+        "cos_theta": "-(2+p)/6"
+      },
+      "latex": {
+        "r": "\\frac{g^{2} \\sqrt{4 - p}}{\\sqrt{3} \\left(p + 8\\right)}",
+        "d": "g^{2} \\sqrt{\\frac{p + 4}{3 \\left(p + 8\\right)}}",
+        "cos_phi": "\\sqrt{\\frac{3 \\left(p + 4\\right)}{2 \\left(p + 8\\right)}}",
+        "cos_theta": "\\frac{- p - 2}{6}"
+      },
+      "values": {
+        "cos_theta": -0.9772838841927122,
+        "cos_phi": 0.9971237271602001,
+        "r": 0.04703672094634112,
+        "d": 1.2306032969607374
+      },
+      "source_printed": {
+        "r": 0.049,
+        "theta": 167.764,
+        "d": 1.294,
+        "phi": 4.347
+      }
+    },
+    {
+      "name": "Two Strands",
+      "solid": "Ico",
+      "analogs": 6,
+      "face": 1,
+      "twist_label": "120",
+      "twist_degrees": 120,
+      "cos_alpha": "-sqrt(5)/3",
+      "cos_tau": "-1/2",
+      "L_squared": "sqrt(5)/18 + 1/6",
+      "straight": false,
+      "expressions": {
+        "r": "2*g**2/(sqrt(3)*(21+w))",
+        "d": "g*sqrt(2/(21+w))",
+        "cos_phi": "sqrt(18/(21+w))",
+        "cos_theta": "-(w + 9)/12"
+      },
+      "latex": {
+        "r": "\\frac{2 g^{2}}{\\sqrt{3} \\left(w + 21\\right)}",
+        "d": "g \\sqrt{\\frac{2}{w + 21}}",
+        "cos_phi": "\\sqrt{\\frac{18}{w + 21}}",
+        "cos_theta": "\\frac{- w - 9}{12}"
+      },
+      "values": {
+        "cos_theta": -0.9363389981249824,
+        "cos_phi": 0.8801464332985585,
+        "r": 0.1301014121335844,
+        "d": 0.4747022813846866
+      },
+      "source_printed": {
+        "r": 0.137,
+        "theta": 159.446,
+        "d": 0.499,
+        "phi": 28.34
+      }
+    },
+    {
+      "name": "Slow Twist",
+      "solid": "Ico",
+      "analogs": 6,
+      "face": 12,
+      "twist_label": "120",
+      "twist_degrees": 120,
+      "cos_alpha": "sqrt(5)/3",
+      "cos_tau": "-1/2",
+      "L_squared": "4*sqrt(5)/9 + 1",
+      "straight": false,
+      "expressions": {
+        "r": "2*g**2/(sqrt(3)*(21-w))",
+        "d": "g**3*sqrt(2/(21-w))",
+        "cos_phi": "sqrt(18/(21-w))",
+        "cos_theta": "(-9 + w)/12"
+      },
+      "latex": {
+        "r": "\\frac{2 g^{2}}{\\sqrt{3} \\left(21 - w\\right)}",
+        "d": "g^{3} \\sqrt{\\frac{2}{21 - w}}",
+        "cos_phi": "\\sqrt{\\frac{18}{21 - w}}",
+        "cos_theta": "\\frac{w - 9}{12}"
+      },
+      "values": {
+        "cos_theta": -0.5636610018750176,
+        "cos_phi": 0.9794320854864141,
+        "r": 0.1611093694370502,
+        "d": 1.382980297821612
+      },
+      "source_printed": {
+        "r": 0.169,
+        "theta": 124.309,
+        "d": 1.454,
+        "phi": 11.641
+      }
+    },
+    {
+      "name": "Rock Candy",
+      "solid": "Ico",
+      "analogs": 12,
+      "face": 2,
+      "twist_label": "120",
+      "twist_degrees": 120,
+      "cos_alpha": "-1/3",
+      "cos_tau": "-1/2",
+      "L_squared": "sqrt(5)/6 + 7/18",
+      "straight": false,
+      "expressions": {
+        "r": "g**2*sqrt(6)/33",
+        "d": "g**2/sqrt(11)",
+        "cos_phi": "3/sqrt(11)",
+        "cos_theta": "-5/6"
+      },
+      "latex": {
+        "r": "\\frac{\\sqrt{6} g^{2}}{33}",
+        "d": "\\frac{g^{2}}{\\sqrt{11}}",
+        "cos_phi": "\\frac{3}{\\sqrt{11}}",
+        "cos_theta": "- \\frac{5}{6}"
+      },
+      "values": {
+        "cos_theta": -0.8333333333333334,
+        "cos_phi": 0.9045340337332909,
+        "r": 0.19432870914244235,
+        "d": 0.7893669480982665
+      },
+      "source_printed": {
+        "r": 0.204,
+        "theta": 146.443,
+        "d": 0.83,
+        "phi": 25.239
+      }
+    },
+    {
+      "name": "Icosa Tree Star",
+      "solid": "Ico",
+      "analogs": 3,
+      "face": 1,
+      "twist_label": "0",
+      "twist_degrees": 0,
+      "cos_alpha": "-sqrt(5)/3",
+      "cos_tau": "1",
+      "L_squared": "sqrt(5)/18 + 1/6",
+      "straight": false,
+      "expressions": {
+        "r": "sqrt(3)/6",
+        "d": "0",
+        "cos_phi": "0",
+        "cos_theta": "-w/3"
+      },
+      "latex": {
+        "r": "\\frac{\\sqrt{3}}{6}",
+        "d": "0",
+        "cos_phi": "0",
+        "cos_theta": "\\frac{- w}{3}"
+      },
+      "values": {
+        "cos_theta": -0.7453559924999299,
+        "cos_phi": 0.0,
+        "r": 0.28867513459481287,
+        "d": 0.0
+      },
+      "source_printed": {
+        "r": 0.304,
+        "theta": 138.19,
+        "d": 0,
+        "phi": 90
+      }
+    },
+    {
+      "name": "Icosacorkscrew",
+      "solid": "Ico",
+      "analogs": 6,
+      "face": 8,
+      "twist_label": "-75",
+      "twist_degrees": -75,
+      "cos_alpha": "1/3",
+      "cos_tau": "-sqrt(2)/4 + sqrt(6)/4",
+      "L_squared": "sqrt(5)/3 + 7/9",
+      "straight": false,
+      "expressions": {
+        "r": "g**2*sqrt(4+q)/(sqrt(3)*(8-q))",
+        "d": "-g**2*sqrt((4-q)/(3*(8-q)))",
+        "cos_phi": "-sqrt(3*(4-q)/(2*(8-q)))",
+        "cos_theta": "(q-2)/6"
+      },
+      "latex": {
+        "r": "\\frac{g^{2} \\sqrt{q + 4}}{\\sqrt{3} \\left(8 - q\\right)}",
+        "d": "- g^{2} \\sqrt{\\frac{4 - q}{3 \\left(8 - q\\right)}}",
+        "cos_phi": "- \\sqrt{\\frac{3 \\left(4 - q\\right)}{2 \\left(8 - q\\right)}}",
+        "cos_theta": "\\frac{q - 2}{6}"
+      },
+      "values": {
+        "cos_theta": -0.16078730326498616,
+        "cos_phi": -0.7990717941595371,
+        "r": 0.48699264452352675,
+        "d": -0.9861768982286714
+      },
+      "source_printed": {
+        "r": 0.512,
+        "theta": 99.253,
+        "d": -1.037,
+        "phi": 143.042
+      }
+    },
+    {
+      "name": "Planar point cluster",
+      "solid": "Ico",
+      "analogs": 6,
+      "face": 2,
+      "twist_label": "0",
+      "twist_degrees": 0,
+      "cos_alpha": "-1/3",
+      "cos_tau": "1",
+      "L_squared": "sqrt(5)/6 + 7/18",
+      "straight": false,
+      "expressions": {
+        "r": "g**2/(2*sqrt(6))",
+        "d": "0",
+        "cos_phi": "0",
+        "cos_theta": "-1/3"
+      },
+      "latex": {
+        "r": "\\frac{g^{2}}{2 \\sqrt{6}}",
+        "d": "0",
+        "cos_phi": "0",
+        "cos_theta": "- \\frac{1}{3}"
+      },
+      "values": {
+        "cos_theta": -0.3333333333333333,
+        "cos_phi": 0.0,
+        "r": 0.5344039501417165,
+        "d": 0.0
+      },
+      "source_printed": {
+        "r": 0.562,
+        "theta": 109.471,
+        "d": 0,
+        "phi": 90
+      }
+    },
+    {
+      "name": "Big Icosacorkscrew",
+      "solid": "Ico",
+      "analogs": 6,
+      "face": 8,
+      "twist_label": "45",
+      "twist_degrees": 45,
+      "cos_alpha": "1/3",
+      "cos_tau": "sqrt(2)/2",
+      "L_squared": "sqrt(5)/3 + 7/9",
+      "straight": false,
+      "expressions": {
+        "r": "g**2*sqrt(26+17*sqrt(2))/(14*sqrt(3))",
+        "d": "g**2*sqrt((3-sqrt(2))/21)",
+        "cos_phi": "sqrt((9-3*sqrt(2))/14)",
+        "cos_theta": "(-1 + sqrt(2))/3"
+      },
+      "latex": {
+        "r": "\\frac{g^{2} \\sqrt{17 \\sqrt{2} + 26}}{14 \\sqrt{3}}",
+        "d": "g^{2} \\sqrt{\\frac{3 - \\sqrt{2}}{21}}",
+        "cos_phi": "\\sqrt{\\frac{9 - 3 \\sqrt{2}}{14}}",
+        "cos_theta": "\\frac{-1 + \\sqrt{2}}{3}"
+      },
+      "values": {
+        "cos_theta": 0.13807118745769836,
+        "cos_phi": 0.5829334262945295,
+        "r": 0.7637519703015041,
+        "d": 0.7194290706026037
+      },
+      "source_printed": {
+        "r": 0.803,
+        "theta": 82.064,
+        "d": 0.756,
+        "phi": 54.343
+      }
+    },
+    {
+      "name": "The Wheel",
+      "solid": "Ico",
+      "analogs": 3,
+      "face": 12,
+      "twist_label": "0",
+      "twist_degrees": 0,
+      "cos_alpha": "sqrt(5)/3",
+      "cos_tau": "1",
+      "L_squared": "4*sqrt(5)/9 + 1",
+      "straight": false,
+      "expressions": {
+        "r": "g**4/(2*sqrt(3))",
+        "d": "0",
+        "cos_phi": "0",
+        "cos_theta": "w/3"
+      },
+      "latex": {
+        "r": "\\frac{g^{4}}{2 \\sqrt{3}}",
+        "d": "0",
+        "cos_phi": "0",
+        "cos_theta": "\\frac{w}{3}"
+      },
+      "values": {
+        "cos_theta": 0.7453559924999299,
+        "cos_phi": 0.0,
+        "r": 1.9786088076336994,
+        "d": 0.0
+      },
+      "source_printed": {
+        "r": 2.08,
+        "theta": 41.81,
+        "d": 0,
+        "phi": 90
+      }
+    }
+  ],
+  "corrected_matching_rows": [
+    {
+      "name": "Quasi-planar",
+      "solid": "Ico",
+      "analogs": 6,
+      "face": 8,
+      "twist_label": "beta+120",
+      "twist_degrees": null,
+      "cos_alpha": "1/3",
+      "cos_tau": "-3*sqrt(5)/8 - 1/8",
+      "L_squared": "sqrt(5)/3 + 7/9",
+      "straight": false,
+      "expressions": {
+        "r": "2/(sqrt(3)*(17+3*w))",
+        "d": "g**3*sqrt(2/(17+3*w))",
+        "cos_phi": "3*g/sqrt(17+3*w)",
+        "cos_theta": "-(5 + 3*w)/12"
+      },
+      "latex": {
+        "r": "\\frac{2}{\\sqrt{3} \\left(3 w + 17\\right)}",
+        "d": "g^{3} \\sqrt{\\frac{2}{3 w + 17}}",
+        "cos_phi": "\\frac{3 g}{\\sqrt{3 w + 17}}",
+        "cos_theta": "\\frac{- 3 w - 5}{12}"
+      },
+      "values": {
+        "cos_theta": -0.9756836610416141,
+        "cos_phi": 0.9969182990801967,
+        "r": 0.04870468221324772,
+        "d": 1.2303497672676267
+      },
+      "source_printed": {
+        "r": 0.049,
+        "theta": 167.764,
+        "d": 1.294,
+        "phi": 4.347
+      }
+    },
+    {
+      "name": "Icosacorkscrew",
+      "solid": "Ico",
+      "analogs": 6,
+      "face": 8,
+      "twist_label": "beta-120",
+      "twist_degrees": null,
+      "cos_alpha": "1/3",
+      "cos_tau": "1/4",
+      "L_squared": "sqrt(5)/3 + 7/9",
+      "straight": false,
+      "expressions": {
+        "r": "g**2*sqrt(15)/21",
+        "d": "-g**2/sqrt(7)",
+        "cos_phi": "-3/sqrt(14)",
+        "cos_theta": "-1/6"
+      },
+      "latex": {
+        "r": "\\frac{\\sqrt{15} g^{2}}{21}",
+        "d": "\\frac{- g^{2}}{\\sqrt{7}}",
+        "cos_phi": "- \\frac{3}{\\sqrt{14}}",
+        "cos_theta": "- \\frac{1}{6}"
+      },
+      "values": {
+        "cos_theta": -0.16666666666666666,
+        "cos_phi": -0.8017837257372732,
+        "r": 0.4828381922968247,
+        "d": -0.9895238368780991
+      },
+      "source_printed": {
+        "r": 0.512,
+        "theta": 99.253,
+        "d": -1.037,
+        "phi": 143.042
+      }
+    },
+    {
+      "name": "Big Icosacorkscrew",
+      "solid": "Ico",
+      "analogs": 6,
+      "face": 8,
+      "twist_label": "beta",
+      "twist_degrees": null,
+      "cos_alpha": "1/3",
+      "cos_tau": "-1/8 + 3*sqrt(5)/8",
+      "L_squared": "sqrt(5)/3 + 7/9",
+      "straight": false,
+      "expressions": {
+        "r": "2*g**4/(sqrt(3)*(17-3*w))",
+        "d": "g*sqrt(2/(17-3*w))",
+        "cos_phi": "3/(g*sqrt(17-3*w))",
+        "cos_theta": "(-5 + 3*w)/12"
+      },
+      "latex": {
+        "r": "\\frac{2 g^{4}}{\\sqrt{3} \\left(17 - 3 w\\right)}",
+        "d": "g \\sqrt{\\frac{2}{17 - 3 w}}",
+        "cos_phi": "\\frac{3}{g \\sqrt{17 - 3 w}}",
+        "cos_theta": "\\frac{3 w - 5}{12}"
+      },
+      "values": {
+        "cos_theta": 0.14235032770828077,
+        "cos_phi": 0.5779470195598069,
+        "r": 0.7690042805576911,
+        "d": 0.7132750814831061
+      },
+      "source_printed": {
+        "r": 0.803,
+        "theta": 82.064,
+        "d": 0.756,
+        "phi": 54.343
+      }
+    }
+  ]
+}

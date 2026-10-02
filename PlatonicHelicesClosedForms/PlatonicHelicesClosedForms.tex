@@ -1,0 +1,1108 @@
+\documentclass[11pt]{article}
+\usepackage[letterpaper,margin=0.95in]{geometry}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+\usepackage{amsmath,amssymb,amsthm}
+\usepackage{booktabs,array,longtable}
+\usepackage{microtype,needspace}
+\usepackage{xcolor}
+\usepackage{fancyhdr}
+\usepackage{hyperref}
+\hypersetup{colorlinks=true,linkcolor=blue!45!black,citecolor=blue!45!black,
+ urlcolor=blue!45!black,pdftitle={Closed Forms for Platonic Helices},
+ pdfauthor={Robert L. Read}}
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[L]{\small Closed forms for Platonic helices}
+\fancyhead[R]{\small Author-review draft}
+\fancyfoot[C]{\thepage}
+\setlength{\headheight}{14pt}
+\setlength{\parskip}{0.35em}
+\newtheorem{theorem}{Theorem}[section]
+\newtheorem{proposition}[theorem]{Proposition}
+\newtheorem{corollary}[theorem]{Corollary}
+\theoremstyle{definition}
+\newtheorem{definition}[theorem]{Definition}
+\newcommand{\nb}{\mathbf n_B}
+\newcommand{\nc}{\mathbf n_C}
+\newcommand{\ee}{\mathbf e}
+\newcommand{\uu}{\mathbf u}
+\newcommand{\hh}{\widehat{\mathbf h}}
+\newcommand{\Rot}{\operatorname{Rot}}
+\newcommand{\tr}{\operatorname{tr}}
+\newcommand{\eff}{\tau_{\mathrm{eff}}}
+\newcommand{\degc}{^{\circ}}
+\title{Closed Forms for Platonic Helices\\[0.4em]
+ \large Exact parameters and an audit of the 28-species catalog}
+\author{Robert L. Read\\\small Public Invention}
+\date{October 2, 2026\\\small Working draft for author review; not submitted}
+
+\begin{document}
+\maketitle
+\begin{abstract}
+Repeated identical face-to-face placements of a rigid solid generate a screw
+motion, and the centroids of successive joining faces trace a segmented helix.
+For joint centers lying on equal-radius face normals, we express the principal
+subunit rotation, the angle between a segment and the oriented screw axis, the
+axial advance, and the joint-centroid radius in terms of three intrinsic inputs:
+the normal-alignment angle, the joining twist, and the distance between joint
+centers. A quaternion composition supplies a common denominator for all four
+parameters. We specialize the result to the five Platonic solids and give exact
+expressions for every entry in the previously published 28-species catalog,
+with edge length one. An audit distinguishes the rotation of a subunit from the
+geometry of a straight joint orbit, identifies the constructor-dependent length
+normalization of the earlier table, and derives exact replacements for three
+icosahedral twists that only approximately match face vertices. The original
+and corrected configurations are both tabulated. Symbolic identities and
+independent matrix, circumcircle, and vertex-matching checks accompany the
+derivations.
+\end{abstract}
+
+\section{Introduction}
+Identical rigid subunits conjoined by the same rule form a periodic chain.
+The resulting motion is a screw motion, so a chosen point of a subunit traces
+a discrete helical orbit. This observation connects the geometry of protein
+helices, polyhedral chains, and engineered assemblies
+\cite{lord2002,dauter2018,read2022}. Exact descriptions of the tetrahelix and
+modified tetrahedral chains already exist, including exact rotation, radius,
+and pitch calculations \cite{sadler2019,onaka2024}. The question addressed here
+is how to obtain a uniform description from the geometry of the joining faces.
+
+Read's 2022 paper supplied algorithms and a numerical catalog of 28
+representative Platonic helices, and proposed closed-form descriptions as
+future work \cite{read2022}. This paper develops such a description for the
+\emph{helix through the joint-face centroids}. A vertex orbit or the orbit of
+the center of the solid can have a different radius under the same screw
+motion. Identifying the point whose orbit is being measured is therefore
+essential when comparing results.
+
+The main result uses the intrinsic inputs
+\[
+ L=\|C-B\|,\qquad
+ \alpha=\arccos(-\nb\cdot\nc),\qquad \tau,
+\]
+where $B,C$ are selected joint centers within one subunit, $\nb,\nc$ are their
+outward unit face normals, and $\tau$ is a twist measured from a specified
+normal-alignment reference. The angle $\alpha$ is generally \emph{not} the
+angle between the two outward normals. Nor should $\alpha,\tau$ be identified
+without a derivation with the bond angle and torsion angle of a polygonal
+chain used in other helix descriptions \cite{dauter2018}.
+
+The theorem applies when the centers, relative to a common origin, satisfy
+$B=\rho\nb$ and $C=\rho\nc$ for the same $\rho>0$. Every Platonic solid has
+this property when its face centroids are used. Under this hypothesis,
+\[
+ Q=1-\cos^2(\alpha/2)\cos^2(\tau/2)
+\]
+governs all four requested parameters. The rotation formula has a broader
+scope than the radius and advance formulas: face positions that do not
+satisfy the equal-radius hypothesis require additional positional data.
+
+Two distinctions emerge when the closed forms are compared with the earlier
+catalog. First, a straight sequence of joint centers does not reveal the
+rotation of the solid about that line. Second, the published lengths agree
+with the original graphics constructors, which use unit circumradius for
+four solids and unit edge length for the cube. We give an explicit conversion
+to unit edges. A separate vertex audit finds that the three catalog twists
+$45\degc,-75\degc,165\degc$ for one icosahedral face class are approximate
+matching choices. Their exact parameters remain well defined, and we retain
+them in the literal catalog tables. We also derive the exact matching twists
+and their parameters.
+
+The word ``species'' below refers to the representatives and names inherited
+from the 2022 catalog. We do not infer uniqueness of an ordered discrete helix
+from its radius and axial advance alone: its angular step also matters. We
+also make no claim that every chain in the catalog avoids self-intersection.
+
+\section{Geometry, motion, and conventions}\label{sec:setup}
+\subsection{A periodic joint-centroid orbit}
+Place a reference solid with its center at the origin and choose two distinct
+faces. Let their centroids be $B,C$ and their outward unit normals be
+$\nb,\nc$. For a Platonic solid of inradius $\rho$,
+\begin{equation}\label{eq:centered}
+ B=\rho\nb,\qquad C=\rho\nc.
+\end{equation}
+Here $L=\|C-B\|$ is a straight-line distance within one solid. It is also the
+length of one segment of the joint-centroid helix. It is not the edge length,
+the circumradius, or the advance along the screw axis.
+
+Let $R$ be the forward rotation that makes the incoming $B$ face of the next
+solid flush against the current $C$ face. Thus $R\nb=-\nc$. The rigid
+placement is
+\begin{equation}\label{eq:placement}
+ T(\mathbf x)=R(\mathbf x-B)+C
+            =R\mathbf x+\mathbf t,\qquad \mathbf t=C-RB.
+\end{equation}
+In particular $T(B)=C$. Repeating this placement gives
+$\mathbf x_j=T^j(B)$, so $\mathbf x_0=B$, $\mathbf x_1=C$, and every
+consecutive segment has length $L$.
+
+For a nonidentity rotation, let $\hh$ be a directed unit vector along its
+screw axis and let $\theta\in[0,\pi]$ be its principal rotation angle. We
+define
+\begin{equation}\label{eq:dphi}
+ d=(C-B)\cdot\hh=\mathbf t\cdot\hh,
+ \qquad \phi=\arccos\!\left(\frac dL\right)\in[0,\pi].
+\end{equation}
+The equality follows because $R\hh=\hh$, which implies
+$\hh\cdot RB=\hh\cdot B$. The radius $r$ is the perpendicular distance
+from $B$ (or any $\mathbf x_j$) to the screw-axis line.
+
+If $r>0$, suitable perpendicular unit vectors $\mathbf e_1,\mathbf e_2$ and
+a point $\mathbf a$ on the axis give
+\begin{equation}\label{eq:orbit}
+ \mathbf x_j=\mathbf a+
+ r\{\cos(j\theta)\mathbf e_1+\sin(j\theta)\mathbf e_2\}
+ +jd\hh,
+ \qquad \mathbf e_2=\hh\times\mathbf e_1.
+\end{equation}
+This is a statement about an ordered joint orbit, rather than merely the
+continuous cylinder or circle containing it.
+
+\subsection{The zero-twist reference}\label{sec:reference}
+For $0<\alpha<\pi$, define
+\begin{equation}\label{eq:alphaeu}
+ \alpha=\arccos(-\nb\cdot\nc),\qquad
+ \ee=\frac{C-B}{L},\qquad
+ \uu=\frac{\nb\times(-\nc)}{\sin\alpha}.
+\end{equation}
+Let $A$ be the shortest rotation that sends $\nb$ to $-\nc$. It has axis
+$\uu$ and angle $\alpha$. Our zero-twist placement uses this rotation.
+The additional twist is about the outward normal of the receiving face:
+\begin{equation}\label{eq:composition}
+ R=\Rot(\nc,\tau)A.
+\end{equation}
+For directed-axis formulas, first choose a representative
+$-\pi<\tau<\pi$. The radius and principal rotation remain periodic in
+$\tau$; the directed-axis choice can reverse when the representative crosses
+the half-turn boundary.
+
+This reference does not assert that $\tau=0$ matches the vertices of two
+regular faces. Vertex matching depends on directions within the face plane
+and is derived separately in Section~\ref{sec:matching}.
+
+\begin{proposition}\label{prop:geometry}
+Under~\eqref{eq:centered}, for distinct nonopposite faces,
+\begin{equation}\label{eq:Lrho}
+ L=2\rho\cos(\alpha/2),
+ \qquad
+ \ee=\cos(\alpha/2)\nc+
+       \sin(\alpha/2)(\nc\times\uu),
+ \qquad \ee\cdot\uu=0.
+\end{equation}
+\end{proposition}
+\begin{proof}
+Since $\nb\cdot\nc=-\cos\alpha$,
+$\|\nc-\nb\|^2=2+2\cos\alpha=4\cos^2(\alpha/2)$.
+This proves the first identity and gives
+$\ee=(\nc-\nb)/(2\cos(\alpha/2))$. The vector triple-product identity gives
+\[
+ \nc\times\uu=
+ \frac{-\nb-\cos\alpha\,\nc}{\sin\alpha}.
+\]
+Substitution and the half-angle identities prove the second identity.
+The final identity follows because $\uu$ is perpendicular to both normals.
+\end{proof}
+
+\section{A common closed form for the four parameters}\label{sec:theorem}
+\begin{theorem}\label{thm:main}
+Suppose~\eqref{eq:centered} holds, $0<\alpha<\pi$, and
+$-\pi<\tau<\pi$. Use the placement~\eqref{eq:placement} and reference
+rotation~\eqref{eq:composition}. Define
+\begin{equation}\label{eq:Q}
+ Q(\alpha,\tau)=1-\cos^2(\alpha/2)\cos^2(\tau/2).
+\end{equation}
+Then $Q>0$, and the directed screw axis may be chosen as
+\begin{equation}\label{eq:axis}
+ \hh=\frac{\sin(\alpha/2)\cos(\tau/2)\uu+
+                  \sin(\tau/2)\ee}{\sqrt Q}.
+\end{equation}
+For this choice, the joint-centroid helix has
+\begin{equation}\label{eq:main}
+ \boxed{\begin{aligned}
+ \cos\theta&=1-2Q,
+ &\theta&=\arccos(1-2Q),\\[2pt]
+ \cos\phi&=\frac{\sin(\tau/2)}{\sqrt Q},
+ &\phi&=\arccos\!\left(\frac{\sin(\tau/2)}{\sqrt Q}\right),\\[2pt]
+ d&=\frac{L\sin(\tau/2)}{\sqrt Q},
+ &r&=\frac{L\sin(\alpha/2)|\cos(\tau/2)|}{2Q}.
+ \end{aligned}}
+\end{equation}
+The axis orientation agrees with the nonstraight rows of the earlier catalog:
+negative representative twists give $d<0$ and $\phi>\pi/2$.
+\end{theorem}
+
+\begin{proof}
+Write $a=\alpha/2$ and $t=\tau/2$ temporarily. A unit quaternion for $A$ is
+$(\cos a,\sin a\,\uu)$ and one for the added twist is
+$(\cos t,\sin t\,\nc)$. Their product has scalar part
+$\cos a\cos t$ because $\nc\cdot\uu=0$, and vector part
+\begin{align}
+ \mathbf v&=\sin a\cos t\,\uu+
+       \sin t\{\cos a\,\nc+\sin a(\nc\times\uu)\}\notag\\
+           &=\sin a\cos t\,\uu+\sin t\,\ee.\label{eq:qvector}
+\end{align}
+The last equality is Proposition~\ref{prop:geometry}. Orthogonality gives
+\[
+ \|\mathbf v\|^2=\sin^2a\cos^2t+\sin^2t
+                 =1-\cos^2a\cos^2t=Q.
+\]
+Since the scalar part is nonnegative on the chosen twist interval, this is
+the principal-angle quaternion. Therefore
+\begin{equation}\label{eq:halfangle}
+ \sin(\theta/2)=\sqrt Q,
+ \qquad \cos(\theta/2)=\cos(\alpha/2)\cos(\tau/2),
+\end{equation}
+and its vector part divided by $\sqrt Q$ is the directed axis~\eqref{eq:axis}.
+This proves the rotation formula.
+
+Taking the scalar product of~\eqref{eq:axis} with $C-B=L\ee$ gives
+$d=L\sin(\tau/2)/\sqrt Q$. Dividing by $L$ proves the formula for
+$\cos\phi$. No choice of the position of an axis point is needed for this
+calculation: the axial component of the displacement is the same at every
+point of a rigid screw motion.
+
+Project $B,C$ orthogonally into a plane perpendicular to the axis. Their
+projected chord length $c$ satisfies
+\begin{align}
+ c^2&=L^2-d^2
+     =L^2\frac{Q-\sin^2t}{Q}
+     =L^2\frac{\sin^2a\cos^2t}{Q}.
+\end{align}
+The chord of a circle of radius $r$ subtending $\theta$ is
+\begin{equation}\label{eq:chord}
+ c=2r\sin(\theta/2).
+\end{equation}
+Combining this with~\eqref{eq:halfangle} proves the radius formula.
+\end{proof}
+
+The four outputs are linked by the familiar identities
+\begin{equation}\label{eq:linked}
+ d=L\cos\phi,\qquad
+ r=\frac{L\sin\phi}{2\sin(\theta/2)}.
+\end{equation}
+The geometric content of the theorem is the explicit connection from face
+data $(\alpha,\tau,L)$ to these extrinsic helix parameters.
+
+\begin{corollary}\label{cor:shape}
+The quantities $\theta,\phi,r/L,d/L$ depend on $\alpha,\tau$ alone. Scaling
+the solid by a factor $s>0$ scales $L,r,d,\rho$ by $s$ and leaves both angles
+unchanged. For nonzero twist,
+\begin{equation}\label{eq:tanphi}
+ \tan^2\phi=\sin^2(\alpha/2)\cot^2(\tau/2).
+\end{equation}
+\end{corollary}
+\begin{proof}
+The scale claim follows from~\eqref{eq:main}. The final identity is
+$(L^2-d^2)/d^2$, using the two squared expressions in the proof.
+The squared identity does not itself specify the sign of $\cos\phi$.
+\end{proof}
+
+\subsection{A different twist reference}
+Let $R_0$ be any other zero-twist rotation satisfying $R_0\nb=-\nc$.
+Then $R_0A^{-1}$ fixes $\nc$, so for some phase $\gamma$,
+\begin{equation}\label{eq:phase}
+ R_0=\Rot(\nc,\gamma)A,
+ \qquad
+ \eff=\tau+\gamma\pmod{2\pi}.
+\end{equation}
+The principal rotation law is always
+\begin{equation}\label{eq:generalrotation}
+ \cos(\theta/2)=\cos(\alpha/2)|\cos(\eff/2)|.
+\end{equation}
+When~\eqref{eq:centered} holds, replacing $\tau$ by a principal representative
+of $\eff$ in Theorem~\ref{thm:main} also supplies $d,\phi,r$. Without the
+centroid-position hypothesis, the rotation law still holds but the remaining
+three formulas need not hold.
+
+This is relevant to the repository convention. Its forward baseline is the
+product of two shortest rotations
+\begin{equation}\label{eq:sourcebaseline}
+ R_0=S(\ee,\nc)S(\nb,-\ee),
+\end{equation}
+where $S(\mathbf a,\mathbf b)$ denotes a shortest alignment. Under
+\eqref{eq:centered}, both rotations have axis $\uu$ and angle $\alpha/2$,
+because
+\[
+ \nb\cdot(-\ee)=\ee\cdot\nc=\cos(\alpha/2).
+\]
+Their product is $A$. Thus $\gamma=0$ for the Platonic face-centroid cases,
+and the original tabulated twists can be used directly. This conclusion is
+derived from the geometry, rather than selected to force numerical agreement.
+
+\section{Exact face geometry for unit edges}\label{sec:faces}
+Throughout the remaining tables the edge length is one. For another edge
+length $a$, multiply every tabulated $L,r,d$ by $a$. Define the golden ratio
+using a symbol distinct from the helix angle:
+\begin{equation}\label{eq:constants}
+ w=\sqrt5,\qquad g=\frac{1+w}{2},\qquad
+ K=\frac{\sqrt{5+2w}}{2w},\qquad
+ p=\sqrt6+\sqrt2,\qquad q=\sqrt6-\sqrt2.
+\end{equation}
+These are fixed algebraic constants. In particular, $K$ is the unit-edge
+Dodecagear radius; it is not an additional input to the theorem.
+
+\begin{center}
+\renewcommand{\arraystretch}{1.35}
+\begin{tabular}{@{}lcc@{}}
+\toprule
+Solid & Inradius $\rho$ & Circumradius for edge one\\
+\midrule
+Tetrahedron & $\sqrt6/12$ & $\sqrt6/4$\\
+Cube & $1/2$ & $\sqrt3/2$\\
+Octahedron & $\sqrt6/6$ & $1/\sqrt2$\\
+Dodecahedron & $\sqrt{250+110w}/20$ & $\sqrt3\,g/2$\\
+Icosahedron & $g^2/(2\sqrt3)$ & $\sqrt{10+2w}/4$\\
+\bottomrule
+\end{tabular}
+\end{center}
+
+Let $A$ denote edge-adjacent faces, $S,T,F$ successive nonopposite normal
+classes where needed, and $O$ opposite faces. The labels $S,T,F$ are defined
+by the scalar products in the next table, rather than by an assumed graphical
+ordering. Counts are relative to a fixed incoming face and exclude that face.
+
+\begin{center}
+\small\renewcommand{\arraystretch}{1.4}
+\begin{tabular}{@{}llrcc@{}}
+\toprule
+Solid & Class & Faces & $\cos\alpha=-\nb\cdot\nc$ & $L$\\
+\midrule
+Tet & $A$ & 3 & $1/3$ & $1/3$\\
+Cub & $A$ & 4 & $0$ & $1/\sqrt2$\\
+    & $O$ & 1 & $1$ & $1$\\
+Oct & $A$ & 3 & $-1/3$ & $\sqrt2/3$\\
+    & $S$ & 3 & $1/3$ & $2/3$\\
+    & $O$ & 1 & $1$ & $\sqrt6/3$\\
+Dod & $A$ & 5 & $-1/w$ & $g^2/w$\\
+    & $S$ & 5 & $1/w$ & $g^3/w$\\
+    & $O$ & 1 & $1$ & $\sqrt{250+110w}/10$\\
+Ico & $A$ & 3 & $-w/3$ & $g/3$\\
+    & $S$ & 6 & $-1/3$ & $g^2/3$\\
+    & $T$ & 6 & $1/3$ & $\sqrt2\,g^2/3$\\
+    & $F$ & 3 & $w/3$ & $g^3/3$\\
+    & $O$ & 1 & $1$ & $g^2/\sqrt3$\\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\subsection{Coordinates and scalar products}
+Unit-edge tetrahedral vertices can be taken as
+$(\pm1,\pm1,\pm1)/(2\sqrt2)$ with product of the three signs positive.
+The normals of distinct faces have dot product $-1/3$. Alternatively, if
+two faces omit vertices $v_i,v_j$, subtracting their centroids gives
+$(v_j-v_i)/3$, proving $L=1/3$ directly.
+
+The cube has vertices $(\pm1/2,\pm1/2,\pm1/2)$ and normals along the
+coordinate axes. The octahedron has vertices on those axes at distance
+$1/\sqrt2$ from the origin. Its face centers are
+$(\pm1,\pm1,\pm1)/(3\sqrt2)$. Changing $k$ signs from a reference face gives
+\begin{equation}\label{eq:octgeometry}
+ L_k=\frac{\sqrt{2k}}3,\qquad \cos\alpha_k=\frac{2k-3}{3},
+ \qquad k=1,2,3.
+\end{equation}
+
+Dodecahedral unit-edge vertices can be taken as $g/2$ times
+\[
+ (\pm1,\pm1,\pm1),\quad
+ (0,\pm g^{-1},\pm g),\quad
+ (\pm g^{-1},\pm g,0),\quad
+ (\pm g,0,\pm g^{-1}).
+\]
+The face normals point to the vertices of the dual icosahedron. Dividing
+\[
+ (0,\pm1,\pm g),\quad(\pm1,\pm g,0),\quad(\pm g,0,\pm1)
+\]
+by $\sqrt{1+g^2}$ gives their unit directions. Relative to one of these
+directions, the other eleven have dot products $1/w,-1/w,-1$ with counts
+$5,5,1$. For example,
+$g/(1+g^2)=1/w$. The table then follows from~\eqref{eq:Lrho}.
+
+Icosahedral unit-edge vertices are half the twelve coordinate vectors just
+listed. Their face normals are the directions of a dual dodecahedron:
+eight vectors $(\pm1,\pm1,\pm1)/\sqrt3$ and twelve vectors formed from
+$(0,\pm g,\pm g^{-1})/\sqrt3$ by cyclic coordinate permutations. Relative
+to $(-1,1,1)/\sqrt3$, the other nineteen have dot products
+\[
+ w/3,\quad 1/3,\quad -1/3,\quad -w/3,\quad -1
+\]
+with counts $3,6,6,3,1$. Negating these dot products gives the listed
+$\cos\alpha$. Computing distances from the origin to the face planes of
+these coordinate solids gives the inradii above; thus the length table uses
+the same edge normalization as the vertex coordinates.
+
+\section{Circular, straight, and singular joint orbits}\label{sec:degenerate}
+\subsection{Zero twist and the circular limit}
+For nonopposite faces, putting $\tau=0$ gives
+\begin{equation}\label{eq:torus}
+ d=0,\qquad \phi=\pi/2,\qquad \theta=\alpha,
+ \qquad r=\frac{L}{2\sin(\alpha/2)}.
+\end{equation}
+The joint orbit lies on a circle. It closes after finitely many steps exactly
+when $\theta/(2\pi)$ is rational. A catalog name ending in ``torus'' does
+not itself establish finite closure of the ordered orbit or of the solid chain.
+
+As $\tau$ runs from $0$ to $\pi$, the formulas give $d$ increasing from zero
+to $L$ and $r$ decreasing to zero. For example, writing $s=\sin(\tau/2)$,
+\[
+ \frac dL=\frac{s}{\sqrt{\sin^2(\alpha/2)+\cos^2(\alpha/2)s^2}},
+\]
+whose derivative with respect to $s$ is positive. Similarly, the expression
+for $r$ is increasing as a function of $|\cos(\tau/2)|$. These statements
+describe the continuous family of joining twists, not only the matching
+twists selected for a catalog.
+
+\subsection{A straight orbit can hide a rotation}
+At $\tau=\pm\pi$ and nonopposite faces, the continuous formulas give
+$r=0$, $|d|=L$, and $\theta=\pi$. The points lie on the screw axis even
+though the solid undergoes a half-turn. The limiting directed axes for
+$+\pi$ and $-\pi$ are opposite. In all straight catalog rows we choose
+the joint-line direction from $B$ to $C$, record $d=L$, and set $\phi=0$.
+
+For opposite faces $\alpha=0$, $A=I$ and $\ee=\nc$. If the twist is
+nonzero, the screw axis is the line through both face centers. Hence $r=0$
+and the same forward convention gives $d=L,\phi=0$. Direct substitution
+into the directed-axis expression would instead give
+$\cos\phi=\operatorname{sgn}(\sin(\tau/2))$ for a principal nonzero twist.
+The difference is an axis-direction choice, not a different line of joint
+points. The full subunit rotation is still the principal angle of the twist.
+
+The earlier catalog records $\theta=0$ for each straight point sequence.
+Here $\theta$ always denotes the principal rotation of the specified rigid
+placement. The two conventions differ in precisely these five rows:
+\begin{center}
+\renewcommand{\arraystretch}{1.3}
+\begin{tabular}{@{}lrrr@{}}
+\toprule
+Name & Twist (deg.) & Subunit $\theta$ (deg.) & Catalog marker (deg.)\\
+\midrule
+Boxbeam & $-180$ & $180$ & $0$\\
+Staircase & $-180$ & $180$ & $0$\\
+Octabeam & $-60$ & $60$ & $0$\\
+Dodecabeam & $-108$ & $108$ & $0$\\
+Pearlshaft & $-60$ & $60$ & $0$\\
+\bottomrule
+\end{tabular}
+\end{center}
+The angular step is unidentifiable from collinear joint points alone. This
+does not imply that the specified motion of a labeled subunit has no rotation.
+
+\subsection{Pure translation and a repeated joint center}
+For opposite faces and zero twist, $Q=0$ and the motion is pure translation.
+The formulas with $Q$ in the denominator must not be used. The joint orbit
+is a line; we record its natural joint-line representation as
+$r=0,d=L,\phi=0,\theta=0$. A pure translation does not select a unique
+axis line among parallel lines.
+
+Selecting the same face twice gives $B=C$ and $L=0$, so the joint orbit
+is stationary. The shortest normal alignment is then antipodal and its axis
+is not uniquely specified by the normals. Such same-face constructions are
+excluded here, as they are from the displayed 28-row catalog. A stationary
+joint orbit by itself does not establish that the entire rigid motion is the
+identity.
+
+\section{Length normalization in the earlier catalog}\label{sec:scale}
+The earlier table does not state a uniform length normalization in its
+caption or column headings. Its entries agree with the geometries built by
+the associated THREE.js constructors \cite{repository}. The tetrahedron,
+octahedron, dodecahedron, and icosahedron constructors use radius one, meaning
+circumradius one. The cube constructor instead gives edge length one.
+
+If $a_0$ is the original constructor's edge length, the conversion is
+\begin{equation}\label{eq:conversion}
+ r_{\text{edge }1}=\frac{r_{\mathrm{catalog}}}{a_0},
+ \qquad d_{\text{edge }1}=\frac{d_{\mathrm{catalog}}}{a_0}.
+\end{equation}
+Use underlying values before rounding when possible. The factors are
+\begin{center}
+\renewcommand{\arraystretch}{1.35}
+\begin{tabular}{@{}lcc@{}}
+\toprule
+Solid & Constructor edge $a_0$ & Catalog-to-unit-edge multiplier\\
+\midrule
+Tet & $\sqrt{8/3}$ & $\sqrt6/4$\\
+Cub & $1$ & $1$\\
+Oct & $\sqrt2$ & $1/\sqrt2$\\
+Dod & $2/(\sqrt3\,g)$ & $\sqrt3\,g/2$\\
+Ico & $4/\sqrt{10+2w}$ & $\sqrt{10+2w}/4$\\
+\bottomrule
+\end{tabular}
+\end{center}
+The code first scales a constructor geometry by $s$ to obtain a requested
+joint-center distance. Its factor named \texttt{SCALE\_TO\_UNIT\_EDGE} is
+$1/s$, which restores the original constructor dimensions. To obtain unit
+edges, the factor would instead be $1/(sa_0)$. Thus the normalization issue
+is localized and can be corrected by scaling the length columns. It does not
+change $\theta,\phi$ or the scale-independent formulas.
+
+For instance, the tetrahedron with circumradius one has
+$a_0=\sqrt{8/3}$ and $L=2\sqrt6/9$. At twist $-120\degc$ it has
+\[
+ r=\frac{\sqrt2}{15},\qquad d=-\frac2{\sqrt{15}},
+\]
+which round to $0.094,-0.516$ as in the catalog. At edge length one, the
+same formulas instead give $r=\sqrt3/30$ and $d=-1/\sqrt{10}$.
+
+Uniform edge normalization can create equal $(r,d)$ pairs across different
+solids. For example, Tetratorus, Octagear, and Icosa Tree Star all have
+$r=\sqrt3/6,d=0$ at edge length one, but different angular steps. Their
+ordered joint orbits should therefore not be merged using only $(r,d)$.
+
+\section{Exact parameters for the 28 original catalog inputs}\label{sec:catalog}
+The tables in this section retain every original name, selected $C$-face,
+and twist from Table~1 of \cite{read2022}. Face $0$ is the incoming $B$ face;
+the numerical face labels follow the pinned repository implementation.
+Lengths use edge length one, and $w,g,K,p,q$ are the fixed constants in
+\eqref{eq:constants}. All square roots denote their nonnegative real values.
+Angles are recovered by $\theta=\arccos(\cos\theta)$ and
+$\phi=\arccos(\cos\phi)$. Numeric twists in these tables are degrees.
+
+The dagger on $\cos\phi$ denotes the forward-axis convention for straight
+joint rows. Their $\cos\theta$ values describe the full rigid placement,
+not the earlier table's zero marker. The three class-$T$ icosahedral twists
+remain literal catalog inputs in this section; exact vertex-matching
+replacements appear in Section~\ref{sec:correction}. Thus a successful
+parameter comparison is not being used as evidence of vertex matching.
+
+\subsection{Tetrahedral and cubic entries}
+For a tetrahedron $L=1/3$, $\cos\alpha=1/3$, and the radius specialization is
+\begin{equation}\label{eq:tetra}
+ r_{\mathrm{Tet}}(\tau)=
+ \frac{\sqrt3 L|\cos(\tau/2)|}{2(1+2\sin^2(\tau/2))}.
+\end{equation}
+This expression is tetrahedron-specific; the face-angle constants change
+for other solids. The table includes the two tetrahedral representatives.
+\begin{center}
+\small
+\renewcommand{\arraystretch}{1.7}
+\begin{tabular}{@{}lrrcccc@{}}
+\toprule
+Name & $C$-face & $\tau$ (deg.) & $\cos\theta$ & $\cos\phi$ & $r$ & $d$\\
+\midrule
+Tetrahelix & 1 & -120 & $\displaystyle - \frac{2}{3}$ & $\displaystyle - \frac{3}{\sqrt{10}}$ & $\displaystyle \frac{\sqrt{3}}{30}$ & $\displaystyle - \frac{1}{\sqrt{10}}$\\
+Tetratorus & 1 & 0 & $\displaystyle \frac{1}{3}$ & $\displaystyle 0$ & $\displaystyle \frac{\sqrt{3}}{6}$ & $\displaystyle 0$\\
+\bottomrule
+\end{tabular}
+\end{center}
+For the cube, face $1$ is opposite face $0$ and face $2$ is adjacent.
+Their lengths are $1$ and $1/\sqrt2$, respectively.
+\begin{center}
+\small
+\renewcommand{\arraystretch}{1.7}
+\begin{tabular}{@{}lrrcccc@{}}
+\toprule
+Name & $C$-face & $\tau$ (deg.) & $\cos\theta$ & $\cos\phi$ & $r$ & $d$\\
+\midrule
+Boxbeam & 1 & -180 & $\displaystyle -1$ & $\displaystyle 1^{\dagger}$ & $\displaystyle 0$ & $\displaystyle 1$\\
+Staircase & 2 & -180 & $\displaystyle -1$ & $\displaystyle 1^{\dagger}$ & $\displaystyle 0$ & $\displaystyle \frac{1}{\sqrt{2}}$\\
+Blockhelix & 2 & -90 & $\displaystyle - \frac{1}{2}$ & $\displaystyle - \sqrt{\frac{2}{3}}$ & $\displaystyle \frac{\sqrt{2}}{6}$ & $\displaystyle - \frac{1}{\sqrt{3}}$\\
+Cubatorus & 2 & 0 & $\displaystyle 0$ & $\displaystyle 0$ & $\displaystyle \frac{1}{2}$ & $\displaystyle 0$\\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\clearpage
+\subsection{Octahedral entries}
+For edge-sharing faces $L=\sqrt2/3$ and $\cos\alpha=-1/3$; for faces
+sharing only a vertex $L=2/3$ and $\cos\alpha=1/3$. Consequently
+\begin{equation}\label{eq:octfunctions}
+ r_{\mathrm{Oct}}(\tau)=
+ \begin{cases}
+ \displaystyle\frac{\sqrt3|\cos(\tau/2)|}{3(2+\sin^2(\tau/2))},&A,\\[5pt]
+ \displaystyle\frac{\sqrt3|\cos(\tau/2)|}{3(1+2\sin^2(\tau/2))},&S,\\[5pt]
+ 0,&O.
+ \end{cases}
+\end{equation}
+Repository faces $1,3,7$ are class $A$, faces $2,4,6$ are class $S$, and
+face $5$ is opposite. The nonopposite matching twists are
+$0,\pm120\degc$; opposite matching twists are $-60,60,180\degc$.
+\begin{center}
+\small
+\renewcommand{\arraystretch}{1.7}
+\begin{tabular}{@{}lrrcccc@{}}
+\toprule
+Name & $C$-face & $\tau$ (deg.) & $\cos\theta$ & $\cos\phi$ & $r$ & $d$\\
+\midrule
+Octabeam & 5 & -60 & $\displaystyle \frac{1}{2}$ & $\displaystyle 1^{\dagger}$ & $\displaystyle 0$ & $\displaystyle \frac{\sqrt{6}}{3}$\\
+Octaspiky & 1 & -120 & $\displaystyle - \frac{5}{6}$ & $\displaystyle - \frac{3}{\sqrt{11}}$ & $\displaystyle \frac{2 \sqrt{3}}{33}$ & $\displaystyle \frac{- \sqrt{22}}{11}$\\
+Octamedium & 2 & -120 & $\displaystyle - \frac{2}{3}$ & $\displaystyle - \frac{3}{\sqrt{10}}$ & $\displaystyle \frac{\sqrt{3}}{15}$ & $\displaystyle \frac{- \sqrt{10}}{5}$\\
+Octagear & 1 & 0 & $\displaystyle - \frac{1}{3}$ & $\displaystyle 0$ & $\displaystyle \frac{\sqrt{3}}{6}$ & $\displaystyle 0$\\
+Treestar & 2 & 0 & $\displaystyle \frac{1}{3}$ & $\displaystyle 0$ & $\displaystyle \frac{\sqrt{3}}{3}$ & $\displaystyle 0$\\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\clearpage
+\subsection{Dodecahedral entries}
+Faces $1$ and $2$ represent classes $A$ and $S$, and face $8$ is opposite.
+The nonopposite matching twists are $0,\pm72\degc,\pm144\degc$.
+The two continuous angle functions are particularly compact:
+\begin{equation}\label{eq:dodphi}
+ \begin{aligned}
+ \cos\phi_A(\tau)&=
+ \frac{\sqrt{10}\sin(\tau/2)}{\sqrt{10-(5-w)\cos^2(\tau/2)}},\\[4pt]
+ \cos\phi_S(\tau)&=
+ \frac{\sqrt{10}\sin(\tau/2)}{\sqrt{10-(5+w)\cos^2(\tau/2)}}.
+ \end{aligned}
+\end{equation}
+The exact radius formulas below use $K$, the fixed radical in
+\eqref{eq:constants}, to avoid long rationalized denominators.
+\begin{center}
+\small
+\renewcommand{\arraystretch}{1.55}
+\begin{tabular}{@{}lrrcc@{}}
+\toprule
+Name & $C$-face & $\tau$ (deg.) & $\cos\theta$ & $\cos\phi$\\
+\midrule
+Dodecabeam & 8 & -108 & $\displaystyle \frac{1 - w}{4}$ & $\displaystyle 1^{\dagger}$\\
+Dodecadoubler & 1 & -144 & $\displaystyle \frac{- 2 w - 5}{10}$ & $\displaystyle - \sqrt{\frac{10}{13 - w}}$\\
+The Alternater & 2 & -144 & $\displaystyle \frac{- w - 15}{20}$ & $\displaystyle - \sqrt{\frac{10}{17 - 3 w}}$\\
+Dodecashaft & 1 & -72 & $\displaystyle \frac{w - 15}{20}$ & $\displaystyle - \sqrt{\frac{10}{3 w + 17}}$\\
+Dodecagear & 1 & 0 & $\displaystyle \frac{- w}{5}$ & $\displaystyle 0$\\
+Dodecacorkscrew & 2 & -72 & $\displaystyle \frac{2 w - 5}{10}$ & $\displaystyle - \sqrt{\frac{10}{w + 13}}$\\
+Dodecadonut & 2 & 0 & $\displaystyle \frac{w}{5}$ & $\displaystyle 0$\\
+\bottomrule
+\end{tabular}
+\end{center}
+\begin{center}
+\small
+\renewcommand{\arraystretch}{1.6}
+\begin{tabular}{@{}lcc@{}}
+\toprule
+Name & $r$ & $d$\\
+\midrule
+Dodecabeam & $\displaystyle 0$ & $\displaystyle \frac{\sqrt{110 w + 250}}{10}$\\
+Dodecadoubler & $\displaystyle \frac{2 K w}{2 w + 15}$ & $\displaystyle -\frac{g^2}{w}\sqrt{\frac{10}{13 - w}}$\\
+The Alternater & $\displaystyle \frac{4 K w}{w + 35}$ & $\displaystyle -\frac{g^3}{w}\sqrt{\frac{10}{17 - 3 w}}$\\
+Dodecashaft & $\displaystyle \frac{4 K g^{2} w}{35 - w}$ & $\displaystyle -\frac{g^2}{w}\sqrt{\frac{10}{3 w + 17}}$\\
+Dodecagear & $\displaystyle K$ & $\displaystyle 0$\\
+Dodecacorkscrew & $\displaystyle \frac{2 K g^{2} w}{15 - 2 w}$ & $\displaystyle -\frac{g^3}{w}\sqrt{\frac{10}{w + 13}}$\\
+Dodecadonut & $\displaystyle K g^{2}$ & $\displaystyle 0$\\
+\bottomrule
+\end{tabular}
+\end{center}
+For example, Dodecashaft uses $\tau=-72\degc$ and class $A$. Inserting
+$\sin^2 36\degc=(5-w)/8$ and $\cos^2 36\degc=(3+w)/8$ gives
+$\cos\phi=-\sqrt{10/(17+3w)}$. Multiplication by $L=g^2/w$ gives its
+tabulated advance. Such factorization is used throughout the length tables.
+
+\clearpage
+\subsection{Icosahedral entries}\label{sec:icotables}
+The representative faces $1,2,8,12,13$ have
+\[
+ \cos\alpha=-w/3,-1/3,1/3,w/3,1,
+\]
+respectively. In class $T$, $L=\sqrt2\,g^2/3$ and
+\begin{equation}\label{eq:icophiT}
+ \cos\phi_T(\tau)=
+ \frac{\sqrt3\sin(\tau/2)}{\sqrt{1+2\sin^2(\tau/2)}}.
+\end{equation}
+The three original twists for this class are $165\degc,-75\degc,45\degc$.
+Here $p,q$ abbreviate the radicals arising from the exact sine and cosine
+of $15\degc$ and $75\degc$. The tables describe these precise input angles,
+although they are not exact vertex matches.
+\begin{center}
+\small
+\renewcommand{\arraystretch}{1.55}
+\begin{tabular}{@{}lrrcc@{}}
+\toprule
+Name & $C$-face & $\tau$ (deg.) & $\cos\theta$ & $\cos\phi$\\
+\midrule
+Pearlshaft & 13 & -60 & $\displaystyle \frac{1}{2}$ & $\displaystyle 1^{\dagger}$\\
+Quasi-planar & 8 & 165 & $\displaystyle \frac{- p - 2}{6}$ & $\displaystyle \sqrt{\frac{3 \left(p + 4\right)}{2 \left(p + 8\right)}}$\\
+Two Strands & 1 & 120 & $\displaystyle \frac{- w - 9}{12}$ & $\displaystyle \sqrt{\frac{18}{w + 21}}$\\
+Slow Twist & 12 & 120 & $\displaystyle \frac{w - 9}{12}$ & $\displaystyle \sqrt{\frac{18}{21 - w}}$\\
+Rock Candy & 2 & 120 & $\displaystyle - \frac{5}{6}$ & $\displaystyle \frac{3}{\sqrt{11}}$\\
+Icosa Tree Star & 1 & 0 & $\displaystyle \frac{- w}{3}$ & $\displaystyle 0$\\
+Icosacorkscrew & 8 & -75 & $\displaystyle \frac{q - 2}{6}$ & $\displaystyle - \sqrt{\frac{3 \left(4 - q\right)}{2 \left(8 - q\right)}}$\\
+Planar point cluster & 2 & 0 & $\displaystyle - \frac{1}{3}$ & $\displaystyle 0$\\
+Big Icosacorkscrew & 8 & 45 & $\displaystyle \frac{-1 + \sqrt{2}}{3}$ & $\displaystyle \sqrt{\frac{9 - 3 \sqrt{2}}{14}}$\\
+The Wheel & 12 & 0 & $\displaystyle \frac{w}{3}$ & $\displaystyle 0$\\
+\bottomrule
+\end{tabular}
+\end{center}
+\begin{center}
+\small
+\renewcommand{\arraystretch}{1.6}
+\begin{tabular}{@{}lcc@{}}
+\toprule
+Name & $r$ & $d$\\
+\midrule
+Pearlshaft & $\displaystyle 0$ & $\displaystyle \frac{g^{2}}{\sqrt{3}}$\\
+Quasi-planar & $\displaystyle \frac{g^{2} \sqrt{4 - p}}{\sqrt{3} \left(p + 8\right)}$ & $\displaystyle g^{2} \sqrt{\frac{p + 4}{3 \left(p + 8\right)}}$\\
+Two Strands & $\displaystyle \frac{2 g^{2}}{\sqrt{3} \left(w + 21\right)}$ & $\displaystyle g \sqrt{\frac{2}{w + 21}}$\\
+Slow Twist & $\displaystyle \frac{2 g^{2}}{\sqrt{3} \left(21 - w\right)}$ & $\displaystyle g^{3} \sqrt{\frac{2}{21 - w}}$\\
+Rock Candy & $\displaystyle \frac{\sqrt{6} g^{2}}{33}$ & $\displaystyle \frac{g^{2}}{\sqrt{11}}$\\
+Icosa Tree Star & $\displaystyle \frac{\sqrt{3}}{6}$ & $\displaystyle 0$\\
+Icosacorkscrew & $\displaystyle \frac{g^{2} \sqrt{q + 4}}{\sqrt{3} \left(8 - q\right)}$ & $\displaystyle - g^{2} \sqrt{\frac{4 - q}{3 \left(8 - q\right)}}$\\
+Planar point cluster & $\displaystyle \frac{g^{2}}{2 \sqrt{6}}$ & $\displaystyle 0$\\
+Big Icosacorkscrew & $\displaystyle \frac{g^{2} \sqrt{17 \sqrt{2} + 26}}{14 \sqrt{3}}$ & $\displaystyle g^{2} \sqrt{\frac{3 - \sqrt{2}}{21}}$\\
+The Wheel & $\displaystyle \frac{g^{4}}{2 \sqrt{3}}$ & $\displaystyle 0$\\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\section{Analytical face matching and the icosahedral correction}\label{sec:matching}
+\subsection{A face-plane calculation}
+Suppose the two selected faces are congruent regular $m$-gons. Choose a
+vertex $P_B$ of the incoming face and a vertex $P_C$ of the receiving face.
+After the shortest normal alignment $A$, put
+\begin{equation}\label{eq:outvectors}
+ \mathbf a=A(P_B-B),\qquad \mathbf b=P_C-C.
+\end{equation}
+These have equal length and lie in the plane perpendicular to $\nc$.
+The twist that aligns the selected vertices is
+\begin{equation}\label{eq:betarule}
+ \beta=\operatorname{atan2}\!\left(
+ \nc\cdot(\mathbf a\times\mathbf b),\ \mathbf a\cdot\mathbf b\right).
+\end{equation}
+Matching this one vertex matches the entire regular polygon as an unordered
+vertex set: all its vertices are equally spaced on the same circumcircle.
+Every matching twist is therefore
+\begin{equation}\label{eq:matchingrule}
+ \tau=\beta+\frac{2\pi j}{m}\pmod{2\pi},\qquad j=0,\ldots,m-1.
+\end{equation}
+Choosing a different receiving vertex changes $\beta$ by a multiple of
+$2\pi/m$ and hence gives the same set of matching twists.
+
+Substitution of the coordinate solids in Section~\ref{sec:faces} gives the
+following bases. The $C$-face numbering is the same as in the catalog.
+\begin{center}
+\small\renewcommand{\arraystretch}{1.35}
+\begin{tabular}{@{}llcl@{}}
+\toprule
+Solid & Faces or class & Base twist & Increment\\
+\midrule
+Tet & all three other faces & $0$ & $120\degc$\\
+Cub & all five other faces & $0$ & $90\degc$\\
+Oct & nonopposite & $0$ & $120\degc$\\
+    & opposite, face $5$ & $60\degc$ & $120\degc$\\
+Dod & nonopposite & $0$ & $72\degc$\\
+    & opposite, face $8$ & $36\degc$ & $72\degc$\\
+Ico & $A,S,F$ & $0$ & $120\degc$\\
+    & opposite, face $13$ & $60\degc$ & $120\degc$\\
+    & $T$: faces $8,11,19$ & $\beta$ & $120\degc$\\
+    & $T$: faces $9,10,17$ & $-\beta$ & $120\degc$\\
+\bottomrule
+\end{tabular}
+\end{center}
+The last two rows use the exact angle derived next. A base of $120\degc$
+in the original implementation is equivalent to zero modulo the triangular
+increment; a base of $45\degc$ is not equivalent to the derived $\beta$.
+
+\subsection{An exact icosahedral base angle}\label{sec:correction}
+Use the unit-edge icosahedral faces numbered $0$ and $8$. With the standard
+coordinates used in the verifier, their vertices are
+\begin{align*}
+ F_B&=\{(-g/2,0,1/2),\ (0,1/2,g/2),\ (-1/2,g/2,0)\},\\
+ F_C&=\{(0,1/2,-g/2),\ (-g/2,0,-1/2),\ (0,-1/2,-g/2)\}.
+\end{align*}
+Thus
+\begin{equation}\label{eq:icoBC}
+ B=\frac{g^2}{6}(-1,1,1),\qquad
+ C=\frac16(-g,0,-g^3),\qquad
+ \nb=\frac{(-1,1,1)}{\sqrt3},\qquad
+ \nc=\frac{(-g^{-1},0,-g)}{\sqrt3}.
+\end{equation}
+The dot product is $\nb\cdot\nc=-1/3$, so $\cos\alpha=1/3$.
+For a direct calculation of $A$, let
+$\mathbf v=\nb\times(-\nc)$ and let $[\mathbf v]_\times$ be its
+cross-product matrix. The shortest alignment is
+\begin{equation}\label{eq:shortmatrix}
+ A=I+[\mathbf v]_\times+
+ \frac{[\mathbf v]_\times^2}{1+\cos\alpha}.
+\end{equation}
+Select $P_B=(-g/2,0,1/2)$ and $P_C=(-g/2,0,-1/2)$ in
+\eqref{eq:outvectors}. Each face has circumradius $1/\sqrt3$, so
+$\|\mathbf a\|^2=\|\mathbf b\|^2=1/3$. Direct substitution gives
+\begin{equation}\label{eq:betacos}
+ \boxed{\cos\beta=\frac{3w-1}{8},\qquad
+ \sin\beta=\frac{\sqrt3(1+w)}8,\qquad
+ \beta\simeq44.4775121859\degc.}
+\end{equation}
+The two displayed numbers have squared sum one and are positive, fixing
+the quadrant. The three matching twists for face $8$ are
+\begin{equation}\label{eq:correctedtwists}
+ \boxed{\beta-120\degc,\qquad\beta,\qquad\beta+120\degc.}
+\end{equation}
+Their sine and cosine values are especially simple:
+\begin{center}
+\renewcommand{\arraystretch}{1.4}
+\begin{tabular}{@{}lcc@{}}
+\toprule
+Twist & Cosine & Sine\\
+\midrule
+$\beta-120\degc$ & $1/4$ & $-\sqrt{15}/4$\\
+$\beta$ & $(3w-1)/8$ & $\sqrt3(1+w)/8$\\
+$\beta+120\degc$ & $-(3w+1)/8$ & $\sqrt3(w-1)/8$\\
+\bottomrule
+\end{tabular}
+\end{center}
+For the three faces with base $-\beta$, the matching set is the negative
+of this set. These supply the opposite handedness of the same three
+joint-orbit parameter families. The other class-$T$ face bases follow either
+by the face symmetries or by the same substitution in~\eqref{eq:betarule}.
+
+For the face-$8$ catalog representatives, every original twist is greater
+than its matching replacement by
+$45\degc-\beta\simeq0.5224878141\degc$. The nearest corresponding vertices
+then differ by the positive distance
+\begin{equation}\label{eq:mismatch}
+ \frac{2}{\sqrt3}\sin\!\left(\frac{45\degc-\beta}{2}\right)
+ \simeq0.00526492
+\end{equation}
+at edge length one. This is a finite geometric mismatch, not floating-point
+roundoff. The implementation's use of the same positive $45\degc$ base
+for all six class-$T$ faces also misses the negative-base family.
+Nevertheless, all three literal catalog configurations remain well-defined
+normal-aligned joint-centroid helices. Their parameter formulas in
+Section~\ref{sec:icotables} are valid independently of exact vertex matching.
+
+\subsection{Exact corrected parameters}
+Retaining the names as labels for their corrected joining rules gives the
+following replacements. The other 25 catalog entries are unchanged by this
+vertex-matching correction. Edge length is one.
+\begin{center}
+\small\renewcommand{\arraystretch}{1.55}
+\begin{tabular}{@{}lccc@{}}
+\toprule
+Name & $\tau$ & $\cos\theta$ & $\cos\phi$\\
+\midrule
+Quasi-planar & $\beta+120\degc$ & $\displaystyle \frac{- 3 w - 5}{12}$ & $\displaystyle \frac{3 g}{\sqrt{3 w + 17}}$\\
+Icosacorkscrew & $\beta-120\degc$ & $\displaystyle - \frac{1}{6}$ & $\displaystyle - \frac{3}{\sqrt{14}}$\\
+Big Icosacorkscrew & $\beta$ & $\displaystyle \frac{3 w - 5}{12}$ & $\displaystyle \frac{3}{g \sqrt{17 - 3 w}}$\\
+\bottomrule
+\end{tabular}
+\end{center}
+\begin{center}
+\small\renewcommand{\arraystretch}{1.6}
+\begin{tabular}{@{}lcc@{}}
+\toprule
+Name & $r$ & $d$\\
+\midrule
+Quasi-planar & $\displaystyle \frac{2}{\sqrt{3} \left(3 w + 17\right)}$ & $\displaystyle g^{3} \sqrt{\frac{2}{3 w + 17}}$\\
+Icosacorkscrew & $\displaystyle \frac{\sqrt{15} g^{2}}{21}$ & $\displaystyle \frac{- g^{2}}{\sqrt{7}}$\\
+Big Icosacorkscrew & $\displaystyle \frac{2 g^{4}}{\sqrt{3} \left(17 - 3 w\right)}$ & $\displaystyle g \sqrt{\frac{2}{17 - 3 w}}$\\
+\bottomrule
+\end{tabular}
+\end{center}
+\begin{center}
+\small\renewcommand{\arraystretch}{1.3}
+\begin{tabular}{@{}lrrrrr@{}}
+\toprule
+Name & $\tau$ (deg.) & $r$ & $d$ & $\theta$ (deg.) & $\phi$ (deg.)\\
+\midrule
+Quasi-planar & $164.477512$ & $0.048705$ & $1.230350$ & $167.3389$ & $4.4993$\\
+Icosacorkscrew & $-75.522488$ & $0.482838$ & $-0.989524$ & $99.5941$ & $143.3008$\\
+Big Icosacorkscrew & $44.477512$ & $0.769004$ & $0.713275$ & $81.8161$ & $54.6937$\\
+\bottomrule
+\end{tabular}
+\end{center}
+
+The source analog counts for these three rows are six each: three faces
+with base $\beta$ and three with base $-\beta$, paired by handedness.
+There are
+\[
+ 3\cdot3+5\cdot4+7\cdot3+11\cdot5+19\cdot3=162
+\]
+distinct-face matching constructions across the five solids. Their counts
+by representative, retaining the earlier names, are
+\begin{center}
+\small\renewcommand{\arraystretch}{1.2}
+\begin{tabular}{@{}llr@{}}
+\toprule
+Solid & Representative multiplicities in catalog order & Total\\
+\midrule
+Tet & $6,3$ & $9$\\
+Cub & $4,4,8,4$ & $20$\\
+Oct & $3,6,6,3,3$ & $21$\\
+Dod & $5,10,10,10,5,10,5$ & $55$\\
+Ico & $3,6,6,6,12,3,6,6,6,3$ & $57$\\
+\bottomrule
+\end{tabular}
+\end{center}
+These multiplicities group the fixed-solid, fixed-edge joint-centroid orbits,
+with handedness paired and with the original catalog's grouping of straight
+orbits retained. Different twists about an opposite face can give the same
+straight joint orbit while rotating the solid by different angles. The
+multiplicities do not identify different solids or different ordered circular
+orbits just because their containing circles happen to agree.
+
+\section{Verification, scope, and further work}\label{sec:verification}
+The supplemental exact catalog records both the literal 28-row input set
+and the three matching corrections. A symbolic generator checks every
+displayed $r^2,d^2,\cos^2\phi$ against the theorem, with the signs checked
+separately, and obtains $\cos\theta$ directly. These checks reduce
+identities in $\mathbb Q(\sqrt2,\sqrt3,\sqrt5)$ after clearing denominators;
+they do not rely on agreement of decimal expansions. The exact vertex calculation
+of $\cos\beta,\sin\beta$ is checked symbolically as well.
+
+An independent standard-library Python program constructs the unit-edge
+coordinate solids and their numbered faces, obtains rotations from
+Rodrigues matrices, obtains axes from their antisymmetric parts in
+nondegenerate cases, and measures radius using projected three-point
+circumcircles. It compares the exact expressions with those constructions,
+converts the lengths back to the original constructor scale, and checks all
+four printed catalog columns. The five zero-angle markers are converted to
+the stated straight-point convention for that comparison.
+
+In the accompanying run, all 28 rows agree with the original table at its
+three-decimal precision. The largest discrepancies against the rounded
+entries are less than $0.000497$ in radius, $0.000453$ in advance,
+$0.000476\degc$ in rotation, and $0.000444\degc$ in segment-axis angle.
+The exact expressions and the independent numerical constructions agree
+within $5\times10^{-16}$ for their algebraic outputs.
+
+The vertex audit checks every corner under every placement. All 162
+corrected distinct-face rules match to numerical precision; 18 rules from
+the original implementation fail that check, precisely the three choices
+on each of the six class-$T$ icosahedral faces. The maximum corrected
+unit-edge vertex discrepancy is less than $6\times10^{-16}$ in the
+accompanying run. A further 3,948 checks cover all ordered nonparallel face
+pairs of the five solids at seven continuous twist values. Their largest
+parameter discrepancy is less than $2\times10^{-15}$.
+
+Numerical checks support the derivations and catch transcription errors;
+they do not replace the geometric and algebraic proofs. Vertex matching
+also does not establish the absence of collisions between nonadjacent
+members of an infinite chain. The present results concern the prescribed
+rigid placement and the orbit of its joint centers.
+
+The equal-radius centroid hypothesis is the useful boundary of the present
+position formulas. It permits generalization beyond the Platonic solids
+whenever two selected joint centers lie at equal distances on their face
+normals from a common point. Extending $r,d,\phi$ to arbitrary joint
+positions requires the translational part of the placement in addition to
+the two normals. The rotational half-angle law already survives that
+extension. Further work can address collision-free realizations, exact
+closure conditions, and geometrically appropriate illustrations of these
+relationships.
+
+\appendix
+\section{Numerical unit-edge crosswalk}\label{app:numeric}
+This table evaluates the original input twists, including the three literal
+icosahedral choices. It is a crosswalk for reviewing the radical tables;
+the exact expressions, rather than these rounded numbers, define the results.
+Here $\theta$ is the full subunit rotation and straight rows use $d>0,\phi=0$.
+\small
+\renewcommand{\arraystretch}{1.1}
+\begin{longtable}{@{}lrrrrr@{}}
+\toprule
+Name & $\tau$ (deg.) & $r$ & $d$ & $\theta$ (deg.) & $\phi$ (deg.)\\
+\midrule
+\endfirsthead
+\toprule
+Name & $\tau$ (deg.) & $r$ & $d$ & $\theta$ (deg.) & $\phi$ (deg.)\\
+\midrule
+\endhead
+\midrule
+\multicolumn{6}{r}{\emph{Continued on the next page}}\\
+\endfoot
+\bottomrule
+\endlastfoot
+Tetrahelix & $-120$ & $0.057735$ & $-0.316228$ & $131.8103$ & $161.5651$\\
+Tetratorus & $0$ & $0.288675$ & $0.000000$ & $70.5288$ & $90.0000$\\
+\addlinespace[0.4em]
+Boxbeam & $-180$ & $0.000000$ & $1.000000$ & $180.0000$ & $0.0000$\\
+Staircase & $-180$ & $0.000000$ & $0.707107$ & $180.0000$ & $0.0000$\\
+Blockhelix & $-90$ & $0.235702$ & $-0.577350$ & $120.0000$ & $144.7356$\\
+Cubatorus & $0$ & $0.500000$ & $0.000000$ & $90.0000$ & $90.0000$\\
+\addlinespace[0.4em]
+Octabeam & $-60$ & $0.000000$ & $0.816497$ & $60.0000$ & $0.0000$\\
+Octaspiky & $-120$ & $0.104973$ & $-0.426401$ & $146.4427$ & $154.7606$\\
+Octamedium & $-120$ & $0.115470$ & $-0.632456$ & $131.8103$ & $161.5651$\\
+Octagear & $0$ & $0.288675$ & $0.000000$ & $109.4712$ & $90.0000$\\
+Treestar & $0$ & $0.577350$ & $0.000000$ & $70.5288$ & $90.0000$\\
+\addlinespace[0.4em]
+Dodecabeam & $-108$ & $0.000000$ & $2.227033$ & $108.0000$ & $0.0000$\\
+Dodecadoubler & $-144$ & $0.158056$ & $-1.128508$ & $161.3006$ & $164.5496$\\
+The Alternater & $-144$ & $0.165307$ & $-1.867378$ & $149.5197$ & $170.3063$\\
+Dodecashaft & $-72$ & $0.491851$ & $-0.760398$ & $129.6575$ & $130.5007$\\
+Dodecagear & $0$ & $0.688191$ & $0.000000$ & $116.5651$ & $90.0000$\\
+Dodecacorkscrew & $-72$ & $0.765348$ & $-1.534764$ & $93.0258$ & $144.1102$\\
+Dodecadonut & $0$ & $1.801707$ & $0.000000$ & $63.4349$ & $90.0000$\\
+\addlinespace[0.4em]
+Pearlshaft & $-60$ & $0.000000$ & $1.511523$ & $60.0000$ & $0.0000$\\
+Quasi-planar & $165$ & $0.047037$ & $1.230603$ & $167.7643$ & $4.3467$\\
+Two Strands & $120$ & $0.130101$ & $0.474702$ & $159.4456$ & $28.3400$\\
+Slow Twist & $120$ & $0.161109$ & $1.382980$ & $124.3094$ & $11.6407$\\
+Rock Candy & $120$ & $0.194329$ & $0.789367$ & $146.4427$ & $25.2394$\\
+Icosa Tree Star & $0$ & $0.288675$ & $0.000000$ & $138.1897$ & $90.0000$\\
+Icosacorkscrew & $-75$ & $0.486993$ & $-0.986177$ & $99.2526$ & $143.0416$\\
+Planar point cluster & $0$ & $0.534404$ & $0.000000$ & $109.4712$ & $90.0000$\\
+Big Icosacorkscrew & $45$ & $0.763752$ & $0.719429$ & $82.0638$ & $54.3429$\\
+The Wheel & $0$ & $1.978609$ & $0.000000$ & $41.8103$ & $90.0000$\\
+\end{longtable}
+\normalsize
+
+\Needspace{12\baselineskip}
+\section{Reproducibility and draft provenance}\label{app:provenance}
+The catalog inputs are from Table~1 of \cite{read2022}. The implementation
+audit uses repository revision
+\begin{center}\small\texttt{8be3839de2204b966c8aedb7c28f6a6f5c18076e}.\end{center}
+Here \texttt{main.js} supplies the constructor scales, face numbering, and
+twist maps, and \path{js/segment_helix_math.js} supplies the adjoining
+construction \cite{repository}. The supplement reconstructs the numbered
+faces on exact coordinate solids; the independent numerical checks use
+those radicals evaluated in double precision.
+
+The package contains the following material:
+\begin{itemize}
+ \item \texttt{PlatonicHelicesClosedForms.tex}: self-contained LaTeX source.
+ \item \texttt{catalog\_data.py}: catalog transcription, exact-coordinate
+       constructions evaluated numerically, and numbered faces.
+ \item \texttt{ExactCatalog.json}: exact expressions, fixed constants,
+       source entries, and corrected entries.
+ \item \texttt{verify\_closed\_forms.py}: independent numerical checks,
+       requiring only Python's standard library.
+ \item \texttt{build\_exact\_catalog.py}: optional symbolic regeneration
+       using SymPy; generated table fragments are also supplied.
+ \item \texttt{verification-results.txt}: output of the accompanying run.
+\end{itemize}
+The manuscript source embeds its tables and has no external image or
+bibliography dependencies. It can be compiled with \texttt{pdflatex} twice
+or with \texttt{latexmk -pdf}. The symbolic supplement is optional for
+compilation and for running the independent verifier.
+
+This author-review draft was developed with ChatGPT assistance in derivation,
+calculation, verification code, and writing. It has not been submitted or
+peer reviewed. No priority claim is made for the quaternion or screw-geometric
+ingredients.
+
+{\small
+\begin{thebibliography}{9}
+\bibitem{read2022}
+R. L. Read, Calculating the segmented helix formed by repetitions of identical
+subunits thereby generating a zoo of Platonic helices,
+\emph{Mathematics} \textbf{10} (2022), 2533.
+\href{https://doi.org/10.3390/math10142533}{doi:10.3390/math10142533}.
+
+\bibitem{lord2002}
+E. A. Lord, Helical structures: the geometry of protein helices and nanotubes,
+\emph{Structural Chemistry} \textbf{13} (2002), 305--314.
+\href{https://doi.org/10.1023/A:1015863923728}{doi:10.1023/A:1015863923728}.
+
+\bibitem{dauter2018}
+Z. Dauter and M. Jaskolski, On the helical arrangements of protein molecules,
+\emph{Protein Science} \textbf{27} (2018), 643--652.
+\href{https://doi.org/10.1002/pro.3356}{doi:10.1002/pro.3356}.
+
+\bibitem{sadler2019}
+G. Sadler, F. Fang, R. Clawson, and K. Irwin,
+Periodic modification of the Boerdijk--Coxeter helix (tetrahelix),
+\emph{Mathematics} \textbf{7} (2019), 1001.
+\href{https://doi.org/10.3390/math7101001}{doi:10.3390/math7101001}.
+
+\bibitem{onaka2024}
+S. Onaka, Periodic arrangements of tetrahedra having appearances similar to
+that of the Boerdijk--Coxeter helix,
+\emph{Scientific Reports} \textbf{14} (2024), 18260.
+\href{https://doi.org/10.1038/s41598-024-69108-w}{doi:10.1038/s41598-024-69108-w}.
+
+\bibitem{repository}
+Public Invention, \emph{Segmented Helices}, source repository,
+\href{https://github.com/PubInv/segmented-helixes}{\texttt{PubInv/segmented-helixes}}.
+Audit revision: \texttt{8be3839de2204b966c8aedb7c28f6a6f5c18076e}.
+\end{thebibliography}
+}
+\end{document}

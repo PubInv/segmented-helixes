@@ -1,0 +1,56 @@
+Closed-form Platonic helix verification; standard-library Python.
+Tet: unit edges, equal face inradii, cos(alpha) counts {0.333333333: 3}
+Cub: unit edges, equal face inradii, cos(alpha) counts {1.0: 1, -0.0: 4}
+Oct: unit edges, equal face inradii, cos(alpha) counts {-0.333333333: 3, 0.333333333: 3, 1.0: 1}
+Dod: unit edges, equal face inradii, cos(alpha) counts {-0.447213595: 5, 0.447213595: 5, 1.0: 1}
+Ico: unit edges, equal face inradii, cos(alpha) counts {-0.745355992: 3, -0.333333333: 6, 0.333333333: 6, 0.745355992: 3, 1.0: 1}
+
+28 catalog checks; lengths converted back to the original constructor scale:
+Name                      r (edge 1)   d (edge 1)     theta_R         phi
+Tetrahelix                0.05773503  -0.31622777  131.810315  161.565051
+Tetratorus                0.28867513   0.00000000   70.528779   90.000000
+Boxbeam                   0.00000000   1.00000000  180.000000    0.000000
+Staircase                 0.00000000   0.70710678  180.000000    0.000000
+Blockhelix                0.23570226  -0.57735027  120.000000  144.735610
+Cubatorus                 0.50000000   0.00000000   90.000000   90.000000
+Octabeam                  0.00000000   0.81649658   60.000000    0.000000
+Octaspiky                 0.10497278  -0.42640143  146.442690  154.760598
+Octamedium                0.11547005  -0.63245553  131.810315  161.565051
+Octagear                  0.28867513   0.00000000  109.471221   90.000000
+Treestar                  0.57735027   0.00000000   70.528779   90.000000
+Dodecabeam                0.00000000   2.22703273  108.000000    0.000000
+Dodecadoubler             0.15805577  -1.12850842  161.300593  164.549563
+The Alternater            0.16530658  -1.86737841  149.519675  170.306276
+Dodecashaft               0.49185062  -0.76039797  129.657476  130.500705
+Dodecagear                0.68819096  -0.00000000  116.565051   90.000000
+Dodecacorkscrew           0.76534804  -1.53476352   93.025845  144.110245
+Dodecadonut               1.80170732   0.00000000   63.434949   90.000000
+Pearlshaft                0.00000000   1.51152263   60.000000    0.000000
+Quasi-planar              0.04703672   1.23060330  167.764260    4.346672
+Two Strands               0.13010141   0.47470228  159.445557   28.339967
+Slow Twist                0.16110937   1.38298030  124.309360   11.640723
+Rock Candy                0.19432871   0.78936695  146.442690   25.239402
+Icosa Tree Star           0.28867513  -0.00000000  138.189685   90.000000
+Icosacorkscrew            0.48699264  -0.98617690   99.252597  143.041556
+Planar point cluster      0.53440395   0.00000000  109.471221   90.000000
+Big Icosacorkscrew        0.76375197   0.71942907   82.063750   54.342870
+The Wheel                 1.97860881  -0.00000000   41.810315   90.000000
+PASS: 28/28 match every printed parameter after scale/convention conversion.
+Maximum printed-value discrepancies: {'r': 0.0004965809277259758, 'd': 0.0004524907574832149, 'theta': 0.0004756561264400716, 'phi': 0.0004435827400470771}
+Maximum exact-radical versus independent matrix/circumcircle discrepancy: 4.440892098500626e-16
+
+PASS: all 162 corrected distinct-face rules match their face vertices.
+Original rules failing exact matching: 18 (the six class-T icosahedral faces).
+Maximum corrected vertex error: 5.438959822042073e-16
+Maximum matrix/circumcircle versus generic-formula discrepancy: 8.881784197001252e-16
+PASS: all 28 representative multiplicities, pairing handedness and grouping straight orbits.
+
+PASS: 3948 ordered-face continuous-twist cases; maximum discrepancy 1.1102230246251565e-15
+
+Exact icosahedral matching correction: beta = 44.477512185929925 degrees
+Quasi-planar            tau=164.47751219 r=0.048704682 d=1.230349767 theta=167.33892120 phi=4.49929499
+Icosacorkscrew          tau=-75.52248781 r=0.482838192 d=-0.989523837 theta=99.59406823 phi=143.30077480
+Big Icosacorkscrew      tau= 44.47751219 r=0.769004281 d=0.713275081 theta=81.81612751 phi=54.69372390
+PASS: corrected radicals, matching vertices, and exact beta sine/cosine.
+
+All checks passed. Numerical checks support, and do not replace, the manuscript proofs.

@@ -1,0 +1,2 @@
+# Optional: the independent verifier needs only Python's standard library.
+sympy==1.14.0
